@@ -19,9 +19,14 @@ AUDIO_ENABLE = no           # Audio output
 
 ENCODER_ENABLE = yes
 
+# LTO makes the compiler work harder when optimizing your code, resulting in a smaller firmware size
+LTO_ENABLE = yes
+# resulting in a smaller firmware size
+QMK_SETTINGS = no
+TAP_DANCE_ENABLE = no
 
-VIA_ENABLE = yes
-VIAL_ENABLE = yes
-VIAL_ENCODERS_ENABLE = yes
 
+# OLED driver SSD1306
+OLED_ENABLE = yes
+OLED_DRIVER = SSD1306
 
