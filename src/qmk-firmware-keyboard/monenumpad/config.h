@@ -13,10 +13,13 @@
  *  ASCII for "mh": 0x6D 0x68
  */
 
-//#define VENDOR_ID    0x05ac //Apple VenderID for Fn key to work as world button 
-//#define PRODUCT_ID   0x0341 //Apple M1 Macbookpro keyboard product ID 
-#define VENDOR_ID    0x6D68   // "mh" = monehsieh
-#define PRODUCT_ID   0x0001
+#define USB_VENDOR_ID_APPLE      0x05ac
+#define USB_PRODUCT_ID_APPLE     0x029c
+#define VENDOR_ID    USB_VENDOR_ID_APPLE //Apple VenderID for Fn key to work as world button 
+#define PRODUCT_ID   USB_PRODUCT_ID_APPLE //Apple M1 Macbookpro keyboard product ID 
+// #define VENDOR_ID    0x6D68   // "mh" = monehsieh
+// #define PRODUCT_ID   0x0001
+
 // version 1: qmk, basic keypad
 // version 2: vial
 // version 3: custom keycode with shortcuts for YouTube, iOS and Func keys
@@ -157,7 +160,5 @@
 
 #define APPLE_FN_ENABLE
 
-#define USB_VENDOR_ID_APPLE      0x05ac
-#define USB_PRODUCT_ID_APPLE     0x029c
 
 

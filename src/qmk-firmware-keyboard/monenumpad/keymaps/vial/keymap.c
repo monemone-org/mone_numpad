@@ -78,7 +78,7 @@ KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
     [_FN1] = LAYOUT(
             MK_YT_WATCHLATER,  MK_YT_SUBSCRIPTNS,  MK_YT_SPEEDDOWN,  MK_YT_SPEEDUP, 
             MK_YT_PREVCH,      _______,            MK_YT_NEXTCH,     MK_IOS_BRIDOWN, 
-            MK_YT_REWIND,      _______,            MK_YT_FASTFORWD,  MK_IOS_BRIDUP, 
+            MK_YT_REWIND,      MK_YT_PLAY,         MK_YT_FASTFORWD,  MK_IOS_BRIDUP, 
  _______,   MK_YT_PREVVID,     _______,            MK_YT_NEXTVID,  
  _______,                      MK_YT_FULLSC,       MK_YT_MINISC,     MK_YT_PLAY),
 
@@ -87,11 +87,11 @@ KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
    MK_IOS_QUICKNOTE, //Quick Note, World+Q
 */
     [_FN2] = LAYOUT(
-              MK_IOS_SEARCH,      KC_H/*MK_IOS_HOME*/, MK_IOS_NOTIFICATION, MK_IOS_CONTROLCENTER, 
-              MK_IOS_PREVAPP,     MK_IOS_APPSWITCHER,  MK_IOS_NEXTAPP,      MK_IOS_BRIDOWN, 
-              MK_YT_REWIND,       _______,             MK_YT_FASTFORWD,     MK_IOS_BRIDUP, 
- _______,     MK_IOS_PREVTRACK,   KC_DOWN,             MK_IOS_NEXTTRACK,  
- KC_APPLE_FN,                     MK_IOS_SHOWKEED,     KC_Q/*MK_IOS_QUICKNOTE*/,    MK_IOS_PLAY),
+              MK_IOS_APPSWITCHER, MK_IOS_HOME, MK_IOS_NOTIFICATION, MK_IOS_CONTROLCENTER, 
+              MK_IOS_PREVAPP,     KC_UP,       MK_IOS_NEXTAPP,      MK_IOS_BRIDOWN, 
+              KC_LEFT,            MK_IOS_PLAY, KC_RIGHT,            MK_IOS_BRIDUP, 
+ _______,     MK_IOS_PREVTRACK,   KC_DOWN,     MK_IOS_NEXTTRACK,  
+ KC_APPLE_FN,                     _______,     MK_IOS_QUICKNOTE,    KC_ENTER),
 
 
 /*
@@ -218,10 +218,10 @@ bool tapMoneKeyCode(uint16_t keycode)
             SEND_STRING(SS_LSFT("<"));
             break;
         case MK_YT_NEXTCH:
-            SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
+            SEND_STRING(SS_LALT(SS_TAP(X_RIGHT)));
             break;
         case MK_YT_PREVCH:
-            SEND_STRING(SS_LALT(SS_TAP(X_RIGHT)));
+            SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
             break;
         case MK_YT_NEXTVID:
             SEND_STRING(SS_LSFT(SS_TAP(X_N)));
