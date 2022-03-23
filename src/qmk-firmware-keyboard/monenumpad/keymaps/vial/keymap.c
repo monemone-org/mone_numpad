@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#define MACRO_TIMER 5
+
 // Defines names for use in layer keycodes and the keymap
 enum layer_names {
     _BASE,
@@ -12,6 +14,44 @@ enum layer_names {
     _FN2,
     _FN3
 };
+
+
+enum MoneKeys {
+   //YouTube Layer
+   MK_YT_REWIND = SAFE_RANGE,  //YouTube Rewind
+   MK_YT_FASTFORWD,  //YouTube Fast forward
+   MK_YT_SPEEDUP, //YouTube Speed up
+   MK_YT_SPEEDDOWN, //YouTube Speed down
+   MK_YT_NEXTCH, //YouTube Next Chapter
+   MK_YT_PREVCH, //YouTube Previous Chapter
+   MK_YT_NEXTVID, //YouTube Next Video
+   MK_YT_PREVVID, //YouTube Previous Video
+   MK_YT_FULLSC, //YouTube Full Screen Player
+   MK_YT_MINISC, //YouTube Mini Player
+   MK_YT_PLAY, //YouTube play/pause
+   MK_YT_WATCHLATER, //YouTube open watch later playlist
+   MK_YT_SUBSCRIPTNS,
+
+   //iOS Layer
+   MK_IOS_HOME, //iOS home screen, WORD+H
+   MK_IOS_SHOWKEED, //iOS show soft keyboard    
+   MK_IOS_PREVTRACK, //iOS previous track  KC_MEDIA_PREV_TRACK
+   MK_IOS_NEXTTRACK, //iOS next track  KC_MEDIA_NEXT_TRACK
+   MK_IOS_PLAY, // iOS Play/pause media  KC_MEDIA_PLAY_PAUSE
+   MK_IOS_SEARCH, //Spotlight Search. Cmd+Space
+   MK_IOS_DOCK,   //Show Dock, World+A
+   MK_IOS_APPLIB, //Show App Lib, Shift+World+A
+   MK_IOS_QUICKNOTE, //Quick Note, World+Q
+   MK_IOS_CONTROLCENTER, //Control Center, World+C
+   MK_IOS_NOTIFICATION, //Notification Center, World+N
+   MK_IOS_APPSWITCHER, //App Switcher, World+Up
+   MK_IOS_PREVAPP, //Previous App, World+Left
+   MK_IOS_NEXTAPP, //Next App, World+Right
+   MK_IOS_BRIDOWN,
+   MK_IOS_BRIDUP
+};
+
+
 
 /*
 #define LAYOUT( \
@@ -27,60 +67,45 @@ enum layer_names {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Base */
     [_BASE] = LAYOUT(
-         KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
-         KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
-         KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
-KC_MUTE, KC_P1,  KC_P2,   KC_P3, 
-KC_BSPACE,    KC_P0   ,   KC_PDOT,  KC_PENT),
+           KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
+           KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
+           KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
+KC_MUTE,   KC_P1,  KC_P2,   KC_P3, 
+KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
 
+
+// YouTube layer
     [_FN1] = LAYOUT(
-         KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
-         KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
-         KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
-KC_MUTE, KC_P1,  KC_P2,   KC_P3, 
-KC_BSPACE,    KC_P0   ,   KC_PDOT,  KC_PENT),
+            MK_YT_WATCHLATER,  MK_YT_SUBSCRIPTNS,  MK_YT_SPEEDDOWN,  MK_YT_SPEEDUP, 
+            MK_YT_PREVCH,      _______,            MK_YT_NEXTCH,     MK_IOS_BRIDOWN, 
+            MK_YT_REWIND,      _______,            MK_YT_FASTFORWD,  MK_IOS_BRIDUP, 
+ _______,   MK_YT_PREVVID,     _______,            MK_YT_NEXTVID,  
+ _______,                      MK_YT_FULLSC,       MK_YT_MINISC,     MK_YT_PLAY),
 
+
+/* iPad Layer   
+   MK_IOS_QUICKNOTE, //Quick Note, World+Q
+*/
     [_FN2] = LAYOUT(
-         KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
-         KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
-         KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
-KC_MUTE, KC_P1,  KC_P2,   KC_P3, 
-KC_BSPACE,    KC_P0   ,   KC_PDOT,  KC_PENT),
+              MK_IOS_SEARCH,      KC_H/*MK_IOS_HOME*/, MK_IOS_NOTIFICATION, MK_IOS_CONTROLCENTER, 
+              MK_IOS_PREVAPP,     MK_IOS_APPSWITCHER,  MK_IOS_NEXTAPP,      MK_IOS_BRIDOWN, 
+              MK_YT_REWIND,       _______,             MK_YT_FASTFORWD,     MK_IOS_BRIDUP, 
+ _______,     MK_IOS_PREVTRACK,   KC_DOWN,             MK_IOS_NEXTTRACK,  
+ KC_APPLE_FN,                     MK_IOS_SHOWKEED,     KC_Q/*MK_IOS_QUICKNOTE*/,    MK_IOS_PLAY),
 
+
+/*
+    FUNC Key Layer
+*/
     [_FN3] = LAYOUT(
-         KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
-         KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
-         KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
-KC_MUTE, KC_P1,  KC_P2,   KC_P3, 
-KC_BSPACE,    KC_P0   ,   KC_PDOT,  KC_PENT)
+              _______, _______, _______, _______, 
+              KC_F7,   KC_F8,   KC_F9,   _______, 
+              KC_F4,   KC_F5,   KC_F6,   _______, 
+ _______,     KC_F1,   KC_F2,   KC_F3,  
+ KC_APPLE_FN,          _______, _______, _______)
 
 };
 
-
-// bool encoder_update_user(uint8_t index, bool clockwise) 
-// {
-//     const layer_state_t curr_layer = get_highest_layer(layer_state);
-
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: encoder: index: %u, clockwise: %u\n", index, (int)clockwise);
-// #endif
-
-//     if(curr_layer == _BASE) {
-//         if (clockwise) {
-//             tap_code(KC_BRIU);
-//         } else {
-//             tap_code(KC_BRID);
-//         }
-//     }
-//     else  {
-//         if (clockwise) {
-//             tap_code(KC_VOLU);
-//         } else {
-//             tap_code(KC_VOLD);
-//         }
-//     }
-//     return false;
-// }
 
 
 void keyboard_post_init_user(void) {
@@ -91,9 +116,231 @@ void keyboard_post_init_user(void) {
   //debug_mouse=true;
 }
 
+static keypos_t switchLayerKey_Pos = { .row= 0, .col= 4 };
+static bool switchLayerKey_pressed = false;
+static uint16_t switchLayerKey_pressed_timer;
 
-layer_state_t getNextLayer(void) {
+const uint8_t keyboard_toggle = 0x65;
 
+// function declarations
+void switchToNextLayer(void);
+layer_state_t getNextLayer(void);
+bool tapMoneKeyCode(uint16_t keycode);
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+
+
+  // If console is enabled, it will print the matrix position and status of each key pressed
+#ifdef CONSOLE_ENABLE
+    uprintf("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
+     keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif 
+
+    // if the right bottom k44 is pressed & hold, tranverse to the next layer.
+    if (record->event.key.col == switchLayerKey_Pos.col && record->event.key.row == switchLayerKey_Pos.row) 
+    {
+        // if switchLayerKey is pressed
+        if (record->event.pressed) 
+        {
+            if (! switchLayerKey_pressed) 
+            {
+#ifdef CONSOLE_ENABLE
+                uprintf("KL: switchLayerKey_pressed = true\n");
+#endif 
+                switchLayerKey_pressed = true;
+                switchLayerKey_pressed_timer = timer_read();
+            }
+
+        }
+        else // !record->event.pressed
+        {
+            // means the key is pressed for less than TAPPING_TERM
+            if (switchLayerKey_pressed)
+            {
+                if (timer_elapsed(switchLayerKey_pressed_timer) < TAPPING_TERM)
+                {
+#ifdef CONSOLE_ENABLE
+                    uprintf("KL: switchLayerKey_pressed, tap_code16(0x%04X);\n", keycode);
+#endif 
+                    if (! tapMoneKeyCode(keycode)) 
+                    {
+                        tap_code16(keycode);
+                    }
+                }
+                else //(timer_elapsed(switchLayerKey_pressed_timer) >= TAPPING_TERM)
+                {
+#ifdef CONSOLE_ENABLE
+                    uprintf("KL: switchLayerKey_pressed and holded, switchToNextLayer()\n");
+#endif 
+                    switchToNextLayer();
+                }
+            } //if (switchLayerKey_pressed)
+
+            switchLayerKey_pressed = false;
+        }    
+
+        return false;
+    }
+    else  // else if not switchLayerKey
+    {
+        switchLayerKey_pressed = false;
+
+        if (record->event.pressed)
+        {
+            tapMoneKeyCode(keycode);
+        }
+
+        return true;
+    }
+    
+}
+
+
+//return true if keycode is Mone defined and has been handled in tapMoneKeyCode
+bool tapMoneKeyCode(uint16_t keycode)
+{
+    bool handled = true;
+
+    //Example:
+    //  SEND_STRING(SS_LALT(SS_TAP(X_V)SS_TAP(X_ENTER)));
+    switch (keycode)
+    {
+        case MK_YT_REWIND:
+            SEND_STRING(SS_TAP(X_LEFT));
+            break;
+        case MK_YT_FASTFORWD:
+            SEND_STRING(SS_TAP(X_RIGHT));
+            break;
+        case MK_YT_SPEEDUP:
+            SEND_STRING(SS_LSFT(">"));
+            break;
+        case MK_YT_SPEEDDOWN:
+            SEND_STRING(SS_LSFT("<"));
+            break;
+        case MK_YT_NEXTCH:
+            SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
+            break;
+        case MK_YT_PREVCH:
+            SEND_STRING(SS_LALT(SS_TAP(X_RIGHT)));
+            break;
+        case MK_YT_NEXTVID:
+            SEND_STRING(SS_LSFT(SS_TAP(X_N)));
+            break;
+        case MK_YT_PREVVID:
+            SEND_STRING(SS_LGUI("[")); // CMD + [
+            break;
+        case MK_YT_FULLSC:
+            SEND_STRING(SS_TAP(X_F));
+            break;
+        case MK_YT_MINISC:
+            SEND_STRING(SS_TAP(X_I));
+            break;
+        case MK_YT_PLAY:
+            SEND_STRING(SS_TAP(X_SPACE));
+            break;
+        case MK_YT_WATCHLATER:
+            SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+            SEND_STRING_DELAY("https://www.youtube.com/playlist?list=WL", MACRO_TIMER);
+            SEND_STRING_DELAY(SS_TAP(X_ENTER), MACRO_TIMER);
+            break;
+        case MK_YT_SUBSCRIPTNS:
+            SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+            SEND_STRING_DELAY("https://www.youtube.com/feed/subscriptions", MACRO_TIMER);
+            SEND_STRING_DELAY(SS_TAP(X_ENTER), MACRO_TIMER);
+            break;
+
+        case MK_IOS_HOME: // FN+H
+            register_code16(KC_APPLE_FN);
+            tap_code(KC_H);
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_SHOWKEED:
+            break;
+
+        case MK_IOS_PREVTRACK:  //iOS previous track  KC_MEDIA_PREV_TRACK
+            SEND_STRING(SS_TAP(X_MEDIA_PREV_TRACK));
+            break;
+
+        case MK_IOS_NEXTTRACK: //iOS next track  KC_MEDIA_NEXT_TRACK
+            SEND_STRING(SS_TAP(X_MEDIA_NEXT_TRACK));
+            break;
+
+        case MK_IOS_PLAY: // iOS Play/pause media  KC_MEDIA_PLAY_PAUSE
+            SEND_STRING(SS_TAP(X_MEDIA_PLAY_PAUSE));
+            break;
+
+        case MK_IOS_SEARCH: //Spotlight Search. Cmd+Space
+            SEND_STRING(SS_LGUI(SS_TAP(X_SPACE)));
+            break;
+
+        case MK_IOS_DOCK: //Show Dock, World+A
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_A));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_APPLIB: //Show App Lib, Shift+World+A
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_LSFT(SS_TAP(X_A)));
+            unregister_code16(KC_APPLE_FN);
+           break;
+
+        case MK_IOS_QUICKNOTE:  //Quick Note, World+Q
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_Q));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_CONTROLCENTER: //Control Center, World+C
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_C));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_NOTIFICATION: //Notification Center, World+N
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_N));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_APPSWITCHER: //App Switcher, World+Up
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_UP));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_PREVAPP: //Previous App, World+Left
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_LEFT));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_NEXTAPP: //Next App, World+Right
+            register_code16(KC_APPLE_FN);
+            SEND_STRING(SS_TAP(X_RIGHT));
+            unregister_code16(KC_APPLE_FN);
+            break;
+
+        case MK_IOS_BRIDOWN:
+            SEND_STRING(SS_TAP(X_BRIGHTNESS_DOWN));
+            break;
+
+        case MK_IOS_BRIDUP:
+            SEND_STRING(SS_TAP(X_BRIGHTNESS_UP));
+            break;
+
+        default:
+            handled = false;
+            break;
+
+    } //switch (keycode) 
+
+    return handled;
+}
+
+layer_state_t getNextLayer(void) 
+{
     const layer_state_t curr_layer = get_highest_layer(layer_state);
 
     layer_state_t next_layer = curr_layer + 1;
@@ -108,42 +355,19 @@ layer_state_t getNextLayer(void) {
 #endif 
 
     return next_layer;
-
 }
 
-static char szKeyCode[20] = {0};
+void switchToNextLayer(void) 
+{
+    const layer_state_t next_layer = getNextLayer();
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    layer_clear();
+    layer_on(_BASE);
+    layer_on(next_layer);
 
-
-  // If console is enabled, it will print the matrix position and status of each key pressed
 #ifdef CONSOLE_ENABLE
-    uprintf("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
-     keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+   uprintf("KL: switchToNextLayer: layer_on = _BASE + %u\n", get_highest_layer(layer_state));
 #endif 
-
-// if the left bottom button(0,4) is pressed , tranverse the different layers one after one.
-    if (record->event.key.col == 0 && record->event.key.row == 4) {
-
-        if (record->event.pressed == 1) {
-            const layer_state_t next_layer = getNextLayer();
-
-            layer_clear();
-            layer_on(next_layer);
-
-    #ifdef CONSOLE_ENABLE
-           uprintf("KL: layer_on: %d\n", next_layer);
-           uprintf("KL: get_highest_layer: %u\n", get_highest_layer(layer_state));
-    #endif 
-
-        }
-
-        return false;
-    }
-
-    
-  sprintf(szKeyCode, "kc: 0x%04X\n", keycode);
-  return true;
 }
 
 
@@ -158,7 +382,7 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 void render_status(void) {
 
     // Host Keyboard Layer Status
-    oled_write_P(PSTR("Mone Num Pad\n"), false);
+    oled_write_P(PSTR("Hi Mone!\n"), false);
 
     oled_write_P(PSTR("Layer: "), false);
 
@@ -167,13 +391,13 @@ void render_status(void) {
             oled_write_P(PSTR("Base\n"), false);
             break;
         case _FN1:
-            oled_write_P(PSTR("FN1\n"), false);
+            oled_write_P(PSTR("YouTube\n"), false);
             break;
         case _FN2:
-            oled_write_P(PSTR("FN2\n"), false);
+            oled_write_P(PSTR("iOS\n"), false);
             break;
         case _FN3:
-            oled_write_P(PSTR("FN3\n"), false);
+            oled_write_P(PSTR("Fn Keys\n"), false);
             break;
         default:
             // Or use the write_ln shortcut over adding '\n' to the end of your string

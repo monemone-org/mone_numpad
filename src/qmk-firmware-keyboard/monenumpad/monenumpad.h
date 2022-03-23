@@ -14,16 +14,6 @@
  * represents the switch matrix.
  */
 
-/*
-#define LAYOUT( \
-    k00, k01, k02, \
-      k10,  k12    \
-) { \
-    { k00, k01,   k02 }, \
-    { k10, KC_NO, k12 }  \
-}
-*/
-
 /* Mone numpad matrix layout
    * ,----------------------- .
    * |    | 01 | 02 | 03 | 04 |
