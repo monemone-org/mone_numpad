@@ -11,9 +11,9 @@
 #define VIAL_ENCODER_DEFAULT { KC_VOLU, KC_VOLD, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS }
 
 
-//enable holding key(0,4) while turning encoder0 will change layers
+// enable holding key(0,4) while turning encoder0 will change layers
 #define MONE_ENCODERS_ENABLE
 
 
-
-
+// reduce RAM and EEPROM usage
+#define VIAL_COMBO_ENTRIES 4

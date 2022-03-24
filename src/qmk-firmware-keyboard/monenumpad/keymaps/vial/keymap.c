@@ -27,11 +27,15 @@ enum MoneKeys {
    MK_YT_PREVCH, //YouTube Previous Chapter
    MK_YT_NEXTVID, //YouTube Next Video
    MK_YT_PREVVID, //YouTube Previous Video
-   MK_YT_FULLSC, //YouTube Full Screen Player
-   MK_YT_MINISC, //YouTube Mini Player
+   MK_YT_FULLSCVW, //YouTube Full Screen Player
+   MK_YT_MINIVW, //YouTube Mini Player
+   MK_YT_THEATERVW, //YouTube Theater view
    MK_YT_PLAY, //YouTube play/pause
+
+   MK_YT_HOME,  //  //YouTube open www.youtube.com
    MK_YT_WATCHLATER, //YouTube open watch later playlist
-   MK_YT_SUBSCRIPTNS,
+   MK_YT_SUBSCRIPTNS, //YouTube open subscription list
+   MK_YT_HISTORY,  //YouTube open history list
 
    //iOS Layer
    MK_IOS_HOME, //iOS home screen, WORD+H
@@ -77,11 +81,11 @@ KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
 
 // YouTube layer
     [_FN1] = LAYOUT(
-            MK_YT_WATCHLATER,  MK_YT_SUBSCRIPTNS,  MK_YT_SPEEDDOWN,  MK_YT_SPEEDUP, 
-            MK_YT_PREVCH,      _______,            MK_YT_NEXTCH,     MK_IOS_BRIDOWN, 
+            MK_YT_HOME,        MK_YT_SUBSCRIPTNS,  MK_YT_WATCHLATER, MK_YT_HISTORY, 
+            MK_YT_PREVCH,      KC_UP,              MK_YT_NEXTCH,     MK_IOS_BRIDOWN, 
             MK_YT_REWIND,      MK_YT_PLAY,         MK_YT_FASTFORWD,  MK_IOS_BRIDUP, 
- _______,   MK_YT_PREVVID,     _______,            MK_YT_NEXTVID,  
- _______,                      MK_YT_FULLSC,       MK_YT_MINISC,     MK_YT_PLAY),
+ _______,   MK_YT_SPEEDDOWN,   KC_DOWN,            MK_YT_SPEEDUP,  
+ _______,                      MK_YT_FULLSCVW,     MK_YT_THEATERVW,  _______),
 
 
 /* iPad Layer   
@@ -92,7 +96,7 @@ KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
               MK_IOS_PREVAPP,     KC_UP,       MK_IOS_NEXTAPP,      MK_IOS_BRIDOWN, 
               KC_LEFT,            MK_IOS_PLAY, KC_RIGHT,            MK_IOS_BRIDUP, 
  _______,     MK_IOS_PREVTRACK,   KC_DOWN,     MK_IOS_NEXTTRACK,  
- KC_APPLE_FN,                     _______,     MK_IOS_QUICKNOTE,    KC_ENTER),
+ KC_APPLE_FN,                     _______,     MK_IOS_QUICKNOTE,    _______),
 
 
 /*
@@ -100,8 +104,8 @@ KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
 */
     [_FN3] = LAYOUT(
               _______, _______, _______, _______, 
-              KC_F7,   KC_F8,   KC_F9,   _______, 
-              KC_F4,   KC_F5,   KC_F6,   _______, 
+              KC_F7,   KC_F8,   KC_F9,   MK_IOS_BRIDOWN, 
+              KC_F4,   KC_F5,   KC_F6,   MK_IOS_BRIDUP, 
  _______,     KC_F1,   KC_F2,   KC_F3,  
  KC_APPLE_FN,          _______, _______, _______)
 
@@ -148,7 +152,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   // If console is enabled, it will print the matrix position and status of each key pressed
 #ifdef CONSOLE_ENABLE
-    uprintf("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
+    uprintf("KL: kc: 0x%04X, c: %u, r: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
      keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
 #endif 
 
@@ -160,9 +164,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         {
             if (switchLayerKey_state == switchLayerKey_not_pressed) 
             {
-#ifdef CONSOLE_ENABLE
-                uprintf("KL: switchLayerKey_state = switchLayerKey_pressed\n");
-#endif 
+// #ifdef CONSOLE_ENABLE
+//                 uprintf("KL: switchLayerKey_state = switchLayerKey_pressed\n");
+// #endif 
                 switchLayerKey_state = switchLayerKey_pressed;
                 switchLayerKey_pressed_timer = timer_read();
             }
@@ -175,9 +179,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             {
                 if (timer_elapsed(switchLayerKey_pressed_timer) < TAPPING_TERM)
                 {
-#ifdef CONSOLE_ENABLE
-                    uprintf("KL: switchLayerKey_pressed, tap_code16(0x%04X);\n", keycode);
-#endif 
+// #ifdef CONSOLE_ENABLE
+//                     uprintf("KL: switchLayerKey_pressed, tap_code16(0x%04X);\n", keycode);
+// #endif 
                     if (! tapMoneKeyCode(keycode)) 
                     {
                         tap_code16(keycode);
@@ -185,9 +189,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
                 else //(timer_elapsed(switchLayerKey_pressed_timer) >= TAPPING_TERM)
                 {
-#ifdef CONSOLE_ENABLE
-                    uprintf("KL: switchLayerKey_pressed and holded, switchToNextLayer()\n");
-#endif 
+// #ifdef CONSOLE_ENABLE
+//                     uprintf("KL: switchLayerKey_pressed and holded, switchToNextLayer()\n");
+// #endif 
                     switchToNextLayer(true);
                 }                
             } //if (switchLayerKey_state == switchLayerKey_pressed)
@@ -211,6 +215,31 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     
 }
 
+
+#define DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME  70  //choose 70ms for Brave on iPad to work
+#define DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME  10
+uint64_t presubmit_webpage_wait_time = DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME;
+uint64_t postsubmit_webpage_wait_time = DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME; 
+bool submit_webpage_auto_press_enter = false; // iOS safari doesn't like auto enter. It keeps loading a truncated URL.
+#define TEST_SUBMIT_WEBPAGE_TIMING
+
+static void openUrl(const char *url)
+{
+#if defined(CONSOLE_ENABLE) && defined(TEST_SUBMIT_WEBPAGE_TIMING)
+    uprintf("KL: pre: %ld\n", (long)presubmit_webpage_wait_time);
+    uprintf("KL: post: %ld\n", (long)postsubmit_webpage_wait_time);
+    uprintf("KL: auto enter: %d\n", (int)submit_webpage_auto_press_enter);
+#endif 
+
+    SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+    wait_ms(presubmit_webpage_wait_time);
+    send_string(url);
+    if (submit_webpage_auto_press_enter)
+    {
+        wait_ms(postsubmit_webpage_wait_time);
+        SEND_STRING(SS_TAP(X_ENTER));    
+    }
+}
 
 //return true if keycode is Mone defined and has been handled in tapMoneKeyCode
 bool tapMoneKeyCode(uint16_t keycode)
@@ -245,27 +274,52 @@ bool tapMoneKeyCode(uint16_t keycode)
         case MK_YT_PREVVID:
             SEND_STRING(SS_LGUI("[")); // CMD + [
             break;
-        case MK_YT_FULLSC:
+        case MK_YT_FULLSCVW:
             SEND_STRING(SS_TAP(X_F));
             break;
-        case MK_YT_MINISC:
+        case MK_YT_MINIVW:
             SEND_STRING(SS_TAP(X_I));
+            break;
+        case MK_YT_THEATERVW:
+            SEND_STRING(SS_TAP(X_T));
             break;
         case MK_YT_PLAY:
             SEND_STRING(SS_TAP(X_SPACE));
             break;
-        case MK_YT_WATCHLATER:
-            SEND_STRING(SS_LGUI(SS_TAP(X_L)));
-            SEND_STRING("https://www.youtube.com/playlist?list=WL");
-            wait_ms(MACRO_TIMER);
-            SEND_STRING(SS_TAP(X_ENTER));
+
+        case MK_YT_HOME:
+#ifdef TEST_SUBMIT_WEBPAGE_TIMING
+            //testing reset
+            presubmit_webpage_wait_time = DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME;
+            postsubmit_webpage_wait_time = DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME; 
+#endif            
+            openUrl("www.youtube.com");
             break;
+
         case MK_YT_SUBSCRIPTNS:
-            SEND_STRING(SS_LGUI(SS_TAP(X_L)));
-            SEND_STRING("https://www.youtube.com/feed/subscriptions");
-            wait_ms(MACRO_TIMER);
-            SEND_STRING(SS_TAP(X_ENTER));
+#ifdef TEST_SUBMIT_WEBPAGE_TIMING        
+            //testing toggle enter key
+            submit_webpage_auto_press_enter = !submit_webpage_auto_press_enter;
+#endif
+            openUrl("www.youtube.com/feed/subscriptions");
             break;
+
+        case MK_YT_WATCHLATER:
+            openUrl("www.youtube.com/playlist?list=WL");
+#ifdef TEST_SUBMIT_WEBPAGE_TIMING
+            //testing
+            presubmit_webpage_wait_time += MACRO_TIMER;
+#endif
+            break;
+
+        case MK_YT_HISTORY:
+            openUrl("www.youtube.com/feed/history");
+#ifdef TEST_SUBMIT_WEBPAGE_TIMING            
+            //testing
+            postsubmit_webpage_wait_time += MACRO_TIMER;
+#endif
+            break;
+
 
         case MK_IOS_HOME: // FN+H
             register_code16(KC_APPLE_FN);
@@ -381,9 +435,9 @@ layer_state_t getNextLayer(bool advance)
         }
     }
 
-#ifdef CONSOLE_ENABLE
-    uprintf("getNextLayer(%d): %d\n", (int)advance, next_layer);
-#endif 
+// #ifdef CONSOLE_ENABLE
+//     uprintf("getNextLayer(%d): %d\n", advance, next_layer);
+// #endif 
 
     return next_layer;
 }
@@ -396,9 +450,9 @@ void switchToNextLayer(bool advance)
     layer_on(_BASE);
     layer_on(next_layer);
 
-#ifdef CONSOLE_ENABLE
-   uprintf("KL: switchToNextLayer: layer_on = _BASE + %u\n", get_highest_layer(layer_state));
-#endif 
+// #ifdef CONSOLE_ENABLE
+//    uprintf("KL: switchToNextLayer: layer_on = _BASE + %u\n", get_highest_layer(layer_state));
+// #endif 
 }
 
 
@@ -435,8 +489,13 @@ void render_status(void) {
             oled_write_ln_P(PSTR("Undefined"), false);
     }
 
-    
-    //oled_write_P(szKeyCode, false);
+
+#ifdef TEST_SUBMIT_WEBPAGE_TIMING
+    char szBuf[50] = {0};
+    sprintf(szBuf, "pre:%ld  post:%ld\n", (long)presubmit_webpage_wait_time, (long)postsubmit_webpage_wait_time);
+    oled_write(szBuf, false);
+#endif
+
     return;
 }
 
@@ -472,9 +531,9 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
     //  also handle switchLayerKey_pressed_and_handled, because the dial can be turnt more than once
     if (switchLayerKey_state == switchLayerKey_pressed || switchLayerKey_state == switchLayerKey_pressed_and_handled) 
     {
-#ifdef CONSOLE_ENABLE
-        uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
-#endif 
+// #ifdef CONSOLE_ENABLE
+//         uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
+// #endif 
 
         if (clockwise)
         {

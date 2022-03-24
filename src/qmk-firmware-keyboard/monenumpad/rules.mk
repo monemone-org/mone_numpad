@@ -8,7 +8,9 @@ BOOTLOADER = atmel-dfu
 #   change yes to no to disable
 #
 BOOTMAGIC_ENABLE = yes      # Enable Bootmagic Lite
-MOUSEKEY_ENABLE = yes       # Mouse keys
+
+#set to no to reduce firmware size
+MOUSEKEY_ENABLE = no       # Mouse keys
 EXTRAKEY_ENABLE = yes       # Audio control and System control
 CONSOLE_ENABLE = yes         # Console for debug
 COMMAND_ENABLE = no         # Commands for debug and configuration
@@ -27,8 +29,14 @@ TAP_DANCE_ENABLE = no
 
 
 # OLED driver SSD1306
+# High resolution: 128 x 64 
 OLED_ENABLE = yes
 OLED_DRIVER = SSD1306
 
 # incompatible with APPLE_FN_ENABLE
 NKRO_ENABLE = no
+
+#set to no to reduce firmware size
+#EXTRAFLAGS+=-flto
+#define NO_ACTION_MACRO
+#define NO_ACTION_FUNCTION

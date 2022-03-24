@@ -5,18 +5,31 @@
 
 #include "config_common.h"
 
+
+/**
+        if (hid->product >= USB_DEVICE_ID_APPLE_WELLSPRING4_ANSI &&
+                hid->product <= USB_DEVICE_ID_APPLE_WELLSPRING4A_JIS)
+            table = macbookair_fn_keys;
+        else if (hid->product < 0x21d || hid->product >= 0x300)
+            table = powerbook_fn_keys;
+        else
+            table = apple_fn_keys;
+
+*/
+#define USB_VENDOR_ID_APPLE      0x05ac
+#define USB_PRODUCT_ID_APPLE     0x029c
+#define VENDOR_ID    0x05ac //Apple VenderID for Fn key to work as world button 
+#define PRODUCT_ID   0x029c //Apple M1 Macbookpro keyboard product ID 
+
 /**
  * A suggested method of choosing a unique VENDOR_ID is choosing two letters from the keyboard’s
  *  designer/vendor name and using the two 8-bit ASCII values of these letters
  * 
  *  Designer: monehsieh
  *  ASCII for "mh": 0x6D 0x68
+ * 
+ * 
  */
-
-#define USB_VENDOR_ID_APPLE      0x05ac
-#define USB_PRODUCT_ID_APPLE     0x029c
-#define VENDOR_ID    0x05ac //Apple VenderID for Fn key to work as world button 
-#define PRODUCT_ID   0x029c //Apple M1 Macbookpro keyboard product ID 
 // #define VENDOR_ID    0x6D68   // "mh" = monehsieh
 // #define PRODUCT_ID   0x0001
 
@@ -53,6 +66,12 @@
 #define ENCODERS_PAD_A { B6 }
 #define ENCODERS_PAD_B { B2 }
 #define ENCODER_RESOLUTION 4
+
+// # OLED driver SSD1306
+// # High resolution: 128 x 64 
+// OLED_ENABLE = yes
+// OLED_DRIVER = SSD1306
+
 
 /*
  * Split Keyboard specific options, make sure you have 'SPLIT_KEYBOARD = yes' in your rules.mk, and define SOFT_SERIAL_PIN.
