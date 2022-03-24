@@ -5,14 +5,15 @@
 
 #include <stdio.h>
 
-#define MACRO_TIMER 5
+#define MACRO_TIMER 10
 
 // Defines names for use in layer keycodes and the keymap
 enum layer_names {
     _BASE,
     _FN1,
     _FN2,
-    _FN3
+    _FN3,
+    _LAST = _FN3
 };
 
 
@@ -116,15 +117,30 @@ void keyboard_post_init_user(void) {
   //debug_mouse=true;
 }
 
+enum switch_layer_key_state {
+    switchLayerKey_not_pressed = 0,
+    switchLayerKey_pressed = 1,
+    switchLayerKey_pressed_and_handled = 2
+};
+
 static keypos_t switchLayerKey_Pos = { .row= 0, .col= 4 };
-static bool switchLayerKey_pressed = false;
+static uint16_t switchLayerKey_state = switchLayerKey_not_pressed;
 static uint16_t switchLayerKey_pressed_timer;
 
 const uint8_t keyboard_toggle = 0x65;
 
 // function declarations
-void switchToNextLayer(void);
-layer_state_t getNextLayer(void);
+
+/**
+ * void switchToNextLayer(bool advance)
+ * @param
+ *      advance:  true, advance to the next layer
+ *                false, go to the previous layer
+ *  
+*/
+void switchToNextLayer(bool advance);
+layer_state_t getNextLayer(bool advance);
+
 bool tapMoneKeyCode(uint16_t keycode);
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -142,12 +158,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // if switchLayerKey is pressed
         if (record->event.pressed) 
         {
-            if (! switchLayerKey_pressed) 
+            if (switchLayerKey_state == switchLayerKey_not_pressed) 
             {
 #ifdef CONSOLE_ENABLE
-                uprintf("KL: switchLayerKey_pressed = true\n");
+                uprintf("KL: switchLayerKey_state = switchLayerKey_pressed\n");
 #endif 
-                switchLayerKey_pressed = true;
+                switchLayerKey_state = switchLayerKey_pressed;
                 switchLayerKey_pressed_timer = timer_read();
             }
 
@@ -155,7 +171,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         else // !record->event.pressed
         {
             // means the key is pressed for less than TAPPING_TERM
-            if (switchLayerKey_pressed)
+            if (switchLayerKey_state == switchLayerKey_pressed)
             {
                 if (timer_elapsed(switchLayerKey_pressed_timer) < TAPPING_TERM)
                 {
@@ -172,18 +188,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef CONSOLE_ENABLE
                     uprintf("KL: switchLayerKey_pressed and holded, switchToNextLayer()\n");
 #endif 
-                    switchToNextLayer();
-                }
-            } //if (switchLayerKey_pressed)
+                    switchToNextLayer(true);
+                }                
+            } //if (switchLayerKey_state == switchLayerKey_pressed)
 
-            switchLayerKey_pressed = false;
+            switchLayerKey_state = switchLayerKey_not_pressed;
         }    
 
         return false;
     }
     else  // else if not switchLayerKey
     {
-        switchLayerKey_pressed = false;
+        switchLayerKey_state = switchLayerKey_not_pressed;
 
         if (record->event.pressed)
         {
@@ -240,13 +256,15 @@ bool tapMoneKeyCode(uint16_t keycode)
             break;
         case MK_YT_WATCHLATER:
             SEND_STRING(SS_LGUI(SS_TAP(X_L)));
-            SEND_STRING_DELAY("https://www.youtube.com/playlist?list=WL", MACRO_TIMER);
-            SEND_STRING_DELAY(SS_TAP(X_ENTER), MACRO_TIMER);
+            SEND_STRING("https://www.youtube.com/playlist?list=WL");
+            wait_ms(MACRO_TIMER);
+            SEND_STRING(SS_TAP(X_ENTER));
             break;
         case MK_YT_SUBSCRIPTNS:
             SEND_STRING(SS_LGUI(SS_TAP(X_L)));
-            SEND_STRING_DELAY("https://www.youtube.com/feed/subscriptions", MACRO_TIMER);
-            SEND_STRING_DELAY(SS_TAP(X_ENTER), MACRO_TIMER);
+            SEND_STRING("https://www.youtube.com/feed/subscriptions");
+            wait_ms(MACRO_TIMER);
+            SEND_STRING(SS_TAP(X_ENTER));
             break;
 
         case MK_IOS_HOME: // FN+H
@@ -339,27 +357,40 @@ bool tapMoneKeyCode(uint16_t keycode)
     return handled;
 }
 
-layer_state_t getNextLayer(void) 
+layer_state_t getNextLayer(bool advance) 
 {
     const layer_state_t curr_layer = get_highest_layer(layer_state);
 
-    layer_state_t next_layer = curr_layer + 1;
-
-    if (next_layer > _FN3) {
-        next_layer = _BASE;
+    layer_state_t next_layer = curr_layer;
+    if (advance)
+    {
+        if (curr_layer == _LAST) {
+            next_layer = _BASE;
+        }
+        else {
+            next_layer = curr_layer + 1;
+        }
+    }
+    else
+    {
+        if (curr_layer == _BASE) {
+            next_layer = _LAST;
+        }
+        else {
+            next_layer = curr_layer - 1;
+        }
     }
 
-
 #ifdef CONSOLE_ENABLE
-    uprintf("getNextLayer: %d\n", next_layer);
+    uprintf("getNextLayer(%d): %d\n", (int)advance, next_layer);
 #endif 
 
     return next_layer;
 }
 
-void switchToNextLayer(void) 
+void switchToNextLayer(bool advance) 
 {
-    const layer_state_t next_layer = getNextLayer();
+    const layer_state_t next_layer = getNextLayer(advance);
 
     layer_clear();
     layer_on(_BASE);
@@ -434,6 +465,37 @@ bool oled_task_user(void) {
     // oled_scroll_left();  // Turns on scrolling
     return false;
 }
+
+
+bool mone_encoder_update(uint8_t index, bool clockwise) 
+{
+    //  also handle switchLayerKey_pressed_and_handled, because the dial can be turnt more than once
+    if (switchLayerKey_state == switchLayerKey_pressed || switchLayerKey_state == switchLayerKey_pressed_and_handled) 
+    {
+#ifdef CONSOLE_ENABLE
+        uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
+#endif 
+
+        if (clockwise)
+        {
+            switchToNextLayer(false);
+        }
+        else 
+        {
+            switchToNextLayer(true);
+        }
+
+        switchLayerKey_state = switchLayerKey_pressed_and_handled;
+
+        return true;
+    }
+    else
+    {
+        return vial_encoder_update(index, clockwise);
+    }
+}
+
+
 
 #endif
 

@@ -15,8 +15,8 @@
 
 #define USB_VENDOR_ID_APPLE      0x05ac
 #define USB_PRODUCT_ID_APPLE     0x029c
-#define VENDOR_ID    USB_VENDOR_ID_APPLE //Apple VenderID for Fn key to work as world button 
-#define PRODUCT_ID   USB_PRODUCT_ID_APPLE //Apple M1 Macbookpro keyboard product ID 
+#define VENDOR_ID    0x05ac //Apple VenderID for Fn key to work as world button 
+#define PRODUCT_ID   0x029c //Apple M1 Macbookpro keyboard product ID 
 // #define VENDOR_ID    0x6D68   // "mh" = monehsieh
 // #define PRODUCT_ID   0x0001
 
@@ -159,6 +159,9 @@
 #define BOOTMAGIC_LITE_COLUMN 0
 
 #define APPLE_FN_ENABLE
+
+
+
 
 
 
