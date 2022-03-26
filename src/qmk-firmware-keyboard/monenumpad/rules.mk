@@ -40,3 +40,5 @@ NKRO_ENABLE = no
 #EXTRAFLAGS+=-flto
 #define NO_ACTION_MACRO
 #define NO_ACTION_FUNCTION
+
+SRC += user_config.c

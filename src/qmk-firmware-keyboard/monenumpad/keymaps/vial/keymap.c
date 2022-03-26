@@ -5,7 +5,32 @@
 
 #include <stdio.h>
 
+#include "user_config.h"
+
 #define MACRO_TIMER 10
+
+/**
+ * Behaviour descriptions:
+ * 
+ * 1. Pressing and holding key (r=0, c=4) will change layers
+ * 
+ * 2. Turning rotary encoder while holding key (r=0, c=4) also changes layers.
+ *    Turning clockwise advances to the next layer. Turning anti-clockwise 
+ *    will move to previous layer.
+ * 
+ * 3. Pressing rotary encoder while holding key (r=0, c=4) will toggle the 
+ *    platform mode between Win and Mac, which affects the pre-programmed key
+ *    shortcuts.
+ * 
+ */
+
+
+/**
+ * Windows Shortcuts:
+ * Fn + DEL to increase the brightness and Fn + Backspace to decrease it.
+ * On Dell XPS laptop keyboard (pictured below), hold the Fn key and press F11 or F12 to adjust the brightness of the screen
+ */
+
 
 // Defines names for use in layer keycodes and the keymap
 enum layer_names {
@@ -19,7 +44,9 @@ enum layer_names {
 
 enum MoneKeys {
    //YouTube Layer
-   MK_YT_REWIND = SAFE_RANGE,  //YouTube Rewind
+   MK_FIRST = SAFE_RANGE,
+
+   MK_YT_REWIND = MK_FIRST,  //YouTube Rewind
    MK_YT_FASTFORWD,  //YouTube Fast forward
    MK_YT_SPEEDUP, //YouTube Speed up
    MK_YT_SPEEDDOWN, //YouTube Speed down
@@ -39,7 +66,7 @@ enum MoneKeys {
 
    //iOS Layer
    MK_IOS_HOME, //iOS home screen, WORD+H
-   MK_IOS_SHOWKEED, //iOS show soft keyboard    
+   //MK_IOS_SHOWKEED, //iOS show soft keyboard    
    MK_IOS_PREVTRACK, //iOS previous track  KC_MEDIA_PREV_TRACK
    MK_IOS_NEXTTRACK, //iOS next track  KC_MEDIA_NEXT_TRACK
    MK_IOS_PLAY, // iOS Play/pause media  KC_MEDIA_PLAY_PAUSE
@@ -53,9 +80,15 @@ enum MoneKeys {
    MK_IOS_PREVAPP, //Previous App, World+Left
    MK_IOS_NEXTAPP, //Next App, World+Right
    MK_IOS_BRIDOWN,
-   MK_IOS_BRIDUP
+   MK_IOS_BRIDUP,
+
+   MK_LAST //exclusive
 };
 
+#define IS_MK_CODE(keycode)     \
+    (MK_FIRST <= keycode && keycode < MK_LAST)
+
+bool tapMoneKeyCode(uint16_t keycode);
 
 
 /*
@@ -119,33 +152,35 @@ void keyboard_post_init_user(void) {
   debug_matrix=true;
   //debug_keyboard=true;
   //debug_mouse=true;
+
+  read_user_config();
 }
 
+
+//
+// Layer management functions
+//
 enum switch_layer_key_state {
     switchLayerKey_not_pressed = 0,
     switchLayerKey_pressed = 1,
     switchLayerKey_pressed_and_handled = 2
 };
 
-static keypos_t switchLayerKey_Pos = { .row= 0, .col= 4 };
+static const keypos_t rotaryEncoderKey_Pos = { .row= 3, .col= 0 };
+static const keypos_t switchLayerKey_Pos = { .row= 0, .col= 4 };
 static uint16_t switchLayerKey_state = switchLayerKey_not_pressed;
 static uint16_t switchLayerKey_pressed_timer;
 
-const uint8_t keyboard_toggle = 0x65;
-
-// function declarations
-
-/**
- * void switchToNextLayer(bool advance)
- * @param
- *      advance:  true, advance to the next layer
- *                false, go to the previous layer
- *  
-*/
+// 
+// void switchToNextLayer(bool advance)
+// param
+//      advance:  true, advance to the next layer
+//                false, go to the previous layer
+//  
 void switchToNextLayer(bool advance);
 layer_state_t getNextLayer(bool advance);
 
-bool tapMoneKeyCode(uint16_t keycode);
+
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
@@ -153,11 +188,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   // If console is enabled, it will print the matrix position and status of each key pressed
 #ifdef CONSOLE_ENABLE
     uprintf("KL: kc: 0x%04X, c: %u, r: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
-     keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+    keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
 #endif 
 
     // if the right bottom k44 is pressed & hold, tranverse to the next layer.
-    if (record->event.key.col == switchLayerKey_Pos.col && record->event.key.row == switchLayerKey_Pos.row) 
+    if (KEYEQ(record->event.key, switchLayerKey_Pos)) 
     {
         // if switchLayerKey is pressed
         if (record->event.pressed) 
@@ -203,11 +238,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     else  // else if not switchLayerKey
     {
-        switchLayerKey_state = switchLayerKey_not_pressed;
-
         if (record->event.pressed)
         {
-            tapMoneKeyCode(keycode);
+            // pressing rotary encoder button while holding switchLayerKey will 
+            // 
+            if (KEYEQ(record->event.key, rotaryEncoderKey_Pos))
+            {
+#ifdef CONSOLE_ENABLE
+                uprintf("KL: rotaryEncoderKey_Pos is pressed, switchLayerKey_state=%d\n", (int)switchLayerKey_state);
+#endif 
+
+                if (switchLayerKey_state == switchLayerKey_pressed || switchLayerKey_state == switchLayerKey_pressed_and_handled)
+                {
+#ifdef CONSOLE_ENABLE
+                uprintf("KL: toggling is_win_mode\n");
+#endif 
+
+                    user_config.is_win_mode = !user_config.is_win_mode;
+
+                    save_user_config();
+
+                    switchLayerKey_state = switchLayerKey_pressed_and_handled;
+    
+                    return false;
+                }                
+            }
+
+            if (tapMoneKeyCode(keycode)) 
+            {
+                return true;
+            }
         }
 
         return true;
@@ -231,10 +291,27 @@ static void openUrl(const char *url)
     uprintf("KL: auto enter: %d\n", (int)submit_webpage_auto_press_enter);
 #endif 
 
-    SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+    // set focus to address bar
+    if (user_config.is_win_mode) 
+    {
+#ifdef CONSOLE_ENABLE
+        uprintf("KL: testing openUrl()\n");
+#endif 
+        //Ctrl-L
+        SEND_STRING(SS_LCTL(SS_TAP(X_L)));
+    }
+    else 
+    {
+        // CMD+L
+        SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+    }
     wait_ms(presubmit_webpage_wait_time);
+
+    // send URL to address bar
     send_string(url);
-    if (submit_webpage_auto_press_enter)
+
+    // press enter to submit
+    if (submit_webpage_auto_press_enter || user_config.is_win_mode)
     {
         wait_ms(postsubmit_webpage_wait_time);
         SEND_STRING(SS_TAP(X_ENTER));    
@@ -244,6 +321,11 @@ static void openUrl(const char *url)
 //return true if keycode is Mone defined and has been handled in tapMoneKeyCode
 bool tapMoneKeyCode(uint16_t keycode)
 {
+    if (!IS_MK_CODE(keycode))
+    {
+        return false;   
+    }
+
     bool handled = true;
 
     //Example:
@@ -263,16 +345,37 @@ bool tapMoneKeyCode(uint16_t keycode)
             SEND_STRING(SS_LSFT("<"));
             break;
         case MK_YT_NEXTCH:
-            SEND_STRING(SS_LALT(SS_TAP(X_RIGHT)));
+            if (user_config.is_win_mode) 
+            {
+                SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+            }
+            else 
+            {
+                SEND_STRING(SS_LALT(SS_TAP(X_RIGHT)));
+            }
             break;
         case MK_YT_PREVCH:
-            SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
+            if (user_config.is_win_mode) 
+            {
+                SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+            }
+            else {
+                SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
+            }
             break;
         case MK_YT_NEXTVID:
             SEND_STRING(SS_LSFT(SS_TAP(X_N)));
             break;
         case MK_YT_PREVVID:
-            SEND_STRING(SS_LGUI("[")); // CMD + [
+            if (user_config.is_win_mode) 
+            {
+                // Windows Edge: Alt + Left arrow
+                SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
+            }
+            else {   
+                // Mac Safari: CMD + [
+                SEND_STRING(SS_LGUI("["));
+            }
             break;
         case MK_YT_FULLSCVW:
             SEND_STRING(SS_TAP(X_F));
@@ -293,19 +396,15 @@ bool tapMoneKeyCode(uint16_t keycode)
             presubmit_webpage_wait_time = DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME;
             postsubmit_webpage_wait_time = DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME; 
 #endif            
-            openUrl("www.youtube.com");
+            openUrl("https://www.youtube.com");
             break;
 
         case MK_YT_SUBSCRIPTNS:
-#ifdef TEST_SUBMIT_WEBPAGE_TIMING        
-            //testing toggle enter key
-            submit_webpage_auto_press_enter = !submit_webpage_auto_press_enter;
-#endif
-            openUrl("www.youtube.com/feed/subscriptions");
+            openUrl("https://www.youtube.com/feed/subscriptions");
             break;
 
         case MK_YT_WATCHLATER:
-            openUrl("www.youtube.com/playlist?list=WL");
+            openUrl("https://www.youtube.com/playlist?list=WL");
 #ifdef TEST_SUBMIT_WEBPAGE_TIMING
             //testing
             presubmit_webpage_wait_time += MACRO_TIMER;
@@ -313,7 +412,7 @@ bool tapMoneKeyCode(uint16_t keycode)
             break;
 
         case MK_YT_HISTORY:
-            openUrl("www.youtube.com/feed/history");
+            openUrl("https://www.youtube.com/feed/history");
 #ifdef TEST_SUBMIT_WEBPAGE_TIMING            
             //testing
             postsubmit_webpage_wait_time += MACRO_TIMER;
@@ -327,8 +426,8 @@ bool tapMoneKeyCode(uint16_t keycode)
             unregister_code16(KC_APPLE_FN);
             break;
 
-        case MK_IOS_SHOWKEED:
-            break;
+        // case MK_IOS_SHOWKEED:
+        //     break;
 
         case MK_IOS_PREVTRACK:  //iOS previous track  KC_MEDIA_PREV_TRACK
             SEND_STRING(SS_TAP(X_MEDIA_PREV_TRACK));
@@ -342,8 +441,16 @@ bool tapMoneKeyCode(uint16_t keycode)
             SEND_STRING(SS_TAP(X_MEDIA_PLAY_PAUSE));
             break;
 
-        case MK_IOS_SEARCH: //Spotlight Search. Cmd+Space
-            SEND_STRING(SS_LGUI(SS_TAP(X_SPACE)));
+        case MK_IOS_SEARCH: //Spotlight Search. 
+            if (user_config.is_win_mode) 
+            {
+                // Win+S
+                SEND_STRING(SS_LGUI(SS_TAP(X_S)));
+            }
+            else {
+                // Cmd+Space
+                SEND_STRING(SS_LGUI(SS_TAP(X_SPACE)));
+            }
             break;
 
         case MK_IOS_DOCK: //Show Dock, World+A
@@ -364,16 +471,33 @@ bool tapMoneKeyCode(uint16_t keycode)
             unregister_code16(KC_APPLE_FN);
             break;
 
-        case MK_IOS_CONTROLCENTER: //Control Center, World+C
-            register_code16(KC_APPLE_FN);
-            SEND_STRING(SS_TAP(X_C));
-            unregister_code16(KC_APPLE_FN);
+        case MK_IOS_CONTROLCENTER: //Control Center
+            if (user_config.is_win_mode) 
+            {
+                // Win+N
+                SEND_STRING(SS_LGUI(SS_TAP(X_A)));
+            }
+            else 
+            {
+                //World+C
+                register_code16(KC_APPLE_FN);
+                SEND_STRING(SS_TAP(X_C));
+                unregister_code16(KC_APPLE_FN);
+            }
             break;
 
-        case MK_IOS_NOTIFICATION: //Notification Center, World+N
-            register_code16(KC_APPLE_FN);
-            SEND_STRING(SS_TAP(X_N));
-            unregister_code16(KC_APPLE_FN);
+        case MK_IOS_NOTIFICATION: //Notification Center
+            if (user_config.is_win_mode) 
+            {
+                // Win+N
+                SEND_STRING(SS_LGUI(SS_TAP(X_N)));
+            }
+            else {
+                // World+N
+                register_code16(KC_APPLE_FN);
+                SEND_STRING(SS_TAP(X_N));
+                unregister_code16(KC_APPLE_FN);
+            }
             break;
 
         case MK_IOS_APPSWITCHER: //App Switcher, World+Up
@@ -469,6 +593,8 @@ void render_status(void) {
     // Host Keyboard Layer Status
     oled_write_P(PSTR("Hi Mone!\n"), false);
 
+    oled_write_P(user_config.is_win_mode ? PSTR("Mode: Win\n"): PSTR("Mode: Mac\n"), false);
+
     oled_write_P(PSTR("Layer: "), false);
 
     switch (get_highest_layer(layer_state)) {
@@ -490,11 +616,11 @@ void render_status(void) {
     }
 
 
-#ifdef TEST_SUBMIT_WEBPAGE_TIMING
-    char szBuf[50] = {0};
-    sprintf(szBuf, "pre:%ld  post:%ld\n", (long)presubmit_webpage_wait_time, (long)postsubmit_webpage_wait_time);
-    oled_write(szBuf, false);
-#endif
+// #ifdef TEST_SUBMIT_WEBPAGE_TIMING
+//     char szBuf[50] = {0};
+//     sprintf(szBuf, "pre:%ld  post:%ld\n", (long)presubmit_webpage_wait_time, (long)postsubmit_webpage_wait_time);
+//     oled_write(szBuf, false);
+// #endif
 
     return;
 }
@@ -534,7 +660,6 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
 // #ifdef CONSOLE_ENABLE
 //         uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
 // #endif 
-
         if (clockwise)
         {
             switchToNextLayer(false);
