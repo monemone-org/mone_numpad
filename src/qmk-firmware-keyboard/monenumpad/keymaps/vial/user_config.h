@@ -1,5 +1,5 @@
 // user_config.h
-
+#pragma once
 
 typedef union {
   uint32_t raw;
