@@ -8,6 +8,8 @@
 // #endif
 
 
+#define HOLD_DETECTION_DURATION     500
+
 press_and_hold_key_t make_press_and_hold_key(
     	keypos_t i_pos,
     	bool (*i_process_hold)(uint16_t keycode),
@@ -78,22 +80,22 @@ bool process_press_and_hold_key(
     {
 	    bool result = false;
 
-        // means the key is pressed for less than TAPPING_TERM
+        // means the key is pressed for less than HOLD_DETECTION_DURATION
         if (key->state == key_pressed)
         {
-            if (timer_elapsed(key->timer) < TAPPING_TERM)
+            if (timer_elapsed(key->timer) < HOLD_DETECTION_DURATION)
             {
 #ifdef DEBUG_PRESS_AND_HOLD
-    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) < TAPPING_TERM. invoke procees_tap().\n",
+    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) < HOLD_DETECTION_DURATION. invoke procees_tap().\n",
     				key->pos.row, key->pos.col);
 #endif    
 
                 result = key->process_tap(keycode);
             }
-            else //(timer_elapsed(key.timer) >= TAPPING_TERM)
+            else //(timer_elapsed(key.timer) >= HOLD_DETECTION_DURATION)
             {
 #ifdef DEBUG_PRESS_AND_HOLD
-    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) >= TAPPING_TERM. invoke procees_hold().\n",
+    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) >= HOLD_DETECTION_DURATION. invoke procees_hold().\n",
     				key->pos.row, key->pos.col);
 #endif    
                 result = key->process_hold(keycode);
