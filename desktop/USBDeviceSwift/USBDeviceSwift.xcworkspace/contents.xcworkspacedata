@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:CleanFlightSerialExample/CleanFlightSerialExample.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:USBDeviceSwift.podspec">
+   </FileRef>
+   <FileRef
+      location = "group:LICENSE">
+   </FileRef>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <FileRef
+      location = "group:Package.swift">
+   </FileRef>
+   <FileRef
+      location = "group:CHANGELOG.md">
+   </FileRef>
+   <FileRef
+      location = "group:RaceflightControllerHIDExample">
+   </FileRef>
+   <FileRef
+      location = "group:STM32DeviceExample/STM32DeviceExample.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:USBDeviceSwift.xcodeproj">
+   </FileRef>
+</Workspace>
