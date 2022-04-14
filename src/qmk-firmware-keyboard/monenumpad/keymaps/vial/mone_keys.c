@@ -7,6 +7,9 @@
 #define MACRO_TIMER 10
 
 
+// #ifdef CONSOLE_ENABLE
+// #define DEBUG_SUBMIT_WEBPAGE_TIMING
+// #endif
 
 
 #define DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME  70  //choose 70ms for Brave on iPad to work
@@ -14,11 +17,11 @@
 uint64_t presubmit_webpage_wait_time = DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME;
 uint64_t postsubmit_webpage_wait_time = DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME; 
 bool submit_webpage_auto_press_enter = false; // iOS safari doesn't like auto enter. It keeps loading a truncated URL.
-#define TEST_SUBMIT_WEBPAGE_TIMING
+
 
 static void openUrl(const char *url)
 {
-#if defined(CONSOLE_ENABLE) && defined(TEST_SUBMIT_WEBPAGE_TIMING)
+#ifdef DEBUG_SUBMIT_WEBPAGE_TIMING
     uprintf("KL: pre: %ld\n", (long)presubmit_webpage_wait_time);
     uprintf("KL: post: %ld\n", (long)postsubmit_webpage_wait_time);
     uprintf("KL: auto enter: %d\n", (int)submit_webpage_auto_press_enter);
@@ -122,7 +125,7 @@ bool process_mone_key(uint16_t keycode)
             break;
 
         case MK_YT_HOME:
-#ifdef TEST_SUBMIT_WEBPAGE_TIMING
+#ifdef DEBUG_SUBMIT_WEBPAGE_TIMING
             //testing reset
             presubmit_webpage_wait_time = DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME;
             postsubmit_webpage_wait_time = DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME; 
@@ -136,7 +139,7 @@ bool process_mone_key(uint16_t keycode)
 
         case MK_YT_WATCHLATER:
             openUrl("https://www.youtube.com/playlist?list=WL");
-#ifdef TEST_SUBMIT_WEBPAGE_TIMING
+#ifdef DEBUG_SUBMIT_WEBPAGE_TIMING
             //testing
             presubmit_webpage_wait_time += MACRO_TIMER;
 #endif
@@ -144,7 +147,7 @@ bool process_mone_key(uint16_t keycode)
 
         case MK_YT_HISTORY:
             openUrl("https://www.youtube.com/feed/history");
-#ifdef TEST_SUBMIT_WEBPAGE_TIMING            
+#ifdef DEBUG_SUBMIT_WEBPAGE_TIMING            
             //testing
             postsubmit_webpage_wait_time += MACRO_TIMER;
 #endif

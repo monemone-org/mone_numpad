@@ -3,6 +3,11 @@
 #include "press_and_hold_key.h"
 #include "mone_keys.h"
 
+// #ifdef CONSOLE_ENABLE
+// #define DEBUG_PRESS_AND_HOLD    1
+// #endif
+
+
 press_and_hold_key_t make_press_and_hold_key(
     	keypos_t i_pos,
     	bool (*i_process_hold)(uint16_t keycode),
@@ -32,8 +37,9 @@ void set_press_and_hold_key_to_handled(press_and_hold_key_t *key)
 	}
 	else 
 	{
-#ifdef CONSOLE_ENABLE
-        uprintf("KL: ASSERT WARNING press_and_hold_key_is_handled():  key->state should be key_pressed.\n");
+#ifdef DEBUG_PRESS_AND_HOLD
+        uprintf("KL: ASSERT WARNING press_and_hold_key_is_handled(c: %u, r: %u):  key->state should be key_pressed.\n",
+        	key->pos.row, key->pos.col);
 #endif 
 
 	}
@@ -50,8 +56,9 @@ bool process_press_and_hold_key(
         return true;
     }
 
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: process_press_and_hold_key - key->pos matched\n");
+// #ifdef DEBUG_PRESS_AND_HOLD
+//     uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - key->pos matched\n",
+//    		key->pos.row, key->pos.col);
 // #endif    
 
     // if key is pressed
@@ -59,9 +66,10 @@ bool process_press_and_hold_key(
     {
         if (key->state == key_not_pressed) 
         {
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: process_press_and_hold_key - key->state == key_not_pressed. Changed state to pressed\n");
-// #endif    
+#ifdef DEBUG_PRESS_AND_HOLD
+		    uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - key->state == key_not_pressed. Changed state to pressed.\n",
+        			key->pos.row, key->pos.col);
+#endif    
             key->state = key_pressed;
             key->timer = timer_read();
         }
@@ -75,35 +83,39 @@ bool process_press_and_hold_key(
         {
             if (timer_elapsed(key->timer) < TAPPING_TERM)
             {
-// #ifdef CONSOLE_ENABLE
-//     			uprintf("KL: process_press_and_hold_key - timer_elapsed(key->timer) < TAPPING_TERM. invoke procees_tap\n");
-// #endif    
+#ifdef DEBUG_PRESS_AND_HOLD
+    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) < TAPPING_TERM. invoke procees_tap().\n",
+    				key->pos.row, key->pos.col);
+#endif    
 
                 result = key->process_tap(keycode);
             }
             else //(timer_elapsed(key.timer) >= TAPPING_TERM)
             {
-// #ifdef CONSOLE_ENABLE
-//     			uprintf("KL: process_press_and_hold_key - timer_elapsed(key->timer) >= TAPPING_TERM. invoke procees_hold\n");
-// #endif    
+#ifdef DEBUG_PRESS_AND_HOLD
+    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) >= TAPPING_TERM. invoke procees_hold().\n",
+    				key->pos.row, key->pos.col);
+#endif    
                 result = key->process_hold(keycode);
             }                
         }
 
         if (result) 
         {
-// #ifdef CONSOLE_ENABLE
-//    			uprintf("KL: process_press_and_hold_key - result == false, process_mone_key\n");
-// #endif    
+#ifdef DEBUG_PRESS_AND_HOLD
+   			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - result == false, process_mone_key() and tap_code16().\n",
+   				key->pos.row, key->pos.col);
+#endif    
 		    if (process_mone_key(keycode)) 
 		    {
 		        tap_code16(keycode);
 		    }                	
         }
 	
-// #ifdef CONSOLE_ENABLE
-// 		uprintf("KL: process_press_and_hold_key - restore key->state = key_not_pressed\n");
-// #endif    
+#ifdef DEBUG_PRESS_AND_HOLD
+		uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - restore key->state = key_not_pressed.\n",
+			key->pos.row, key->pos.col);
+#endif    
         key->state = key_not_pressed;
 
     }

@@ -8,6 +8,13 @@
 #include "user_config.h"
 #include "press_and_hold_key.h"
 #include "mone_keys.h"
+#include "maxmix/maxmix.h"
+
+#ifdef CONSOLE_ENABLE
+#define DEBUG_EDIT_SESSION
+#define DEBUG_MAXMIX
+//#define DEBUG_LAYER
+#endif
 
 /**
  * Behaviour descriptions:
@@ -122,9 +129,11 @@ press_and_hold_key_t switch_layer_key;
 const keypos_t rotary_encoder_keypos = { .row= 3, .col= 0 };
 press_and_hold_key_t rotary_encoder_key;
 
+bool editing_session_mode = false;
+
 
 void keyboard_post_init_user(void) 
-{
+{    
   // Customise these values to desired behaviour
   debug_enable=true;
   debug_matrix=true;
@@ -145,6 +154,8 @@ void keyboard_post_init_user(void)
         process_hold_rotary_encoder_key,
         process_tap_rotary_encoder_key
     );
+
+  initialize_maxmix();
 }
 
 
@@ -205,9 +216,9 @@ layer_state_t getNextLayer(bool advance)
         }
     }
 
-// #ifdef CONSOLE_ENABLE
-//     uprintf("getNextLayer(%d): %d\n", advance, next_layer);
-// #endif 
+#ifdef DEBUG_LAYER
+    uprintf("getNextLayer(%d): %d\n", advance, next_layer);
+#endif 
 
     return next_layer;
 }
@@ -220,9 +231,9 @@ void switchToNextLayer(bool advance)
     layer_on(_BASE);
     layer_on(next_layer);
 
-// #ifdef CONSOLE_ENABLE
-//    uprintf("KL: switchToNextLayer: layer_on = _BASE + %u\n", get_highest_layer(layer_state));
-// #endif 
+#ifdef DEBUG_LAYER
+   uprintf("KL: switchToNextLayer: layer_on = _BASE + %u\n", get_highest_layer(layer_state));
+#endif 
 }
 
 
@@ -237,30 +248,43 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 void render_status(void) {
 
     // Host Keyboard Layer Status
-    oled_write_P(PSTR("Hi Mone!\n"), false);
-
-    oled_write_P(user_config.is_win_mode ? PSTR("Mode: Win\n"): PSTR("Mode: Mac\n"), false);
-
-    oled_write_P(PSTR("Layer: "), false);
-
-    switch (get_highest_layer(layer_state)) {
-        case _BASE:
-            oled_write_P(PSTR("Base\n"), false);
-            break;
-        case _FN1:
-            oled_write_P(PSTR("YouTube\n"), false);
-            break;
-        case _FN2:
-            oled_write_P(PSTR("iOS\n"), false);
-            break;
-        case _FN3:
-            oled_write_P(PSTR("Fn Keys\n"), false);
-            break;
-        default:
-            // Or use the write_ln shortcut over adding '\n' to the end of your string
-            oled_write_ln_P(PSTR("Undefined"), false);
+    if (editing_session_mode)
+    {
+        oled_write_P(PSTR("Editing Audio"), false);
+        oled_write_ln_P(PSTR("Session"), false);
+        oled_write_ln_P(PSTR(""), false);
+        oled_write_P(PSTR("Audio: "), false);
+        oled_write_ln(curr_session_data.name, false);        
     }
+    else
+    {
+        //oled_write_P(PSTR("Hi Mone!\n"), false);
 
+        oled_write_P(user_config.is_win_mode ? PSTR("Mode: Win\n"): PSTR("Mode: Mac\n"), false);
+
+        oled_write_P(PSTR("Layer: "), false);
+
+        switch (get_highest_layer(layer_state)) {
+            case _BASE:
+                oled_write_P(PSTR("Base\n"), false);
+                break;
+            case _FN1:
+                oled_write_P(PSTR("YouTube\n"), false);
+                break;
+            case _FN2:
+                oled_write_P(PSTR("iOS\n"), false);
+                break;
+            case _FN3:
+                oled_write_P(PSTR("Fn Keys\n"), false);
+                break;
+            default:
+                // Or use the write_ln shortcut over adding '\n' to the end of your string
+                oled_write_ln_P(PSTR("Undefined"), false);
+        }
+
+        oled_write_P(PSTR("Audio: "), false);
+        oled_write_ln(curr_session_data.name, false);
+    }
 
 // #ifdef TEST_SUBMIT_WEBPAGE_TIMING
 //     char szBuf[50] = {0};
@@ -273,10 +297,7 @@ void render_status(void) {
 
 
 bool oled_task_user(void) {
-    render_status();  // Renders the current keyboard state (layer, lock, caps, scroll, etc)
-
-    // render_logo();  // Renders a static logo
-    // oled_scroll_left();  // Turns on scrolling
+    render_status();
     return false;
 }
 
@@ -287,9 +308,9 @@ bool oled_task_user(void) {
 // return true if qmk should continue processing the pressed key 
 bool process_hold_switch_layer_key(uint16_t keycode)
 {
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: process_hold_switch_layer_key\n"),
-// #endif    
+#ifdef DEBUG_LAYER
+    uprintf("KL: process_hold_switch_layer_key\n"),
+#endif    
 
     switchToNextLayer(true);
     return false;
@@ -298,9 +319,9 @@ bool process_hold_switch_layer_key(uint16_t keycode)
 // return true if qmk should continue processing the pressed key 
 bool process_tap_switch_layer_key(uint16_t keycode)
 {
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: process_tap_switch_layer_key\n");
-// #endif    
+#ifdef DEBUG_LAYER
+    uprintf("KL: process_tap_switch_layer_key\n");
+#endif    
     return true;
 }
 
@@ -308,23 +329,32 @@ bool process_tap_switch_layer_key(uint16_t keycode)
 // return true if qmk should continue processing the pressed key 
 bool process_hold_rotary_encoder_key(uint16_t keycode)
 {
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: rotaryEncoderKey_Pos is hold, TODO: change audio channel\n");
-// #endif 
-
-    return true;
+#ifdef DEBUG_EDIT_SESSION
+    uprintf("KL: rotaryEncoderKey_Pos is hold, TODO: change audio channel\n");
+#endif 
+    editing_session_mode = !editing_session_mode;
+    return false;
 }
 
 // return true if qmk should continue processing the pressed key 
 bool process_tap_rotary_encoder_key(uint16_t keycode)
 {
-       
-// #ifdef CONSOLE_ENABLE
-//     uprintf("KL: rotaryEncoderKey_Pos is pressed, switch_layer_key.state=%d\n", (int)switch_layer_key.state);
-// #endif 
+#ifdef DEBUG_LAYER
+    uprintf("KL: rotaryEncoderKey_Pos is pressed, switch_layer_key.state=%d\n", (int)switch_layer_key.state);
+#endif     
 
+    if (editing_session_mode)
+    {
+#ifdef DEBUG_EDIT_SESSION
+    uprintf("KL: rotaryEncoderKey_Pos is pressed, editing_session_mode=%d\n", (int)editing_session_mode);
+#endif 
+
+        editing_session_mode = false;        
+        return false;
+    }
     // pressing rotary encoder button while holding switchLayerKey will 
-    if (press_and_hold_key_is_pressed(&switch_layer_key))
+    // switch between win and mac  mode.
+    else if (press_and_hold_key_is_pressed(&switch_layer_key))
     {
         user_config.is_win_mode = !user_config.is_win_mode;
 
@@ -334,19 +364,49 @@ bool process_tap_rotary_encoder_key(uint16_t keycode)
 
         return false;
     }
-
-    return true;
+    else
+    {
+        return true;
+    }
 }
 
 
+#ifndef VIAL_ENCODERS_ENABLE
+bool mone_encoder_update(uint8_t index, bool clockwise);
+
+bool encoder_update_kb(uint8_t index, bool clockwise)
+{
+    return mone_encoder_update(index, clockwise);
+}
+#endif
+
 bool mone_encoder_update(uint8_t index, bool clockwise) 
 {
-    //  also handle switchLayerKey_pressed_and_handled, because the dial can be turnt more than once
-    if (press_and_hold_key_is_pressed(&switch_layer_key)) 
+#ifdef DEBUG_EDIT_SESSION
+        uprintf("KL: mone_encoder_update(index=%d, clockwise=%d)\n", (int)index, (int)clockwise);
+#endif 
+
+    if (editing_session_mode)
     {
-// #ifdef CONSOLE_ENABLE
-//         uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
-// #endif 
+#ifdef DEBUG_EDIT_SESSION
+        uprintf("KL: mone_encoder_update: editing_session_mode == true, changing curr session\n");
+#endif 
+        if (clockwise)
+        {
+            edit_prev_session();
+        }
+        else
+        {
+            edit_next_session();
+        }
+        return true;
+    }
+    //  also handle switchLayerKey_pressed_and_handled, because the dial can be turnt more than once
+    else if (press_and_hold_key_is_pressed(&switch_layer_key)) 
+    {
+#ifdef DEBUG_LAYER
+        uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
+#endif 
         if (clockwise)
         {
             switchToNextLayer(false);
@@ -362,8 +422,65 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
     }
     else
     {
-        return vial_encoder_update(index, clockwise);
+#ifdef VIAL_ENCODERS_ENABLE        
+        if (! maxmix_is_running())
+        {
+#ifdef DEBUG_MAXMIX
+            uprintf("KL: mone_encoder_update !maxmix_is_running\n");
+#endif 
+            return vial_encoder_update(index, clockwise);
+        }
+
+        uint16_t keycode = vial_get_encoder_keycode(index, clockwise);
+        bool encoder_is_volumne_control = ((keycode == KC_VOLD) && clockwise) || ((keycode == KC_VOLU) && !clockwise);
+        if (! encoder_is_volumne_control)
+        {
+#ifdef DEBUG_MAXMIX
+            uprintf("KL: mone_encoder_update !encoder_is_volumne_control\n");
+#endif 
+            return vial_encoder_update(index, clockwise);
+        }        
+#endif
+
+        if (clockwise)
+        {
+            dec_curr_session_volumne();
+        }
+        else
+        {
+            inc_curr_session_volumne();
+        }
+        return true;
+
     }
+}
+
+
+void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
+
+#ifdef DEBUG_EDIT_SESSION
+    uprintf("KL: raw_hid_receive_kb(length=%d)\n", (int)length);
+#endif 
+
+    uint8_t *command_id = &data[0];
+
+#ifdef DEBUG_EDIT_SESSION
+    uprintf("KL: raw_hid_receive_kb(command_id=0x%02X)\n", *command_id);
+#endif 
+
+    if (*command_id != id_mone_prefix) {
+        // Unhandled message.
+        *command_id = id_unhandled;
+        //*command_data = *command_data; // force use of variable
+        return;
+    }
+
+    uint8_t *maxmix_data = &data[1];
+    uint8_t maxmix_len = length - 1;
+    handle_maxmix_command(
+        maxmix_data,
+        maxmix_len
+        );
 }
 
 
