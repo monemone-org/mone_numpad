@@ -170,7 +170,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
 			desktop_client_protocol_version = (command_data[0] << 8) | command_data[1];
 
 			#ifdef DEBUG_MAXMIX
-			uprintf("KL: handle_maxmix_command(PROTOCOL_VERSION_EXCHANGE), desktop_client_protocol_version=0x%04X.\n", 
+			uprintf("KL: handle_maxmix_command(PROTOCOL_VERSION_EXCHANGE)=0x%04X.\n", 
 					(int)desktop_client_protocol_version);
 			#endif 
 
@@ -194,7 +194,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(SESSION_INFO) - ASSERT ERROR command_data_len < sizeof(session_info).\n");
+        	uprintf("KL: handle_maxmix_command(SESSION_INFO) - ERROR command_data_len < sizeof(session_info).\n");
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -213,7 +213,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(CURRENT_SESSION) - ASSERT ERROR command_data_len < sizeof(curr_session_data).\n");
+        	uprintf("KL: handle_maxmix_command(CURRENT_SESSION) - ERROR command_data_len < sizeof(curr_session_data).\n");
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -232,7 +232,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(PREVIOUS_SESSION) - ASSERT ERROR command_data_len < sizeof(prev_session_data).\n");
+        	uprintf("KL: handle_maxmix_command(PREVIOUS_SESSION) - ERROR command_data_len < sizeof(prev_session_data).\n");
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -251,7 +251,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(NEXT_SESSION) - ASSERT ERROR command_data_len < sizeof(next_session_data).\n");
+        	uprintf("KL: handle_maxmix_command(NEXT_SESSION) - ERROR command_data_len < sizeof(next_session_data).\n");
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -259,7 +259,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
 
     default:
 		#ifdef DEBUG_MAXMIX
-    	uprintf("KL: handle_maxmix_command - ASSERT ERROR unknown command_id: %d.\n", (int)command_id);
+    	uprintf("KL: handle_maxmix_command - ERROR unknown cmd: %d.\n", (int)command_id);
 		#endif 
 		*command_id = CMD_ERR;
     	break;

@@ -26,7 +26,7 @@ LTO_ENABLE = yes
 # resulting in a smaller firmware size
 QMK_SETTINGS = no
 TAP_DANCE_ENABLE = no
-
+KEY_OVERRIDE_ENABLE = no
 
 # OLED driver SSD1306
 # High resolution: 128 x 64 

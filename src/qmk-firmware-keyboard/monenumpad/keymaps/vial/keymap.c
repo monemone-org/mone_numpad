@@ -11,8 +11,8 @@
 #include "maxmix/maxmix.h"
 
 #ifdef CONSOLE_ENABLE
-#define DEBUG_EDIT_SESSION
-#define DEBUG_MAXMIX
+//#define DEBUG_EDIT_SESSION
+//#define DEBUG_MAXMIX
 //#define DEBUG_LAYER
 #endif
 
