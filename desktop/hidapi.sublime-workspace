@@ -1,0 +1,376 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"is",
+				"is_win_mode"
+			],
+			[
+				"eec",
+				"eeconfig_update_user"
+			],
+			[
+				"MK_HOME",
+				"MK_YT_HOME"
+			],
+			[
+				"switchLayerKey_",
+				"switchLayerKey_pressed_and_handled"
+			],
+			[
+				"tap",
+				"tap_code16"
+			],
+			[
+				"regi",
+				"register_code"
+			],
+			[
+				"key",
+				"key04_state"
+			],
+			[
+				"k",
+				"k04_handled"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"c",
+				"Set Syntax: C++"
+			],
+			[
+				"c++",
+				"Set Syntax: C++"
+			],
+			[
+				"w",
+				"Word Wrap: Toggle"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"remove p",
+				"Package Control: Remove Package"
+			],
+			[
+				"open",
+				"Open in Browser: Guide"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"indent",
+				"Indent XML"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 112.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi"
+	],
+	"file_history":
+	[
+		"/Users/monehsieh/dev/apps/BackgroundMusic/build_and_install.sh",
+		"/Users/monehsieh/dev/keyboard/maxmix-software/Embedded/MaxMix/src/ButtonEvents/ButtonEvents.h",
+		"/Users/monehsieh/dev/keyboard/maxmix-software/Embedded/MaxMix/src/ButtonEvents/Meta/README.md",
+		"/Users/monehsieh/dev/keyboard/maxmix-software/Embedded/MaxMix/Structs.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_tapping.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/send_string_keycodes.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/drashna/oled/sh110x.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/send_string.h",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/oledfonts/Dialog_plain_16.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/drivers/oled/oled_driver.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/platforms/arm_atsam/_wait.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/tmk_core/protocol/arm_atsam/clks.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/vial.c",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/rules.mk",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/encoder.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/quantum.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action.h",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/keymaps/vial/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/keycode.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/lib/chibios/os/hal/ports/SPC5/SPC56ELxx/xpc56el.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/process_keycode/process_auto_shift.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/lib/chibios-contrib/os/common/startup/MSP430X/compilers/GCC/ld/msp430fr6989_symbols.ld",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/lib/chibios-contrib/os/common/startup/MSP430X/compilers/GCC/ld/msp430fr5969_symbols.ld",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/keyboard.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_code.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/drashna/keyrecords/secrets.md",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/keymap_common.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/quantum.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_util.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_util.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/tmk_core/protocol/report.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/tmk_core/protocol/report.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/tmk_core/protocol/vusb/vusb.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/send_string.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_tapping.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/edvorakjp/edvorakjp_process_record.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/via.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/dynamic_keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/keycode_legacy.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/drivers/lcd/st7565.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/keyboard.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/drivers/oled/ssd1306_sh1106.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/process_keycode/process_terminal.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_layer.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/docs/feature_oled_driver.md",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/3by2/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/keymaps/vial/vial.json",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/keymaps/vial/keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/40percentclub/4x4/keymaps/vial/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/bbaserdem/rules.mk",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/tmk_core/protocol/usb_descriptor.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/drashna/keyrecords/process_records.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/badger/badger.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/drashna/keyrecords/tapping.c",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/monenumpad.h",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/keymaps/vial/keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/gmmk/pro/ansi/keymaps/mike1808/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/qmk_settings.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/0xcb/1337/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/quantum_keycodes.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/xulkal/layouts.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/owlab/voice65/soldered/soldered.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/users/greatwizard/ortho.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/matthewdias/m3n3van/keymaps/default/keymap.json",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/action_layer.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/command.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/lib/python/qmk/keymap.py",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/docs/feature_layers.md",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/hhkb/ansi/keymaps/shela/keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/quantum/dynamic_macro.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/z12/keymaps/zigotica/keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/lib/lufa/Demos/Device/LowLevel/Keyboard/doxyfile",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/layouts/community/ergodox/workman_osx_mdw/keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/lib/usbhost/USB_Host_Shield_2.0/settings.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/rules.mk",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/0xcb/static/keymaps/bongocat/keymap.c",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/0xcb/1337/keymaps/via/keymap.c",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware-keyboard/monenumpad/keymaps/vial/rules.mk",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/readme.md",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/keymaps/vial/rules.mk",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/config.h",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad/info.json",
+		"/Users/monehsieh/dev/keyboard/vial-qmk/keyboards/monenumpad",
+		"/Users/monehsieh/dev/keyboard/mone_numpad/monenumpad ver4 qmk_firmware/keyboards/kb/keymaps/via/rules.mk",
+		"/Users/monehsieh/dev/keyboard/qmk_firmware/users/cjuniet/cjuniet.c",
+		"/Users/monehsieh/dev/keyboard/qmk_firmware/users/drashna/oled/oled_stuff.c",
+		"/Users/monehsieh/dev/keyboard/mone numpad/monenumpad ver2.json",
+		"/Users/monehsieh/dev/aws.s3/www.monemone.org/apps/index.html",
+		"/Users/monehsieh/dev/aws.s3/www.monemone.org/apps/manifest.plist",
+		"/Users/monehsieh/dev/aws.s3/note.md",
+		"/Users/monehsieh/dev/aws.s3/note.txt",
+		"/Users/monehsieh/Library/Application Support/Sublime Text 3/Packages/Open In Browser/README.md",
+		"/Users/monehsieh/dev/aws.s3/monemone.org/index.html",
+		"/Users/monehsieh/dev/repo/DialPhone/DialPhone/Assets.xcassets/AppIcon.appiconset/Contents.json",
+		"/Users/monehsieh/dev/repo/DialPhone/images/distribution_info.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3-fixed-sorted.txt",
+		"/Users/monehsieh/Downloads/instagram-download/users-comments.html",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3-fixed-sorted2.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3-fixed.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3-sorted.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3b-sorted.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comment-user-list3b.txt",
+		"/Users/monehsieh/Downloads/instagram-download/Instagram-dl-master/run.sh",
+		"/Users/monehsieh/Downloads/instagram-download/instagram-oauth-nodejs-server/.env",
+		"/Users/monehsieh/Downloads/instagram-download/Instagram-dl-master/instagram-dl.py",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-query-1.json",
+		"/Users/monehsieh/mone-home/scripts/photos/photo-archiver-tools/idiff_mean_error.sh",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/get-ig-comments.sh",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/likes-usernames.txt",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/dt-sabers-post.json",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/comments-ul-list.html",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-ul-list.html",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-query-6.json",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-query-5.json",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-query-4.json",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-query-3.json",
+		"/Users/monehsieh/mone-home/scripts/ig-tools/like-query-2.json",
+		"/Users/monehsieh/Downloads/instagram-download/get_instagram_comments-master/requirements.txt",
+		"/Users/monehsieh/Downloads/instagram-download/Instagram-dl-master/requirements.txt",
+		"/Users/monehsieh/mone-home/scripts/get-ig-comments.sh",
+		"/Users/monehsieh/Downloads/SoundFont/tusken/ffprobe_wav.sh",
+		"/Users/monehsieh/Downloads/SoundFont/tusken/wav_probe.txt",
+		"/Users/monehsieh/Library/Mobile Documents/com~apple~CloudDocs/Personal Documents/Finance/Finance 2020/Tax/CRA owing $26.42",
+		"/Users/monehsieh/dev/tommy_2020_summer/sdcard_backup/ProffieOS/functions/random.h",
+		"/Users/monehsieh/dev/tommy_2020_summer/sdcard_backup/ProffieOS/functions/bump.h"
+	],
+	"find":
+	{
+		"height": 24.0
+	},
+	"find_in_files":
+	{
+		"height": 102.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": true,
+		"wrap": true
+	},
+	"folders":
+	[
+		{
+			"path": "/Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi"
+		}
+	],
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 24.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "",
+	"replace":
+	{
+		"height": 44.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"keycode",
+				"vial-qmk/quantum/keycode.h"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 222.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

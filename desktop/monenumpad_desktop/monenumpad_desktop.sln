@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.810.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monenumpad_desktop", "monenumpad_desktop\monenumpad_desktop.csproj", "{D2C33E56-D1B4-4F06-BC30-1F61AA157234}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2054B9D7-66F0-433A-A48B-1F8B2DA957E6}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2C33E56-D1B4-4F06-BC30-1F61AA157234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2C33E56-D1B4-4F06-BC30-1F61AA157234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2C33E56-D1B4-4F06-BC30-1F61AA157234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2C33E56-D1B4-4F06-BC30-1F61AA157234}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {482785A4-546C-4985-8883-A9B560B11B70}
+	EndGlobalSection
+EndGlobal

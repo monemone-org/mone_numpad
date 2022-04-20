@@ -1,0 +1,49 @@
+﻿<Properties StartupConfiguration="{D2C33E56-D1B4-4F06-BC30-1F61AA157234}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="monenumpad_desktop/FieldMarshalFunc.cs">
+    <Files>
+      <File FileName="monenumpad_desktop/Program.cs" Line="48" Column="44" />
+      <File FileName="monenumpad_desktop/HidApiCommunicationLayer.cs" Line="138" Column="56" />
+      <File FileName="monenumpad_desktop/structs.cs" Line="150" Column="37" />
+      <File FileName="monenumpad_desktop/BitVector.cs" Line="46" Column="25" />
+      <File FileName="monenumpad_desktop/FieldInfo.cs" Line="88" Column="41" />
+      <File FileName=".editorconfig" Line="1" Column="1" />
+      <File FileName="monenumpad_desktop/Platform.cs" Line="15" Column="26" />
+      <File FileName="monenumpad_desktop/FieldMarshalFunc.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="monenumpad_desktop" expanded="True">
+            <Node name="monenumpad_desktop" expanded="True">
+              <Node name="maxmix" expanded="True" />
+              <Node name="FieldMarshalFunc.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <Debugger.DebugSourceFolders />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/maxmix/BitVector.cs" relfile="monenumpad_desktop/maxmix/BitVector.cs" line="128" column="1" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/maxmix/FieldInfo.cs" relfile="monenumpad_desktop/maxmix/FieldInfo.cs" line="131" column="1" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/HidApiCommunicationLayer.cs" relfile="monenumpad_desktop/HidApiCommunicationLayer.cs" line="501" column="1" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Program.cs" relfile="monenumpad_desktop/Program.cs" line="34" column="1" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Program.cs" relfile="monenumpad_desktop/Program.cs" line="56" column="13" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations>
+    <MultiItemSolutionRunConfiguration Id="Debug Run" Name="Debug Run">
+      <Items>
+        <StartupItem ItemId="{D2C33E56-D1B4-4F06-BC30-1F61AA157234}" ItemName="monenumpad_desktop" ConfigurationId="Default" />
+      </Items>
+    </MultiItemSolutionRunConfiguration>
+  </MultiItemStartupConfigurations>
+  <MonoDevelop.Ide.ItemProperties.monenumpad__desktop PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>

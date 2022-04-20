@@ -54,9 +54,9 @@ enum Command //: int8_t
 typedef struct __attribute__((__packed__)) 
 {
     uint8_t count;           // 8 bits, total count of session
-    // 168 bits - 21 byte
+    // 8 bits - 1 byte
 } SessionInfo;
-#define SessionInfo_Size       21
+#define SessionInfo_Size       1
 
 extern SessionInfo makeSessionInfo(void);
 
