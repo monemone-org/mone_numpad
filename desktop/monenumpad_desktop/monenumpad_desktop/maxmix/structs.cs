@@ -2,8 +2,9 @@
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Collections.Generic;
+using monenumpad_desktop.Marshal;
 
-namespace monenumpad_desktop.maxmix
+namespace monenumpad_desktop.Maxmix
 {
     namespace structs
     {

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using monenumpad_desktop;
-using monenumpad_desktop.maxmix;
+using monenumpad_desktop.Marshal;
 
 
 namespace hidapi

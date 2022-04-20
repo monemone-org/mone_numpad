@@ -250,6 +250,7 @@ namespace monenumpad_desktop
             // Request state (cmd 0x81). The first byte is the report number (0x1).
             buf[0] = 0x1;
             buf[1] = 0x81;
+
             res = hidDevice.Write(buf, 17);
             if (res < 0)
             {

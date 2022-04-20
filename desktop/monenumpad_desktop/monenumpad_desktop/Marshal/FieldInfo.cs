@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace monenumpad_desktop.maxmix
+namespace monenumpad_desktop.Marshal
 {
     public struct FieldDesc
     {

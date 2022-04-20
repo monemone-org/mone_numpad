@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace monenumpad_desktop.maxmix
+namespace monenumpad_desktop.Marshal
 {
     public static class FieldMarshalFunc
     {
@@ -279,10 +279,10 @@ namespace monenumpad_desktop.maxmix
             };
             do
             {
-                b0 = Marshal.ReadByte(ptr, i);
-                b1 = Marshal.ReadByte(ptr, i + 1);
-                b2 = Marshal.ReadByte(ptr, i + 2);
-                b3 = Marshal.ReadByte(ptr, i + 3);
+                b0 = System.Runtime.InteropServices.Marshal.ReadByte(ptr, i);
+                b1 = System.Runtime.InteropServices.Marshal.ReadByte(ptr, i + 1);
+                b2 = System.Runtime.InteropServices.Marshal.ReadByte(ptr, i + 2);
+                b3 = System.Runtime.InteropServices.Marshal.ReadByte(ptr, i + 3);
                 i += 4;
 
                 bytes.Add(b0);

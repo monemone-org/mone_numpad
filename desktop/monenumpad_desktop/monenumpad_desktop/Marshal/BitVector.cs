@@ -2,10 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using SysMarshal = System.Runtime.InteropServices.Marshal;
 using System.Text;
 
-namespace monenumpad_desktop.maxmix
+namespace monenumpad_desktop.Marshal
 {
     public struct BitVector
     {
@@ -57,7 +57,7 @@ namespace monenumpad_desktop.maxmix
             var bytes = new byte[ptrByteCount];
             for (int i = 0; i < ptrByteCount; ++i)
             {
-                bytes[i] = Marshal.ReadByte(ptrBytes, i);
+                bytes[i] = SysMarshal.ReadByte(ptrBytes, i);
             }
 
             return bytes;
@@ -69,7 +69,7 @@ namespace monenumpad_desktop.maxmix
             int i = 0;
             do
             {
-                data.Add(Marshal.ReadByte(ptrBytes, i));
+                data.Add(SysMarshal.ReadByte(ptrBytes, i));
                 ++i;
             }
             while (!endOfDataFunc(data));

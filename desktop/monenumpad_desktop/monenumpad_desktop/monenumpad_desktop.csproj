@@ -7,11 +7,13 @@
 
   <ItemGroup>
     <None Remove="maxmix\" />
+    <None Remove="Marshal\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="maxmix\" />
+    <Folder Include="Marshal\" />
   </ItemGroup>
 </Project>
