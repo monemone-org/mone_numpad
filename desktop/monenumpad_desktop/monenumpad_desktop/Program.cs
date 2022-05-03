@@ -87,18 +87,16 @@ namespace monenumpad_desktop
             {
                 Console.WriteLine("Cannot find Mone NumPad.");
                 return;
-
             }
 
-
-            monenumpad_desktop.Maxmix.KBCommService commService = new KBCommService(
-                new MockSessionProvider()
+            KBCommService commService = new KBCommService(
+                    new MockSessionProvider()
                 );
 
             commService.connect(dev_monenumpad.Value);
             while (commService.isConnected)
             {
-                Thread.Sleep(10000);
+                Thread.Sleep(5000);
             }
 
             //int res = 0;
@@ -336,8 +334,8 @@ namespace monenumpad_desktop
 
             HidAPI.hid_exit();
 
-            Console.WriteLine("Press a key to exit\n");
-            Console.ReadKey();
+            //Console.WriteLine("Press a key to exit\n");
+            //Console.ReadKey();
 
             return;
         }

@@ -1,3 +1,3 @@
 [submodule "desktop/hidapi"]
 	path = desktop/hidapi
-	url = https://github.com/libusb/hidapi.git
+	url = https://github.com/monemone-org/hidapi.git

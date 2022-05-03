@@ -37,8 +37,6 @@ namespace monenumpad_desktop.Maxmix
 
 
         public delegate void KBCommServiceNotifyDelegate(KBCommService kBCommService);
-
-        public event KBCommServiceNotifyDelegate DeviceConnected;
         public event KBCommServiceNotifyDelegate DeviceDisconnected;
 
         private class OutputOnlySessionProvider : IAudioSessionProvider
@@ -103,7 +101,6 @@ namespace monenumpad_desktop.Maxmix
             this._connectedDevice.DataReceived += Device_DataReceived;
             this._connectedDevice.Disconnected += Device_Disconnected;
             this.sendProtocolVersion();
-            this.DeviceConnected?.Invoke(this);
         }
 
         public void disconnect()
@@ -114,7 +111,6 @@ namespace monenumpad_desktop.Maxmix
                 var device = this.connectedDevice;
                 this._connectedDevice.Close();
                 this._connectedDevice = null;
-                //this._delegate.deviceDisconnected(device);
                 this.DeviceDisconnected?.Invoke(this);
             }
         }
@@ -166,17 +162,36 @@ namespace monenumpad_desktop.Maxmix
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            this.sendSessionInfo();
-            this.sendSessionInfoTimer.Enabled = true;
+            // accessing sendSessionInfoTimer needs to be thread safe
+            // because OnTimedEvent is called on a different thread.
+            Timer timer = null;
+            lock (this)
+            {
+                timer = this.sendSessionInfoTimer;
+            }
+
+            if (timer != null)
+            {
+                this.sendSessionInfo();
+                timer.Enabled = true;
+            }
         }
 
         private void stopRefreshingSessionInfoTimer()
         {
-            if (this.sendSessionInfoTimer != null)
+            // accessing sendSessionInfoTimer needs to be thread safe
+            // because OnTimedEvent is called on a different thread.
+            Timer timer = null;
+            lock (this)
             {
-                this.sendSessionInfoTimer.Stop();
-                this.sendSessionInfoTimer.Dispose();
+                timer = this.sendSessionInfoTimer;
                 this.sendSessionInfoTimer = null;
+            }
+
+            if (timer != null)
+            {
+                timer.Stop();
+                timer.Dispose();
             }
         }
 
@@ -267,7 +282,7 @@ namespace monenumpad_desktop.Maxmix
             this.log("sendSessionData(curr = {0}). has_prev={1}. has_next={2}.", curr_session_data.name,
                 curr_session_data.has_prev, curr_session_data.has_next);
             this.sendStructMessage(Command.CURRENT_SESSION, curr_session_data);
-            this.log(curr_session_data.ToBitVector().ToString());
+            //this.log(curr_session_data.ToBitVector().ToString());
 
             if (!curr_only)
             {
@@ -347,10 +362,6 @@ namespace monenumpad_desktop.Maxmix
             msgBytes[1] = (byte)command;
             data.CopyTo(msgBytes, 2);
 
-            if (command != Command.SESSION_INFO)
-            {
-                this.log("connectedDevice.Write={0}", msgBytes);
-            }
             this.connectedDevice.Write(msgBytes, msgBytes.Length);
         }
 
@@ -384,6 +395,7 @@ namespace monenumpad_desktop.Maxmix
         //
         public void Device_Disconnected(object sender, EventArgs e)
         {
+            this.log("Device is disconnected.");
             this.disconnect();
         }
 

@@ -49,14 +49,19 @@ namespace hidapi
             this.id = dev.device_id;
 
             HidAPI.hid_register_read_callback(_device, hid_on_read_callback);
+            HidAPI.hid_register_disconnected_callback(_device, hid_on_disconnecte_callback);
         }
 
-        void hid_on_read_callback(IntPtr data, uint length)
+        void hid_on_read_callback(IntPtr device, IntPtr data, uint length)
         {
             var bytes = BitVector.readPtrBytes(data, (int)length);
             this.DataReceived(this, new DataEventArgs(bytes));
         }
 
+        void hid_on_disconnecte_callback(IntPtr device)
+        {
+            this.Disconnected(this, new EventArgs());
+        }
 
         public void SetNonBlocking(bool nonblock)
         {
@@ -170,7 +175,7 @@ namespace hidapi
                 byte[] writeBuf = new byte[HID_MAX_PACKET_SIZE];
                 buffer.CopyTo(writeBuf, 0);
 
-                Console.WriteLine("HidAPI.hid_write(size={0})", HID_MAX_PACKET_SIZE);
+                //Console.WriteLine("HidAPI.hid_write(size={0})", HID_MAX_PACKET_SIZE);
                 int ret = HidAPI.hid_write(_device, writeBuf, (uint)HID_MAX_PACKET_SIZE);
                 //if (ret < 0)
                 //    Custom logging

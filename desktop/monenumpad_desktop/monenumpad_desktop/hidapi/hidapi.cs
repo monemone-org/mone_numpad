@@ -288,7 +288,8 @@ namespace hidapi
         #region DllImports
 
         // data is byte array
-        public delegate void hid_on_read_callback(IntPtr data, uint length);
+        public delegate void hid_on_read_callback(IntPtr device, IntPtr data, uint length);
+        public delegate void hid_on_disconnected_callback(IntPtr device);
 
         [DllImport(HIDAPI_DLL)]
         public static extern int hid_register_read_callback(
@@ -296,7 +297,16 @@ namespace hidapi
             [MarshalAs(UnmanagedType.FunctionPtr)] hid_on_read_callback on_read_callback);
 
         [DllImport(HIDAPI_DLL)]
-        public static extern void hid_unregister_read_callback(IntPtr dev);
+        public static extern void hid_unregister_read_callback(IntPtr device);
+
+        [DllImport(HIDAPI_DLL)]
+        public static extern int hid_register_disconnected_callback(
+            IntPtr device,
+            [MarshalAs(UnmanagedType.FunctionPtr)] hid_on_disconnected_callback on_disconnected_callback);
+
+        [DllImport(HIDAPI_DLL)]
+        public static extern void hid_unregister_disconnected_callback(IntPtr device);
+
 
         [DllImport(HIDAPI_DLL)]
         public static extern int hid_read(IntPtr device, [Out, MarshalAs(UnmanagedType.LPArray)] byte[] data, uint length);
