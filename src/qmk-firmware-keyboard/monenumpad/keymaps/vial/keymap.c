@@ -137,6 +137,7 @@ bool process_tap_switch_layer_key(uint16_t keycode);
 bool process_hold_rotary_encoder_key(uint16_t keycode);
 bool process_tap_rotary_encoder_key(uint16_t keycode);
 
+const keypos_t switch_layer_combo_key_keypos = { .row= 4, .col= 0 };
 const keypos_t switch_layer_keypos = { .row= 0, .col= 4 };
 press_and_hold_key_t switch_layer_key;
 const keypos_t rotary_encoder_keypos = { .row= 3, .col= 0 };
@@ -190,9 +191,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
     {
         return false;
     }
-
+ 
     if (record->event.pressed)
     {
+        // pressing key(c=0,r=4) (the del key on the left bottom corner)
+        //  while holding switchLayerKey will switch between Win and Mac mode.
+        if (record->event.key.col == switch_layer_combo_key_keypos.col
+            && record->event.key.row == switch_layer_combo_key_keypos.row
+            && press_and_hold_key_is_pressed(&switch_layer_key))
+        {
+            user_config.is_win_mode = !user_config.is_win_mode;
+            save_user_config();
+            set_press_and_hold_key_to_handled(&switch_layer_key);
+            return false;
+        }
+
         if (!process_mone_key(keycode)) 
         {
             return false;
@@ -386,18 +399,6 @@ bool process_tap_rotary_encoder_key(uint16_t keycode)
 #endif 
 
         editing_session_mode = false;        
-        return false;
-    }
-    // pressing rotary encoder button while holding switchLayerKey will 
-    // switch between win and mac  mode.
-    else if (press_and_hold_key_is_pressed(&switch_layer_key))
-    {
-        user_config.is_win_mode = !user_config.is_win_mode;
-
-        save_user_config();
-
-        set_press_and_hold_key_to_handled(&switch_layer_key);
-
         return false;
     }
     else
