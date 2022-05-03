@@ -10,7 +10,7 @@ namespace monenumpad_desktop.Marshal
     public struct BitVector
     {
         private readonly byte[] bytes;
-        readonly int bitCount;
+        private readonly int bitCount;
 
         private static readonly byte[] BitMasks = {
                 0b1000_0000,
@@ -24,6 +24,8 @@ namespace monenumpad_desktop.Marshal
                 0b0000_0001
             };
 
+        //private BitVector() { }
+
         public BitVector(int bitCount)
             : this( new byte[((bitCount + 7) / 8)], bitCount ) 
         {
@@ -31,7 +33,19 @@ namespace monenumpad_desktop.Marshal
 
         public BitVector(byte[] bytes, int bitCount = -1)
         {
-            this.bytes = bytes;
+            int byteCount = ((bitCount + 7) / 8);
+            if (byteCount > 0 && bytes.Length < byteCount)
+            {
+                // fill the missing byte with 0
+                byte[] newBytes = new byte[byteCount];
+                Array.Copy(bytes, newBytes, bytes.Length);
+                this.bytes = newBytes;
+            }
+            else
+            {
+                this.bytes = bytes;
+            }
+
             if (bitCount < 0)
             {
                 this.bitCount = bytes.Length * 8;
@@ -43,16 +57,16 @@ namespace monenumpad_desktop.Marshal
         }
 
         public BitVector(IntPtr ptr, int ptrByteCount, int bitCount = -1)
-            : this( BitVector.readBytes(ptr, ptrByteCount), bitCount )
+            : this( BitVector.readPtrBytes(ptr, ptrByteCount), bitCount )
         {
         }
 
         public BitVector(IntPtr ptr, Func<List<byte>,bool> endOfDataFunc, int bitCount = -1)
-            : this(BitVector.readBytes(ptr, endOfDataFunc), bitCount)
+            : this(BitVector.readPtrBytes(ptr, endOfDataFunc), bitCount)
         {
         }
 
-        static private byte[] readBytes(IntPtr ptrBytes, int ptrByteCount)
+        static public byte[] readPtrBytes(IntPtr ptrBytes, int ptrByteCount)
         {
             var bytes = new byte[ptrByteCount];
             for (int i = 0; i < ptrByteCount; ++i)
@@ -63,7 +77,7 @@ namespace monenumpad_desktop.Marshal
             return bytes;
         }
 
-        static private byte[] readBytes(IntPtr ptrBytes, Func<List<byte>, bool> endOfDataFunc)
+        static public byte[] readPtrBytes(IntPtr ptrBytes, Func<List<byte>, bool> endOfDataFunc)
         {
             var data = new List<byte>();
             int i = 0;
@@ -78,6 +92,7 @@ namespace monenumpad_desktop.Marshal
         }
 
 
+        // bit count
         public int Count
         {
             get { return this.bitCount; }
@@ -89,6 +104,7 @@ namespace monenumpad_desktop.Marshal
             {
                 int nByte = index / 8;
                 int nBit = index % 8;
+                Debug.Assert(nByte < this.bytes.Length);
                 byte byteValue = this.bytes[nByte];
                 return ((byteValue & BitMasks[nBit]) != 0 ? true : false);
             }
@@ -97,6 +113,7 @@ namespace monenumpad_desktop.Marshal
             {
                 int nByte = index / 8;
                 int nBit = index % 8;
+                Debug.Assert(nByte < this.bytes.Length);
                 byte byteValue = this.bytes[nByte];
                 if (value)
                 {
@@ -110,14 +127,21 @@ namespace monenumpad_desktop.Marshal
             }
         }
 
-        public BitVector getSubVector(int offset, int count)
+        // till end of the BitVector
+        public BitVector getSubVector(int bitOffset)
         {
-            Debug.Assert(count > 0);
+            int bitCount = this.bitCount - bitOffset;
+            return getSubVector(bitOffset, bitCount);
+        }
 
-            var subVector = new BitVector(count);
-            for (int i=0; i<count; ++i)
+        public BitVector getSubVector(int bitOffset, int bitCount)
+        {
+            Debug.Assert(bitCount > 0);
+
+            var subVector = new BitVector(bitCount);
+            for (int i = 0; i < bitCount; ++i)
             {
-                subVector[i] = this[offset + i];
+                subVector[i] = this[bitOffset + i];
             }
             return subVector;
         }

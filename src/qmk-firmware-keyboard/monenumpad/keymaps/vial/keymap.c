@@ -13,6 +13,7 @@
 #ifdef CONSOLE_ENABLE
 //#define DEBUG_EDIT_SESSION
 //#define DEBUG_MAXMIX
+//#define DEBUG_RECEIVE_KB
 //#define DEBUG_LAYER
 #endif
 
@@ -40,7 +41,7 @@
 
 
 // Defines names for use in layer keycodes and the keymap
-enum layer_names {
+enum layers {
     _BASE,
     _FN1,
     _FN2,
@@ -48,6 +49,13 @@ enum layer_names {
     _LAST = _FN3
 };
 
+
+const char* layer_names[] = {
+    "Base",
+    "YouTube",
+    "iOS",
+    "Fn Keys"
+};
 
 /*
 #define LAYOUT( \
@@ -62,13 +70,18 @@ enum layer_names {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Base */
+//     [_BASE] = LAYOUT(
+//            KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
+//            KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
+//            KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
+// KC_MUTE,   KC_P1,  KC_P2,   KC_P3, 
+// KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
     [_BASE] = LAYOUT(
            KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
-           KC_P7,  KC_P8,   KC_P9,   KC_PMNS, 
-           KC_P4,  KC_P5,   KC_P6,   KC_PPLS, 
-KC_MUTE,   KC_P1,  KC_P2,   KC_P3, 
-KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
-
+           KC_7,  KC_8,   KC_9,   KC_PMNS, 
+           KC_4,  KC_5,   KC_6,   KC_PPLS, 
+KC_MUTE,   KC_1,  KC_2,   KC_3, 
+KC_BSPACE,        KC_0, KC_DOT,   KC_PENT),
 
 // YouTube layer
     [_FN1] = LAYOUT(
@@ -250,11 +263,11 @@ void render_status(void) {
     // Host Keyboard Layer Status
     if (editing_session_mode)
     {
-        oled_write_P(PSTR("Editing Audio"), false);
+        oled_write_ln_P(PSTR("Choosing Audio"), false);
         oled_write_ln_P(PSTR("Session"), false);
-        oled_write_ln_P(PSTR(""), false);
         oled_write_P(PSTR("Audio: "), false);
         oled_write_ln(curr_session_data.name, false);        
+        oled_write_ln_P(PSTR(""), false);
     }
     else
     {
@@ -264,26 +277,49 @@ void render_status(void) {
 
         oled_write_P(PSTR("Layer: "), false);
 
-        switch (get_highest_layer(layer_state)) {
-            case _BASE:
-                oled_write_P(PSTR("Base\n"), false);
-                break;
-            case _FN1:
-                oled_write_P(PSTR("YouTube\n"), false);
-                break;
-            case _FN2:
-                oled_write_P(PSTR("iOS\n"), false);
-                break;
-            case _FN3:
-                oled_write_P(PSTR("Fn Keys\n"), false);
-                break;
-            default:
-                // Or use the write_ln shortcut over adding '\n' to the end of your string
-                oled_write_ln_P(PSTR("Undefined"), false);
-        }
+        int layer = get_highest_layer(layer_state);
+        const char *layer_name = layer_names[layer];
+        oled_write_ln(layer_name, false);
+
+        // switch (get_highest_layer(layer_state)) {
+        //     case _BASE:
+        //         oled_write_P(PSTR("Base\n"), false);
+        //         break;
+        //     case _FN1:
+        //         oled_write_P(PSTR("YouTube\n"), false);
+        //         break;
+        //     case _FN2:
+        //         oled_write_P(PSTR("iOS\n"), false);
+        //         break;
+        //     case _FN3:
+        //         oled_write_P(PSTR("Fn Keys\n"), false);
+        //         break;
+        //     default:
+        //         // Or use the write_ln shortcut over adding '\n' to the end of your string
+        //         oled_write_ln_P(PSTR("Undefined"), false);
+        // }
 
         oled_write_P(PSTR("Audio: "), false);
         oled_write_ln(curr_session_data.name, false);
+
+        // we only know the volumne data if maxmix is sending us those data.
+        if (maxmix_is_running() && !curr_session_data.volume.unknown)
+        {
+            uint8_t vol = curr_session_data.volume.volume;
+            if (vol > 100) {
+                vol = 100;
+            }
+            char szVol[10] = {0};
+            itoa( (int)curr_session_data.volume.volume, szVol, 10 );
+            oled_write_P(PSTR("Vol: "), false);
+            oled_write(szVol, false);
+            oled_write_P(PSTR(", "), false);
+            oled_write_ln_P(curr_session_data.volume.isMuted ? PSTR("Muted"):PSTR("Unmuted"), false);
+        }
+        else
+        {
+            oled_write_ln_P(PSTR(""), false);
+        }
     }
 
 // #ifdef TEST_SUBMIT_WEBPAGE_TIMING
@@ -366,6 +402,12 @@ bool process_tap_rotary_encoder_key(uint16_t keycode)
     }
     else
     {
+        if (maxmix_is_running())
+        {
+            toggle_curr_session_mute();
+            return false;
+        }
+
         return true;
     }
 }
@@ -440,7 +482,7 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
 #endif 
             return vial_encoder_update(index, clockwise);
         }        
-#endif
+#endif // VIAL_ENCODERS_ENABLE
 
         if (clockwise)
         {
@@ -458,13 +500,13 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
 
 void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
 
-#ifdef DEBUG_EDIT_SESSION
+#ifdef DEBUG_RECEIVE_KB
     uprintf("KL: raw_hid_receive_kb(length=%d)\n", (int)length);
 #endif 
 
     uint8_t *command_id = &data[0];
 
-#ifdef DEBUG_EDIT_SESSION
+#ifdef DEBUG_RECEIVE_KB
     uprintf("KL: raw_hid_receive_kb(command_id=0x%02X)\n", *command_id);
 #endif 
 

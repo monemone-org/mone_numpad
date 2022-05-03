@@ -8,12 +8,14 @@
   <ItemGroup>
     <None Remove="maxmix\" />
     <None Remove="Marshal\" />
+    <None Remove="hidapi\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="maxmix\" />
+    <Folder Include="Maxmix\" />
     <Folder Include="Marshal\" />
+    <Folder Include="hidapi\" />
   </ItemGroup>
 </Project>

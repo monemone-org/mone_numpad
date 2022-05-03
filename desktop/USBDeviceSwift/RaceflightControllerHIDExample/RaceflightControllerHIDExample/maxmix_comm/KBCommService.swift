@@ -35,7 +35,7 @@ public class KBCommService: NSObject, HIDDeviceMonitorDelegate
                            name: (space, space, space, space, space, space, space, space, space, space, space, space, space, space, space, space, space, space, space, space),
                            has_prev: 0,
                            has_next: 0,
-                           volume: VolumeData(unknown: 0, volume: 50, isMuted: 0))
+                           volume: VolumeData(unknown: 0, isMuted: 0, volume: 50))
     }();
     
     let sessionProvider: AudioSessionProvider
@@ -209,7 +209,7 @@ public class KBCommService: NSObject, HIDDeviceMonitorDelegate
                                       name: namePointer,
                                       has_prev: prevSessionIndex(index:sessionIndex) != nil ? 1: 0,
                                       has_next: nextSessionIndex(index:sessionIndex) != nil ? 1 : 0,
-                                      volume: VolumeData(unknown: 0, volume: 50, isMuted: 0))
+                                      volume: VolumeData(unknown: 0, isMuted: 0, volume: 50))
         
         return sessionData;
     }
@@ -275,16 +275,19 @@ public class KBCommService: NSObject, HIDDeviceMonitorDelegate
         }
         
         var data: Data = Data()
-        data.append(0xFD)
+        data.append(UInt8(MSG_ID_PREFIX))
         data.append(command.to_command_id())
         serializer.serialize(data: msgData, into: &data)
         
-        let str = """
-                  Sending cmd=\(command.displayName)
-                  """;
-        self.delegate?.log(str)
+        if (command != SESSION_INFO)
+        {
+            let str = """
+                      Sending cmd=\(command.displayName)
+                      """;
+            self.delegate?.log(str)
+        }
         
-        self.deviceMonitor?.write(data, to: device, reportId: 0)
+        HIDDeviceMonitor.write(data, to: device, reportId: 0)
     }
     
 

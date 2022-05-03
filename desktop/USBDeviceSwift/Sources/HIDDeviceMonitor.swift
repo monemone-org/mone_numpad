@@ -67,7 +67,6 @@ open class HIDDeviceMonitor {
         }
     }
 
-    
     // main thread function
     public func isDeviceDiscovered(
                     _ device:HIDDevice) -> Bool
@@ -213,9 +212,9 @@ open class HIDDeviceMonitor {
         }
     }
     
-    public func write(_ data: Data,
-                      to device: HIDDevice,
-                      reportId: UInt8 = 2)
+    static public func write(_ data: Data,
+                             to device: HIDDevice,
+                             reportId: UInt8 = 0)
     {
         let bytesArray = [UInt8](data)
 

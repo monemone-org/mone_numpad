@@ -43,6 +43,7 @@ SessionData makeOutSessionData(void)
     	.has_next = false,
     	.volume = makeVolumeData()
     };
+    o.volume.unknown = true; //we don't know the volumne
     return o;
 }
 

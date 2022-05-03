@@ -79,7 +79,7 @@ namespace hidapi
 
 
     /** hidapi info structure */
-    struct hid_device_info
+    public struct hid_device_info
     {
         enum FieldIndex
         {
@@ -152,6 +152,8 @@ namespace hidapi
 
             // struct hid_device_info *
             this.next = Layout.GetFieldValue(bitVector, FieldIndex.next, FieldMarshalFunc.ToIntPtr);
+
+            this.device_id = new DeviceID(this.vendor_id, this.product_id);
         }
 
 
@@ -159,6 +161,9 @@ namespace hidapi
             :this(new BitVector(ptr, Layout.StructSize, Layout.StructSize * 8))
         {
         }
+
+        // to help identify the Device instance
+        public DeviceID device_id;
 
         /** Platform-specific device path */
         //char *
@@ -208,326 +213,6 @@ namespace hidapi
         //struct hid_device_info *;
         public IntPtr next;
     };
-
-
-    public class Device
-    {
-        #region Interop
-        protected IntPtr _device;
-
-        private Object _locker = new object();
-
-        public bool IsOpen()
-        {
-            return _device != IntPtr.Zero;
-        }
-
-        public void Open(ushort vid, ushort hid, string serial)
-        {
-            if (_device != IntPtr.Zero)
-                throw new Exception("a device is already opened; close it first.");
-
-            IntPtr ret = HidAPI.hid_open(vid, hid, serial);
-            _device = ret;
-            //if (_device != IntPtr.Zero)
-            //    hid_set_nonblocking(_device, 1);
-        }
-
-        public void SetNonBlocking(bool nonblock)
-        {
-            int ret = HidAPI.hid_set_nonblocking(_device, (nonblock? (int)1 : (int)0));
-            if (ret < 0)
-                throw new Exception("Failed to set non blocking.");
-        }
-
-        // non-blocking read
-        // return bytes_read
-        public int Read(byte[] buffer, int length)
-        {
-            lock (_locker)
-            {
-                AssertValidDev();
-                int ret = HidAPI.hid_read_timeout(_device, buffer, (uint)length, 0/*1*/);
-                //if (ret < 0)
-                //    throw new Exception("Failed to Read.");
-
-                return ret;
-            }
-        }
-
-        public int ReadBlocking(byte[] buffer, int length)
-        {
-            lock (_locker)
-            {
-                AssertValidDev();
-                int ret = HidAPI.hid_read_timeout(_device, buffer, (uint)length, -1);
-                //if (ret < 0)
-                //    throw new Exception("Failed to Read.");
-
-                return ret;
-            }
-        }
-
-        public void Close()
-        {
-            AssertValidDev();
-            HidAPI.hid_close(_device);
-            _device = IntPtr.Zero;
-        }
-
-        public int ExitHidAPI()
-        {
-            return HidAPI.hid_exit();
-        }
-
-        public String GetProductString()
-        {
-            AssertValidDev();
-            byte[] buf = new byte[1000];
-            //buf is wchar_t *, UTF32, 4 bytes
-            int ret = HidAPI.hid_get_product_string(_device, buf, (uint)(buf.Length / 4) - 1);
-            if (ret < 0)
-                throw new Exception("failed to receive product string");
-            return EncodeBuffer(buf);
-        }
-
-        public String GetManufacturerString()
-        {
-            AssertValidDev();
-            byte[] buf = new byte[1000];
-            // buf is wchar_t *, UTF32, 4 bytes
-            int ret = HidAPI.hid_get_manufacturer_string(_device, buf, (uint)(buf.Length / 4) - 1);
-            if (ret < 0)
-                throw new Exception("failed to receive manufacturer string");
-            return EncodeBuffer(buf);
-        }
-
-        public int GetFeatureReport(byte[] buffer, int length)
-        {
-            AssertValidDev();
-            int ret = HidAPI.hid_get_feature_report(_device, buffer, (uint)length);
-            //if (ret < 0)
-            //    throw new Exception("failed to get feature report");
-            return ret;
-        }
-
-        public int SendFeatureReport(byte[] buffer, int length)
-        {
-            int ret = HidAPI.hid_send_feature_report(_device, buffer, (uint)length);
-            //if (ret < 0)
-            //    throw new Exception("failed to send feature report");
-            return ret;
-        }
-
-        public int Write(byte[] buffer, int length)
-        {
-            lock (_locker)
-            {
-                AssertValidDev();
-                int ret = HidAPI.hid_write(_device, buffer, (uint)Math.Min(length, HID_MAX_PACKET_SIZE + 1));
-                //if (ret < 0)
-                //    Custom logging
-                return ret;
-            }
-        }
-
-        public String Error()
-        {
-            AssertValidDev();
-            IntPtr ret = HidAPI.hid_error(_device);
-            return Marshal.PtrToStringAuto(ret);
-        }
-
-        public string GetIndexedString(int index)
-        {
-            AssertValidDev();
-            byte[] buf = new byte[1000];
-            // buf is wchar_t *, UTF32, 4 bytes
-            int ret = HidAPI.hid_get_indexed_string(_device, index, buf, (uint)(buf.Length / 4) - 1);
-            if (ret < 0)
-                throw new Exception("failed to receive indexed string");
-            return EncodeBuffer(buf);
-        }
-
-        public string GetSerialNumberString()
-        {
-            AssertValidDev();
-            byte[] buf = new byte[1000];
-            // buf is wchar_t *, UTF32, 4 bytes
-            int ret = HidAPI.hid_get_serial_number_string(_device, buf, (uint)(buf.Length / 4) - 1);
-            if (ret < 0)
-                throw new Exception("failed to receive serial number string");
-            return EncodeBuffer(buf);
-        }
-
-        private string EncodeBuffer(byte[] buffer)
-        {
-            //return Encoding.UTF32.GetString(buffer).Trim('\0');
-            return FieldMarshalFunc.BytesToStringWChar_t(buffer);
-        }
-
-        private void AssertValidDev()
-        {
-            if (_device == IntPtr.Zero) throw new Exception("No device opened");
-        }
-
-
-
-        #endregion Interop
-
-        #region Constructors
-        public static Device GetDevice(ushort vid, ushort pid)
-        {
-            try
-            {
-                Device layer = new Device();
-                layer.Open(vid, pid, null);
-                return layer._device == IntPtr.Zero ? null : layer;
-            }
-            catch (System.BadImageFormatException)
-            {
-                //Custom logging
-                return null;
-            }
-            catch (Exception)
-            {
-                //Custom logging
-                return null;
-            }
-        }
-
-        #endregion Constructors
-
-        private const int HID_MAX_PACKET_SIZE = 1024;
-
-        #region ICommunicationLayer
-
-        public void Init()
-        {
-            try
-            {
-                if (IsOpen())
-                {
-                    ContinueReadProcessing = true;
-                    ReadThread = new Thread(new ThreadStart(ReadLoop));
-                    ReadThread.Name = "HidApiReadThread";
-                    ReadThread.Start();
-                }
-                else
-                {
-                    Disconnect();
-                }
-            }
-            catch (Exception)
-            {
-                //Custom logging
-                throw;
-            }
-        }
-
-        public bool SendData(byte[] data)
-        {
-            try
-            {
-                MemoryStream stream = new MemoryStream(HID_MAX_PACKET_SIZE + 1);
-                stream.WriteByte(0);
-                stream.Write(data, 0, HID_MAX_PACKET_SIZE);
-
-                var dataToWrite = stream.ToArray();
-                int ret = Write(dataToWrite, dataToWrite.Length);
-                if (ret >= 0)
-                    return true;
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                //Custom logging
-                return false;
-            }
-        }
-
-        public event EventHandler<DataEventArgs> DataReceived;
-
-        public event EventHandler Disconnected;
-
-        public void Start()
-        {
-            ContinueReadProcessing = true;
-        }
-
-        public void Stop()
-        {
-            Disconnect();
-        }
-
-        #endregion ICommunicationLayer
-
-        private Thread ReadThread = null;
-
-        protected volatile bool ContinueReadProcessing = true;
-
-        private void ReadLoop()
-        {
-            var culture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentCulture = culture;
-            Thread.CurrentThread.CurrentUICulture = culture;
-            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
-
-            while (ContinueReadProcessing)
-            {
-                try
-                {
-                    byte[] report = new byte[HID_MAX_PACKET_SIZE];
-
-                    var result = Read(report, HID_MAX_PACKET_SIZE);
-
-                    if (result > 0)
-                    {
-                        DataReceived(this, new DataEventArgs(report));
-                    }
-                    else if (result < 0)
-                    {
-                        Disconnect();
-                    }
-                }
-                catch (Exception)
-                {
-                    Disconnect();
-                }
-
-                Thread.Sleep(1);
-            }
-        }
-
-        private void Disconnect()
-        {
-            ContinueReadProcessing = false;
-            Disconnected(this, EventArgs.Empty);
-        }
-
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            ContinueReadProcessing = false;
-            ReadThread.Join(500);
-            if (ReadThread.IsAlive)
-            {
-#pragma warning disable SYSLIB0006 // Type or member is obsolete
-                ReadThread.Abort();
-#pragma warning restore SYSLIB0006 // Type or member is obsolete
-            }
-
-            if (IsOpen())
-                Close();
-            int res = ExitHidAPI();
-        }
-
-        #endregion IDisposable Members
-    }
 
     internal class Utf32Marshaler : ICustomMarshaler
     {
@@ -601,6 +286,18 @@ namespace hidapi
         }
 
         #region DllImports
+
+        // data is byte array
+        public delegate void hid_on_read_callback(IntPtr data, uint length);
+
+        [DllImport(HIDAPI_DLL)]
+        public static extern int hid_register_read_callback(
+            IntPtr device,
+            [MarshalAs(UnmanagedType.FunctionPtr)] hid_on_read_callback on_read_callback);
+
+        [DllImport(HIDAPI_DLL)]
+        public static extern void hid_unregister_read_callback(IntPtr dev);
+
         [DllImport(HIDAPI_DLL)]
         public static extern int hid_read(IntPtr device, [Out, MarshalAs(UnmanagedType.LPArray)] byte[] data, uint length);
 
@@ -633,6 +330,9 @@ namespace hidapi
 
         [DllImport(HIDAPI_DLL)]
         public static extern int hid_get_indexed_string(IntPtr device, int string_index, [Out] byte[] _string, uint maxlen);
+
+        [DllImport(HIDAPI_DLL)]
+        public static extern int hid_get_max_report_length(IntPtr device);        
 
         [DllImport(HIDAPI_DLL)]
         public static extern IntPtr hid_error(IntPtr device);
@@ -671,7 +371,15 @@ namespace hidapi
         [DllImport(HIDAPI_DLL)]
         public static extern void hid_free_enumeration(/*struct hid_device_info * */IntPtr devs);
 
+        public delegate void hid_on_add_device_callback(/*struct hid_device_info * */IntPtr dev);
+
+        [DllImport(HIDAPI_DLL)]
+        public static extern IntPtr hid_enumerate_ex(ushort vendor_id,
+                                                    ushort product_id,
+                                                    ushort usage_page,
+                                                    ushort usage,
+                                                    [MarshalAs(UnmanagedType.FunctionPtr)] hid_on_add_device_callback on_added_device);
 
         #endregion DllImports
     }
-    }
+}

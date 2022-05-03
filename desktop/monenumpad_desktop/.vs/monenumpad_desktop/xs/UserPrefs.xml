@@ -1,30 +1,27 @@
 ﻿<Properties StartupConfiguration="{D2C33E56-D1B4-4F06-BC30-1F61AA157234}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="monenumpad_desktop/Marshal/FieldMarshalFunc.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="monenumpad_desktop/Marshal/BitVector.cs">
     <Files>
-      <File FileName="monenumpad_desktop/Program.cs" Line="3" Column="1" />
-      <File FileName="monenumpad_desktop/HidApiCommunicationLayer.cs" Line="9" Column="33" />
-      <File FileName="monenumpad_desktop/structs.cs" Line="92" Column="14" />
-      <File FileName="monenumpad_desktop/BitVector.cs" Line="72" Column="36" />
-      <File FileName="monenumpad_desktop/FieldInfo.cs" Line="19" Column="1" />
-      <File FileName=".editorconfig" Line="1" Column="1" />
-      <File FileName="monenumpad_desktop/Platform.cs" Line="8" Column="1" />
-      <File FileName="monenumpad_desktop/FieldMarshalFunc.cs" Line="280" Column="15" />
+      <File FileName="monenumpad_desktop/Maxmix/KBCommService.cs" Line="247" Column="76" />
+      <File FileName="monenumpad_desktop/Maxmix/MockSessionProvider.cs" Line="73" Column="20" />
+      <File FileName="monenumpad_desktop/Maxmix/IAudioSessionProvider.cs" Line="21" Column="9" />
+      <File FileName="monenumpad_desktop/Maxmix/structs.cs" Line="158" Column="1" />
+      <File FileName="monenumpad_desktop/Program.cs" Line="30" Column="1" />
+      <File FileName="monenumpad_desktop/Marshal/FieldInfo.cs" Line="102" Column="1" />
+      <File FileName="monenumpad_desktop/Marshal/BitVector.cs" Line="158" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="monenumpad_desktop" expanded="True">
             <Node name="monenumpad_desktop" expanded="True">
-              <Node name="Marshal" expanded="True" />
-              <Node name="maxmix" expanded="True">
-                <Node name="structs.cs" selected="True" />
+              <Node name="hidapi" expanded="True" />
+              <Node name="Marshal" expanded="True">
+                <Node name="BitVector.cs" selected="True" />
               </Node>
+              <Node name="Maxmix" expanded="True" />
             </Node>
           </Node>
         </State>
-      </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State />
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
@@ -33,9 +30,13 @@
   <Debugger.DebugSourceFolders />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/hidapi.cs" relfile="monenumpad_desktop/hidapi.cs" line="411" column="1" />
-      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Program.cs" relfile="monenumpad_desktop/Program.cs" line="167" column="13" />
-      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Marshal/BitVector.cs" relfile="monenumpad_desktop/Marshal/BitVector.cs" line="154" column="1" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Maxmix/ArrayExtensions.cs" relfile="monenumpad_desktop/Maxmix/ArrayExtensions.cs" line="37" column="17" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Maxmix/ArrayExtensions.cs" relfile="monenumpad_desktop/Maxmix/ArrayExtensions.cs" line="29" column="17" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Maxmix/KBCommService.cs" relfile="monenumpad_desktop/Maxmix/KBCommService.cs" line="111" column="13" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/hidapi/hidapi.cs" relfile="monenumpad_desktop/hidapi/hidapi.cs" line="296" column="1" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Maxmix/structs.cs" relfile="monenumpad_desktop/Maxmix/structs.cs" line="143" column="17" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Program.cs" relfile="monenumpad_desktop/Program.cs" line="30" column="13" />
+      <Breakpoint file="/Users/monehsieh/dev/keyboard/mone_numpad/desktop/monenumpad_desktop/monenumpad_desktop/Maxmix/structs.cs" relfile="monenumpad_desktop/Maxmix/structs.cs" line="158" column="17" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations>

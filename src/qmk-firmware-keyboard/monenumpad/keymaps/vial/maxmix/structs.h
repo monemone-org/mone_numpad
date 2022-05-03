@@ -61,14 +61,15 @@ typedef struct __attribute__((__packed__))
 extern SessionInfo makeSessionInfo(void);
 
 
-typedef struct __attribute__((__packed__)) 
+typedef struct __attribute__((__packed__))
 {
-    uint8_t unknown: 1;
-    uint8_t volume : 7; // 7 bits
+    uint8_t unknown: 1;    // if true, then we don't have the correct values of isMuted and volume.
     uint8_t isMuted : 1;   // 1 bit
-    // 9 bits - 2 bytes
+    uint8_t volume;        // 8 bits
+    // 10 bits
 } VolumeData;
 #define VolumeData_Size       2
+
 
 extern VolumeData makeVolumeData(void);
 
@@ -79,11 +80,11 @@ typedef  struct __attribute__((__packed__))
     char name[SessionData_Name_Size]; // 20 bytes - 160 bits
     uint8_t has_prev : 1; // 1 bit
     uint8_t has_next : 1; // 1 bit
-    VolumeData volume; // 9 bits 
+    VolumeData volume; // VolumeData_Size * 8 bits = 16 bits
 
-    // 179 bits - 23 bytes
+    // 186 bits - 24 bytes
 } SessionData;
-#define SessionData_Size        23
+#define SessionData_Size        24
 
 extern SessionData makeSessionData(void);
 extern SessionData makeOutSessionData(void);

@@ -116,6 +116,9 @@ class ViewController: NSViewController, NSComboBoxDataSource, KBCommServiceDeleg
         self.rfDeviceView.isHidden = true
         self.connectedDeviceLabel.isHidden = true
         self.devicesComboBox.reloadData()
+        
+        // test
+        _ = makeSessionData();
     }
     
     override var representedObject: Any? {

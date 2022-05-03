@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -247,22 +248,35 @@ namespace monenumpad_desktop.Marshal
         }
 
         // char* to string
-        public static string ToString(byte[] data)
+        public static Func<byte[], string> ToStringFunc(Encoding encoding)
         {
-            return ToString(data, Encoding.ASCII);
+            string toString(byte[] bytes)
+            {
+                return encoding.GetString(bytes).Trim('\0');
+            }
+
+            return toString;
         }
-        public static string ToString(byte[] data, Encoding encoding)
+        public static Func<string,byte[]> FromStringFunc(int nChars, Encoding encoding, bool nullTerminated)
         {
-            return encoding.GetString(data);
+            if (nullTerminated)
+            {
+                nChars -= 1;
+            }
+
+            byte[] fromString(string value)
+            {
+                value = value.Substring(0, Math.Min(value.Length,nChars));
+                byte[] bytes = encoding.GetBytes(value);
+                return bytes.Concat(new byte[] { 0 }).ToArray();
+            }
+
+            return fromString;
         }
-        public static byte[] FromString(string value)
-        {
-            return FromString(value, Encoding.ASCII);
-        }
-        public static byte[] FromString(string value, Encoding encoding)
-        {
-            return encoding.GetBytes(value);
-        }
+        //public static byte[] FromString(string value, Encoding encoding)
+        //{
+        //    return encoding.GetBytes(value);
+        //}
 
         // Convert a wchar_t* IntPtr to string
         //

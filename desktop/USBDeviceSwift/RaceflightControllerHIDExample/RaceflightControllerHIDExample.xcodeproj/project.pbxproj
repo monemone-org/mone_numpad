@@ -17,6 +17,7 @@
 		8A4BDF362805453C00762092 /* MockSessionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4BDF352805453C00762092 /* MockSessionProvider.swift */; };
 		8A4BDF382805455100762092 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4BDF372805455100762092 /* misc.swift */; };
 		8A4BDF3A2805456300762092 /* structs+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4BDF392805456300762092 /* structs+ext.swift */; };
+		8A9C51B2281F9E26000D98DF /* structs.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A4BDF2A28053C4800762092 /* structs.c */; };
 		8ABAFC602807D176006260BD /* Serializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABAFC5F2807D176006260BD /* Serializer.swift */; };
 		8ABAFC622807D3B4006260BD /* AudioSessionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABAFC612807D3B4006260BD /* AudioSessionProvider.swift */; };
 /* End PBXBuildFile section */
@@ -236,6 +237,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A4BDF362805453C00762092 /* MockSessionProvider.swift in Sources */,
+				8A9C51B2281F9E26000D98DF /* structs.c in Sources */,
 				8A4BDF382805455100762092 /* misc.swift in Sources */,
 				8A4BDF3A2805456300762092 /* structs+ext.swift in Sources */,
 				8A4BDF342805452100762092 /* KBCommService.swift in Sources */,

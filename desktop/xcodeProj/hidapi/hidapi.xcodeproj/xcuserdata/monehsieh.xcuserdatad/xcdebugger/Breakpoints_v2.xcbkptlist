@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "D89327AC-828D-4558-8DFC-C99FB80F432B"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "012469B3-4A3D-48BA-ACC0-03380E8F2E7B"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/hidtest/test.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "253"
+            endingLineNumber = "253"
+            landmarkName = "main(argc, argv)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/mac/thread_object.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "148"
+            endingLineNumber = "148"
+            landmarkName = "read_thread(param)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF - 47b0266233dbe7ab"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162"
+                  offsetFromSymbolStart = "220">
+               </Location>
+               <Location
+                  uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF - 47b0266233dbe640"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "169"
+                  endingLineNumber = "169"
+                  offsetFromSymbolStart = "236">
+               </Location>
+               <Location
+                  uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF - 47b0266233dbe682"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "171"
+                  endingLineNumber = "171"
+                  offsetFromSymbolStart = "192">
+               </Location>
+               <Location
+                  uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF - 47b0266233dbe682"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "171"
+                  endingLineNumber = "171"
+                  offsetFromSymbolStart = "236">
+               </Location>
+               <Location
+                  uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF - 47b0266233dbe7ab"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162"
+                  offsetFromSymbolStart = "236">
+               </Location>
+               <Location
+                  uuid = "C24595DB-17E0-4FB5-925E-BF38CE0532BF - 47b0266233dbe7ab"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162"
+                  offsetFromSymbolStart = "249">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DA56B868-FA2A-4354-B908-7BA07B3D0965"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/mac/hid.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "582"
+            endingLineNumber = "582"
+            landmarkName = "hid_close(dev)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "DA56B868-FA2A-4354-B908-7BA07B3D0965 - 8c4c2886cad8256e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "557"
+                  endingLineNumber = "557"
+                  offsetFromSymbolStart = "0">
+               </Location>
+               <Location
+                  uuid = "DA56B868-FA2A-4354-B908-7BA07B3D0965 - 8c4c2886cad82a85"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "548"
+                  endingLineNumber = "548"
+                  offsetFromSymbolStart = "0">
+               </Location>
+               <Location
+                  uuid = "DA56B868-FA2A-4354-B908-7BA07B3D0965 - 8c4c2886cad825ac"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "555"
+                  endingLineNumber = "555"
+                  offsetFromSymbolStart = "0">
+               </Location>
+               <Location
+                  uuid = "DA56B868-FA2A-4354-B908-7BA07B3D0965 - 8c4c2886cad8256e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "557"
+                  endingLineNumber = "557"
+                  offsetFromSymbolStart = "52">
+               </Location>
+               <Location
+                  uuid = "DA56B868-FA2A-4354-B908-7BA07B3D0965 - 8c4c2886cad827d3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "570"
+                  endingLineNumber = "570"
+                  offsetFromSymbolStart = "42">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B6967994-8B92-4E09-9F4C-894E981EB6AB"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/mac/hid_device_list_node.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "71"
+            endingLineNumber = "71"
+            landmarkName = "remove_hid_device_from_list(device, list)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "B6967994-8B92-4E09-9F4C-894E981EB6AB - 6b75a360d5d29000"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid_device_list_node.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "71"
+                  endingLineNumber = "71"
+                  offsetFromSymbolStart = "304">
+               </Location>
+               <Location
+                  uuid = "B6967994-8B92-4E09-9F4C-894E981EB6AB - 6b75a360d5d29000"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "hid_close"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/hid_device_list_node.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "71"
+                  endingLineNumber = "71"
+                  offsetFromSymbolStart = "289">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2A2D6560-EF97-43C3-A00F-E7CF42B8E1D2"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/mac/thread_object.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "158"
+            endingLineNumber = "158"
+            landmarkName = "read_thread(param)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "2A2D6560-EF97-43C3-A00F-E7CF42B8E1D2 - 47b0266233dbe7ab"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162"
+                  offsetFromSymbolStart = "236">
+               </Location>
+               <Location
+                  uuid = "2A2D6560-EF97-43C3-A00F-E7CF42B8E1D2 - 47b0266233dbe7ab"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_thread"
+                  moduleName = "libhidapi.0.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/monehsieh/dev/keyboard/mone_numpad/desktop/hidapi/mac/thread_object.c"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162"
+                  offsetFromSymbolStart = "249">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "BE2E5D9F-3185-4E4E-AF33-3D6722EF761C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/hidtest/test.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "80"
+            endingLineNumber = "80"
+            landmarkName = "main(argc, argv)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D3BE01AE-993E-413F-9EA2-EEE4D4AC8D61"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/mac/hid.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "836"
+            endingLineNumber = "836"
+            landmarkName = "hid_register_read_callback(dev)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D6415973-3AE2-4BE8-8E8D-98F144F97F0C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../hidapi/mac/hid.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "844"
+            endingLineNumber = "844"
+            landmarkName = "hid_unregister_read_callback(dev)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

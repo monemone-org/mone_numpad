@@ -3,9 +3,9 @@
 #include "press_and_hold_key.h"
 #include "mone_keys.h"
 
-// #ifdef CONSOLE_ENABLE
-// #define DEBUG_PRESS_AND_HOLD    1
-// #endif
+#ifdef CONSOLE_ENABLE
+#define DEBUG_PRESS_AND_HOLD    1
+#endif
 
 
 #define HOLD_DETECTION_DURATION     500

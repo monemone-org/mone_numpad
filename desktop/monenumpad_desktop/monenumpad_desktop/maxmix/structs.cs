@@ -3,11 +3,17 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Collections.Generic;
 using monenumpad_desktop.Marshal;
+using System.Text;
 
 namespace monenumpad_desktop.Maxmix
 {
     namespace structs
     {
+        interface StructMarshallable
+        {
+            BitVector ToBitVector();
+        }
+
 
         public static class Constants
         {
@@ -63,72 +69,104 @@ namespace monenumpad_desktop.Maxmix
 
         //session_info also serve as a heartbeat
         //[StructLayout(LayoutKind.Explicit, Size = 1/*SessionInfo_Size*/, CharSet = CharSet.Ansi)]
-        public struct SessionInfo
+        public struct SessionInfo : StructMarshallable
         {
+            public readonly static int SessionInfo_Size = 1; //in bytes
+            public enum FieldIndex
+            {
+                Count
+            };
+            public readonly static PackedStructLayout<FieldIndex> Layout;
+
+            static SessionInfo()
+            {
+                Layout = new PackedStructLayout<FieldIndex>(new FieldDesc[]{
+                        new FieldDesc("Count", 8)
+                    });
+                Debug.Assert(Layout.StructSize == SessionInfo_Size);
+            }
+
             public byte count;           // 8 bits, total count of session
-        };
+
+            public SessionInfo(byte count)
+            {
+                this.count = count;
+            }
+
+            public SessionInfo(BitVector bitVector)
+            {
+                this.count = Layout.GetFieldValue(bitVector, FieldIndex.Count, FieldMarshalFunc.ToByte);
+            }
+
+            public BitVector ToBitVector()
+            {
+                var bitVector = new BitVector(Layout.StructSize * 8);
+                Layout.SetFieldValue(bitVector, FieldIndex.Count, this.count, FieldMarshalFunc.FromByte);
+                return bitVector;
+            }
+        }
 
 
-
-        public struct VolumeData
+        public struct VolumeData: StructMarshallable
         {
             public readonly static int VolumeData_Size = 2; //in bytes
             public enum FieldIndex
             {
                 Unknown,
-                Volume,
-                IsMuted
+                IsMuted,
+                Volume
             };
             public readonly static PackedStructLayout<FieldIndex> Layout;
 
             static VolumeData()
             {
                 Layout = new PackedStructLayout<FieldIndex>(new FieldDesc[]{
-                        new FieldDesc("unknown", 1), //in bits
-                        new FieldDesc("volume", 7), //in bits
-                        new FieldDesc("isMuted", 1) //in bits
+                        new BitFieldDesc("unknown", 1), //in bits
+                        new BitFieldDesc("isMuted", 1), //in bits
+                        new FieldDesc("volume", 8) //1 byte
                     });
                 Debug.Assert(Layout.StructSize == VolumeData_Size);
             }
 
 
             public bool unknown; // 1 bit
-            public byte volume; // 7 bits
             public bool isMuted; // 1 bit
-            // 9 bits - 2 bytes
+            public byte volume; // 8 bits
+            // 2 bytes
 
             public VolumeData(
                 bool unknown,
-                byte volume,
-                bool isMuted)
+                bool isMuted,
+                byte volume
+                )
             {
                 this.unknown = unknown;
-                this.volume = volume;
                 this.isMuted = isMuted;
+                this.volume = volume;
             }
 
             public VolumeData(BitVector bitVector)
             {
                 this.unknown = Layout.GetFieldValue(bitVector, FieldIndex.Unknown, FieldMarshalFunc.ToBool);
-                this.volume = Layout.GetFieldValue(bitVector, FieldIndex.Volume, FieldMarshalFunc.ToByte);
                 this.isMuted = Layout.GetFieldValue(bitVector, FieldIndex.IsMuted, FieldMarshalFunc.ToBool);
+                this.volume = Layout.GetFieldValue(bitVector, FieldIndex.Volume, FieldMarshalFunc.ToByte);
             }
 
             public BitVector ToBitVector()
             {
-                var bitVector = new BitVector();
+                var bitVector = new BitVector(Layout.StructSize * 8);
                 Layout.SetFieldValue(bitVector, FieldIndex.Unknown, this.unknown, FieldMarshalFunc.FromBool);
-                Layout.SetFieldValue(bitVector, FieldIndex.Volume, this.volume, FieldMarshalFunc.FromByte);
                 Layout.SetFieldValue(bitVector, FieldIndex.IsMuted, this.isMuted, FieldMarshalFunc.FromBool);
+                Layout.SetFieldValue(bitVector, FieldIndex.Volume, this.volume, FieldMarshalFunc.FromByte);
                 return bitVector;
             }
 
         };
 
-        public struct SessionData
+        public struct SessionData: StructMarshallable
         {
             private readonly static int SessionData_Name_Size = 20; //in bytes
-            private readonly static int SessionData_Size = 23; //in bytes
+            private readonly static int SessionData_Size = 24; //in bytes
             enum FieldIndex
             {
                 ID,
@@ -144,8 +182,8 @@ namespace monenumpad_desktop.Maxmix
                 Layout = new PackedStructLayout<FieldIndex>(new FieldDesc[]{
                         new FieldDesc("ID", 8), //in bits
                         new FieldDesc("Name", SessionData_Name_Size * 8), //in bits
-                        new FieldDesc("HasPrev", 1), //in bits
-                        new FieldDesc("HasNext", 1), //in bits
+                        new BitFieldDesc("HasPrev", 1), //in bits
+                        new BitFieldDesc("HasNext", 1), //in bits
                         new FieldDesc("Volume", VolumeData.Layout.StructSize * 8), //in bits
                     });
                 Debug.Assert(Layout.StructSize == SessionData_Size);
@@ -155,7 +193,7 @@ namespace monenumpad_desktop.Maxmix
             public string name; // 20 bytes - 160 bits
             public bool has_prev; // : 1; // 1 bit
             public bool has_next; // : 1; // 1 bit
-            public VolumeData volume; // 9 bits 
+            public VolumeData volume; // VolumeData.Layout.StructSize bytes 
 
             public SessionData(
                 byte id,
@@ -174,25 +212,25 @@ namespace monenumpad_desktop.Maxmix
             public SessionData(BitVector bitVector)
             {
                 this.id = Layout.GetFieldValue(bitVector, FieldIndex.ID, FieldMarshalFunc.ToByte);
-                this.name = Layout.GetFieldValue(bitVector, FieldIndex.Name, FieldMarshalFunc.ToString);
+                this.name = Layout.GetFieldValue(bitVector, FieldIndex.Name, FieldMarshalFunc.ToStringFunc(Encoding.ASCII));
                 this.has_prev = Layout.GetFieldValue(bitVector, FieldIndex.HasPrev, FieldMarshalFunc.ToBool);
                 this.has_next = Layout.GetFieldValue(bitVector, FieldIndex.HasNext, FieldMarshalFunc.ToBool);
-                this.volume = Layout.GetFieldValue(bitVector, FieldIndex.Volume, MarshaStructFunc.ToVolumeData);
+                this.volume = Layout.GetFieldValue(bitVector, FieldIndex.Volume, MarshalStructFunc.ToVolumeData);
             }
 
             public BitVector ToBitVector()
             {
-                var bitVector = new BitVector();
+                var bitVector = new BitVector(Layout.StructSize * 8);
                 Layout.SetFieldValue(bitVector, FieldIndex.ID, this.id, FieldMarshalFunc.FromByte);
-                Layout.SetFieldValue(bitVector, FieldIndex.Name, this.name, FieldMarshalFunc.FromString);
+                Layout.SetFieldValue(bitVector, FieldIndex.Name, this.name, FieldMarshalFunc.FromStringFunc(SessionData_Name_Size, Encoding.UTF8, true));
                 Layout.SetFieldValue(bitVector, FieldIndex.HasPrev, this.has_prev, FieldMarshalFunc.FromBool);
                 Layout.SetFieldValue(bitVector, FieldIndex.HasNext, this.has_next, FieldMarshalFunc.FromBool);
-                Layout.SetFieldValue(bitVector, FieldIndex.Volume, this.volume, MarshaStructFunc.FromVolumeData);
+                Layout.SetFieldValue(bitVector, FieldIndex.Volume, this.volume, MarshalStructFunc.FromVolumeData);
                 return bitVector;
             }
         } // class SessionData
 
-        public static class MarshaStructFunc
+        public static class MarshalStructFunc
         {
             public static VolumeData ToVolumeData(byte[] data)
             {

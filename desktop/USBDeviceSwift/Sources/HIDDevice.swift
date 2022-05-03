@@ -245,4 +245,9 @@ public class HIDDevice {
     }
     
 
+    public func write(_ data: Data)
+    {
+        HIDDeviceMonitor.write(data, to: self)
+    }
+
 }
