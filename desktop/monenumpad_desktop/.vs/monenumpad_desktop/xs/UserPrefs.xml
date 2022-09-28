@@ -1,11 +1,11 @@
 ﻿<Properties StartupConfiguration="{D2C33E56-D1B4-4F06-BC30-1F61AA157234}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="monenumpad_desktop/Maxmix/KBCommService.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="monenumpad_desktop/Program.cs">
     <Files>
-      <File FileName="monenumpad_desktop/Maxmix/KBCommService.cs" Line="166" Column="46" />
+      <File FileName="monenumpad_desktop/Maxmix/KBCommService.cs" Line="183" Column="48" />
       <File FileName="monenumpad_desktop/Maxmix/MockSessionProvider.cs" Line="73" Column="20" />
       <File FileName="monenumpad_desktop/Maxmix/IAudioSessionProvider.cs" Line="21" Column="9" />
       <File FileName="monenumpad_desktop/Maxmix/structs.cs" Line="151" Column="57" />
-      <File FileName="monenumpad_desktop/Program.cs" Line="99" Column="37" />
+      <File FileName="monenumpad_desktop/Program.cs" Line="55" Column="1" />
       <File FileName="monenumpad_desktop/Marshal/FieldInfo.cs" Line="100" Column="1" />
       <File FileName="monenumpad_desktop/Marshal/BitVector.cs" Line="160" Column="1" />
       <File FileName="monenumpad_desktop/hidapi/Device.cs" Line="52" Column="91" />
@@ -19,9 +19,8 @@
             <Node name="monenumpad_desktop" expanded="True">
               <Node name="hidapi" expanded="True" />
               <Node name="Marshal" expanded="True" />
-              <Node name="Maxmix" expanded="True">
-                <Node name="KBCommService.cs" selected="True" />
-              </Node>
+              <Node name="Maxmix" expanded="True" />
+              <Node name="Program.cs" selected="True" />
             </Node>
           </Node>
         </State>
