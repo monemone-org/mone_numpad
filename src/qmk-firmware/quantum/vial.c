@@ -326,6 +326,14 @@ static void exec_keycode(uint16_t keycode) {
 }
 
 bool vial_encoder_update(uint8_t index, bool clockwise) {
+    uint16_t code = vial_get_encoder_keycode(index, clockwise);
+    exec_keycode(code);
+    return true;
+}
+
+// Mone: refactor code to get encoder keycode out to a separate function
+uint16_t vial_get_encoder_keycode(uint8_t index, bool clockwise) 
+{
     uint16_t code;
 
     layer_state_t layers = layer_state | default_layer_state;
@@ -334,17 +342,15 @@ bool vial_encoder_update(uint8_t index, bool clockwise) {
         if (layers & (1UL << i)) {
             code = dynamic_keymap_get_encoder(i, index, clockwise);
             if (code != KC_TRNS) {
-                exec_keycode(code);
-                return true;
+                return code;
             }
         }
     }
     /* fall back to layer 0 */
     code = dynamic_keymap_get_encoder(0, index, clockwise);
-    exec_keycode(code);
-
-    return true;
+    return code;
 }
+
 #endif
 
 #ifdef VIAL_TAP_DANCE_ENABLE

@@ -73,7 +73,7 @@ __attribute__((weak)) bool encoder_update_kb(uint8_t index, bool clockwise) {
 
 #ifdef VIAL_ENCODERS_ENABLE
 #include "vial.h"
-    #ifdef MONE_ENCODERS_ENABLE
+    #ifdef VIAL_MONE_ENCODERS_ENABLE
         #define encoder_update_kb mone_encoder_update
 
         __attribute__((weak)) bool mone_encoder_update(uint8_t index, bool clockwise) {

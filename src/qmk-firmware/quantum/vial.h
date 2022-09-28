@@ -31,6 +31,7 @@ bool process_record_vial(uint16_t keycode, keyrecord_t *record);
 
 #ifdef VIAL_ENCODERS_ENABLE
 bool vial_encoder_update(uint8_t index, bool clockwise);
+uint16_t vial_get_encoder_keycode(uint8_t index, bool clockwise);
 #endif
 
 extern int vial_unlocked;
