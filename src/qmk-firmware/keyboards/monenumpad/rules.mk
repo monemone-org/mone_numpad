@@ -18,3 +18,10 @@ RGBLIGHT_ENABLE = no        # Enable keyboard RGB underglow
 AUDIO_ENABLE = no           # Audio output
 
 ENCODER_ENABLE = yes
+
+
+VIA_ENABLE = yes
+VIAL_ENABLE = yes
+VIAL_ENCODERS_ENABLE = yes
+
+

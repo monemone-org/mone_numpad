@@ -14,7 +14,7 @@
  */
 #define VENDOR_ID    0x6D68      // "mh" = monehsieh
 #define PRODUCT_ID   0x0001
-#define DEVICE_VER   0x0001
+#define DEVICE_VER   0x0002      // version 2: vial
 #define MANUFACTURER monehsieh
 #define PRODUCT      monenumpad
 
@@ -44,12 +44,6 @@
 #define ENCODERS_PAD_A { B6 }
 #define ENCODERS_PAD_B { B2 }
 #define ENCODER_RESOLUTION 4
-
-
-#define BOOTMAGIC_LITE_ROW 4
-#define BOOTMAGIC_LITE_COLUMN 0
-
-
 
 /*
  * Split Keyboard specific options, make sure you have 'SPLIT_KEYBOARD = yes' in your rules.mk, and define SOFT_SERIAL_PIN.
@@ -152,5 +146,21 @@
 #define NO_ACTION_FUNCTION
 
 /* Bootmagic Lite key configuration */
-//#define BOOTMAGIC_LITE_ROW 0
-//#define BOOTMAGIC_LITE_COLUMN 0
+#define BOOTMAGIC_LITE_ROW 4
+#define BOOTMAGIC_LITE_COLUMN 0
+
+
+#define VIAL_KEYBOARD_UID {0xE1, 0x03, 0xDC, 0xC8, 0xB3, 0x98, 0x04, 0x18}
+// top 2 keys of right most column
+#define VIAL_UNLOCK_COMBO_ROWS {0,1}
+#define VIAL_UNLOCK_COMBO_COLS {4,4}
+
+#define VIAL_ENCODER_DEFAULT { KC_VOLD, KC_VOLU, KC_BRID, KC_BRIU, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS }
+
+
+
+
+
+
+
+

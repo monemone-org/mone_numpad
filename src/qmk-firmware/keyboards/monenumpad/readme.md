@@ -8,20 +8,30 @@
 * Hardware Supported: *The PCBs, controllers supported*
 * Hardware Availability: *Links to where you can find this hardware*
 
+Install qmk
+
+    git clone https://github.com/vial-kb/vial-qmk.git
+
 Make example for this keyboard (after setting up your build environment):
 
-    make monenumpad:default
+    make monenumpad:vial
 
 Flashing example for this keyboard:
 
-    make monenumpad:default:flash
+    make monenumpad:vial:flash
 
 See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_tools) and the [make instructions](https://docs.qmk.fm/#/getting_started_make_guide) for more information. Brand new to QMK? Start with our [Complete Newbs Guide](https://docs.qmk.fm/#/newbs).
 
+
+See [VIAL Porting Build](https://get.vial.today/docs/)
+
+
 ## Bootloader
 
-Enter the bootloader in 3 ways:
+Enter the bootloader in one of the following ways:
 
-* **Bootmagic reset**: Hold down the key at (0,0) in the matrix (usually the top left key or Escape) and plug in the keyboard
 * **Physical reset button**: Briefly press the button on the back of the PCB - some may have pads you must short instead
-* **Keycode in layout**: Press the key mapped to `RESET` if it is available
+* **Ground reset pin**: Short GND and RESET pin on the micro controller
+
+
+
