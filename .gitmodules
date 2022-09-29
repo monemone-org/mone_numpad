@@ -7,3 +7,6 @@
 # [submodule "qmk_firmware"]
 # 	path = qmk_firmware
 # 	url = https://github.com/monemone-org/qmk_firmware.git
+[submodule "vial-qmk"]
+	path = vial-qmk
+	url = https://github.com/monemone-org/vial-qmk

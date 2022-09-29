@@ -128,8 +128,7 @@
 	},
 	"expanded_folders":
 	[
-		"/Users/monehsieh/dev/keyboard/mone_numpad",
-		"/Users/monehsieh/dev/keyboard/mone_numpad/src"
+		"/Users/monehsieh/dev/keyboard/mone_numpad"
 	],
 	"file_history":
 	[
@@ -264,13 +263,14 @@
 	],
 	"find":
 	{
-		"height": 38.0
+		"height": 24.0
 	},
 	"find_in_files":
 	{
 		"height": 102.0,
 		"where_history":
 		[
+			"/Users/monehsieh/dev/keyboard/mone_numpad/qmk_firmware,<project filters>",
 			"/Users/monehsieh/dev/keyboard/mone_numpad/src/qmk-firmware",
 			"/Users/monehsieh/dev/keyboard/vial-qmk,<project filters>",
 			"",
@@ -299,6 +299,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"vial_encoder_update",
+			"VIAL_ENCODERS_ENABLE",
+			"VIAL",
 			"SKIP_GIT",
 			"<<<<<<< HEAD",
 			"<<<",
@@ -423,10 +426,7 @@
 			"CONSOLE_ENABLE",
 			"VIAL_ENCODERS_ENABLE",
 			"switchToNextLayer",
-			"edit_session_mode",
-			"VIAL_ENCODER_DEFAULT",
-			"VIAL_KEYBOARD_UID",
-			"MONE_ENCODERS_ENABLE"
+			"edit_session_mode"
 		],
 		"highlight": true,
 		"in_selection": false,
