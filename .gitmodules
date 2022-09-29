@@ -1,3 +1,12 @@
 [submodule "desktop/hidapi"]
 	path = desktop/hidapi
 	url = https://github.com/monemone-org/hidapi.git
+
+
+	
+# [submodule "qmk_firmware"]
+# 	path = qmk_firmware
+# 	url = https://github.com/monemone-org/qmk_firmware.git
+[submodule "qmk_firmware"]
+	path = qmk_firmware
+	url = https://github.com/monemone-org/qmk_firmware.git
