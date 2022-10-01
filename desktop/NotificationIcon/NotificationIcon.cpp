@@ -10,15 +10,48 @@
 #pragma comment(lib, "comctl32.lib")
 
 #include "resource.h"
+#include "framework.h"
 #include <windows.h>
 #include <shellapi.h>
 #include <commctrl.h>
 #include <strsafe.h>
+#include <Mmdeviceapi.h>
+#include "TMMNotificationClient.h"
+#include "CMMDevice.h"
+#include "CMMDeviceController.h"
+
+using namespace ATL;
+
 
 HINSTANCE g_hInst = NULL;
+HWND g_hwndMainWin = NULL;
+
+CMMDeviceController* g_pDeviceController = NULL;
+
 
 UINT const WMAPP_NOTIFYCALLBACK = WM_APP + 1;
 UINT const WMAPP_HIDEFLYOUT     = WM_APP + 2;
+
+UINT const WMAPP_REFRESH_SESSION = WM_APP + 3;
+UINT const WMAPP_REFRESH_DEVICE = WM_APP + 4;
+UINT const WMAPP_REFRESH_AUDIOCONTROLLER = WM_APP + 5;
+
+void PostMainThreadRefreshSession(CMMSession *pSession)
+{
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_SESSION, (WPARAM)pSession, 0);
+}
+
+void PostMainThreadRefreshDevice(CMMDevice* pDevice)
+{
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_DEVICE, (WPARAM)pDevice, 0);
+}
+
+void PostMainThreadRefreshAudioController(CMMDeviceController* pDeviceController)
+{
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_AUDIOCONTROLLER, (WPARAM)pDeviceController, 0);
+}
+
+
 
 UINT_PTR const HIDEFLYOUT_TIMER_ID = 1;
 
@@ -26,7 +59,9 @@ wchar_t const szWindowClass[] = L"NotificationIconTest";
 wchar_t const szFlyoutWindowClass[] = L"NotificationFlyout";
 
 // Use a guid to uniquely identify our icon
-class __declspec(uuid("9D0B8B92-4E1C-488e-A1E1-2331AFCE2CB5")) PrinterIcon;
+// Mone: updated GUID every time the app restarts. Otherwise
+// the icon may disappear if it's relaunched soon after a previous crash.
+GUID PrinterIconGUID;
 
 // Forward declarations of functions included in this code module:
 void                RegisterWindowClass(PCWSTR pszClassName, PCWSTR pszMenuName, WNDPROC lpfnWndProc);
@@ -44,31 +79,90 @@ BOOL                ShowNoInkBalloon();
 BOOL                ShowPrintJobBalloon();
 BOOL                RestoreTooltip();
 
-int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR /*lpCmdLine*/, int nCmdShow)
+
+
+class CATLProject1Module : public ATL::CAtlExeModuleT< CATLProject1Module >
+{
+public:
+    //DECLARE_LIBID(LIBID_ATLProject1Lib)
+    //DECLARE_REGISTRY_APPID_RESOURCEID(IDR_ATLPROJECT1, "{fedd9863-fabc-4c3b-8b21-d68c0f1bdb7d}")
+
+    HRESULT Run(int nShowCmd = SW_HIDE) throw()
+    {
+        //Mone: set application DPI awareness for all the HWNDs going to be created.
+        DPI_AWARENESS_CONTEXT context = nullptr;
+        context = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
+        SetThreadDpiAwarenessContext(context);
+
+        //HRESULT hr = CoInitialize(NULL);
+        //if (FAILED(hr)) {
+        //    OutputDebugString(TEXT("CoInitialize failed"));
+        //    return 1;
+        //}
+
+        HRESULT hr = S_OK;
+
+        hr = CoCreateGuid( &PrinterIconGUID );
+
+        try
+        {
+            g_pDeviceController = CMMDeviceController::CreateObject();
+
+            // print out all devices and sessions
+            g_pDeviceController->dump();
+        }
+        catch (HRESULT)
+        {
+
+        }
+        
+//        g_hInst = hInstance;
+        RegisterWindowClass(szWindowClass, MAKEINTRESOURCE(IDC_NOTIFICATIONICON), WndProc);
+        RegisterWindowClass(szFlyoutWindowClass, NULL, FlyoutWndProc);
+
+        // Create the main window. This could be a hidden window if you don't need
+        // any UI other than the notification icon.
+        WCHAR szTitle[100];
+        LoadString(g_hInst, IDS_APP_TITLE, szTitle, ARRAYSIZE(szTitle));
+        HWND hwnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+            CW_USEDEFAULT, 0, 250, 200, NULL, NULL, g_hInst, NULL);
+        if (hwnd)
+        {
+            //Mone: store hwnd created. Replace options dlg with this main hwnd
+            g_hwndMainWin = hwnd;
+
+            // Mone: hide main window on create
+            //ShowWindow(hwnd, nCmdShow);
+
+            // Main message loop:
+            this->RunMessageLoop();
+            //MSG msg;
+            //while (GetMessage(&msg, NULL, 0, 0))
+            //{
+            //    TranslateMessage(&msg);
+            //    DispatchMessage(&msg);
+            //}
+        }
+
+        if (g_pDeviceController)
+        {
+            delete g_pDeviceController;
+            g_pDeviceController = NULL;
+        }
+
+        return E_FAIL;
+
+    }
+};
+
+CATLProject1Module _AtlModule;
+
+
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR /*lpCmdLine*/, int nCmdShow)
 {
     g_hInst = hInstance;
-    RegisterWindowClass(szWindowClass, MAKEINTRESOURCE(IDC_NOTIFICATIONICON), WndProc);
-    RegisterWindowClass(szFlyoutWindowClass, NULL, FlyoutWndProc);
+    return _AtlModule.WinMain(nCmdShow);
 
-    // Create the main window. This could be a hidden window if you don't need
-    // any UI other than the notification icon.
-    WCHAR szTitle[100];
-    LoadString(hInstance, IDS_APP_TITLE, szTitle, ARRAYSIZE(szTitle));
-    HWND hwnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, 250, 200, NULL, NULL, g_hInst, NULL);
-    if (hwnd)
-    {
-        ShowWindow(hwnd, nCmdShow);
-
-        // Main message loop:
-        MSG msg;
-        while (GetMessage(&msg, NULL, 0, 0))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
-    return 0;
 }
 
 void RegisterWindowClass(PCWSTR pszClassName, PCWSTR pszMenuName, WNDPROC lpfnWndProc)
@@ -92,7 +186,7 @@ BOOL AddNotificationIcon(HWND hwnd)
     // add the icon, setting the icon, tooltip, and callback message.
     // the icon will be identified with the GUID
     nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE | NIF_SHOWTIP | NIF_GUID;
-    nid.guidItem = __uuidof(PrinterIcon);
+    nid.guidItem = PrinterIconGUID;
     nid.uCallbackMessage = WMAPP_NOTIFYCALLBACK;
     LoadIconMetric(g_hInst, MAKEINTRESOURCE(IDI_NOTIFICATIONICON), LIM_SMALL, &nid.hIcon);
     LoadString(g_hInst, IDS_TOOLTIP, nid.szTip, ARRAYSIZE(nid.szTip));
@@ -107,7 +201,7 @@ BOOL DeleteNotificationIcon()
 {
     NOTIFYICONDATA nid = {sizeof(nid)};
     nid.uFlags = NIF_GUID;
-    nid.guidItem = __uuidof(PrinterIcon);
+    nid.guidItem = PrinterIconGUID;
     return Shell_NotifyIcon(NIM_DELETE, &nid);
 }
 
@@ -116,7 +210,7 @@ BOOL ShowLowInkBalloon()
     // Display a low ink balloon message. This is a warning, so show the appropriate system icon.
     NOTIFYICONDATA nid = {sizeof(nid)};
     nid.uFlags = NIF_INFO | NIF_GUID;
-    nid.guidItem = __uuidof(PrinterIcon);
+    nid.guidItem = PrinterIconGUID;
     // respect quiet time since this balloon did not come from a direct user action.
     nid.dwInfoFlags = NIIF_WARNING | NIIF_RESPECT_QUIET_TIME;
     LoadString(g_hInst, IDS_LOWINK_TITLE, nid.szInfoTitle, ARRAYSIZE(nid.szInfoTitle));
@@ -129,7 +223,7 @@ BOOL ShowNoInkBalloon()
     // Display an out of ink balloon message. This is a error, so show the appropriate system icon.
     NOTIFYICONDATA nid = {sizeof(nid)};
     nid.uFlags = NIF_INFO | NIF_GUID;
-    nid.guidItem = __uuidof(PrinterIcon);
+    nid.guidItem = PrinterIconGUID;
     nid.dwInfoFlags = NIIF_ERROR;
     LoadString(g_hInst, IDS_NOINK_TITLE, nid.szInfoTitle, ARRAYSIZE(nid.szInfoTitle));
     LoadString(g_hInst, IDS_NOINK_TEXT, nid.szInfo, ARRAYSIZE(nid.szInfo));
@@ -141,7 +235,7 @@ BOOL ShowPrintJobBalloon()
     // Display a balloon message for a print job with a custom icon
     NOTIFYICONDATA nid = {sizeof(nid)};
     nid.uFlags = NIF_INFO | NIF_GUID;
-    nid.guidItem = __uuidof(PrinterIcon);
+    nid.guidItem = PrinterIconGUID;
     nid.dwInfoFlags = NIIF_USER | NIIF_LARGE_ICON;
     LoadString(g_hInst, IDS_PRINTJOB_TITLE, nid.szInfoTitle, ARRAYSIZE(nid.szInfoTitle));
     LoadString(g_hInst, IDS_PRINTJOB_TEXT, nid.szInfo, ARRAYSIZE(nid.szInfo));
@@ -154,7 +248,7 @@ BOOL RestoreTooltip()
     // After the balloon is dismissed, restore the tooltip.
     NOTIFYICONDATA nid = {sizeof(nid)};
     nid.uFlags = NIF_SHOWTIP | NIF_GUID;
-    nid.guidItem = __uuidof(PrinterIcon);
+    nid.guidItem = PrinterIconGUID;
     return Shell_NotifyIcon(NIM_MODIFY, &nid);
 }
 
@@ -184,6 +278,11 @@ void PositionFlyout(HWND hwnd, REFGUID guidIcon)
 
 HWND ShowFlyout(HWND hwndMainWindow)
 {
+    if (g_pDeviceController)
+    {
+        g_pDeviceController->dump();
+    }
+
     // size of the bitmap image (which will be the client area of the flyout window).
     RECT rcWindow = {};
     rcWindow.right = 214;
@@ -196,7 +295,7 @@ HWND ShowFlyout(HWND hwndMainWindow)
         CW_USEDEFAULT, 0, rcWindow.right - rcWindow.left, rcWindow.bottom - rcWindow.top, hwndMainWindow, NULL, g_hInst, NULL);
     if (hwndFlyout)
     {
-        PositionFlyout(hwndFlyout, __uuidof(PrinterIcon));
+        PositionFlyout(hwndFlyout, PrinterIconGUID);
         SetForegroundWindow(hwndFlyout);
     }
     return hwndFlyout;
@@ -279,7 +378,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case IDM_OPTIONS:
                 // placeholder for an options dialog
-                MessageBox(hwnd,  L"Display the options dialog here.", L"Options", MB_OK);
+                //MessageBox(hwnd,  L"Display the options dialog here.", L"Options", MB_OK);
+                ShowWindow(hwnd, SW_SHOW);
+                break;
+
+            // Mone: add a Hide command to hide the main window
+            case IDM_HIDE:
+                ShowWindow(hwnd, SW_HIDE);
                 break;
 
             case IDM_EXIT:
@@ -289,6 +394,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_FLYOUT:
                 s_hwndFlyout = ShowFlyout(hwnd);
                 break;
+
+            case IDM_REFRESH_AUDIO:
+            {
+                CMMDeviceController* pController = g_pDeviceController;
+                pController->Refresh();
+                pController->dump();
+                break;
+            }
 
             default:
                 return DefWindowProc(hwnd, message, wParam, lParam);
@@ -338,6 +451,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         s_hwndFlyout = NULL;
         s_fCanShowFlyout = FALSE;
         break;
+
+    case WMAPP_REFRESH_SESSION:
+    {
+        CMMSession* pSession = (CMMSession*)wParam;
+        pSession->Refresh();
+        pSession->dump();
+        break;
+    }
+
+    case WMAPP_REFRESH_DEVICE:
+    {
+        CMMDevice* pDevice = (CMMDevice*)wParam;
+        pDevice->Refresh();
+        pDevice->dump();
+        break;
+    }
+
+    case WMAPP_REFRESH_AUDIOCONTROLLER:
+    {
+        CMMDeviceController* pController = (CMMDeviceController*)wParam;
+        pController->Refresh();
+        pController->dump();
+        break;
+    }
 
     case WM_TIMER:
         if (wParam == HIDEFLYOUT_TIMER_ID)
