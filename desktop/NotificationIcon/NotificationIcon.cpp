@@ -36,19 +36,28 @@ UINT const WMAPP_REFRESH_SESSION = WM_APP + 3;
 UINT const WMAPP_REFRESH_DEVICE = WM_APP + 4;
 UINT const WMAPP_REFRESH_AUDIOCONTROLLER = WM_APP + 5;
 
-void PostMainThreadRefreshSession(CMMSession *pSession)
+void PostMainThreadRefreshSession(const MMSessionID& sessionID) throw ()
 {
-    PostMessage(g_hwndMainWin, WMAPP_REFRESH_SESSION, (WPARAM)pSession, 0);
+    // Create a copy of the MMSessionID object and pass that to the main thread.
+    // When the main thread is done, the main thread handler will free the
+    // copy of MMSessionID.
+    MMSessionID* pSessionID = new MMSessionID(sessionID);
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_SESSION, (WPARAM)pSessionID, 0);
 }
 
-void PostMainThreadRefreshDevice(CMMDevice* pDevice)
+void PostMainThreadRefreshDevice(const MMDeviceID& deviceID) throw ()
 {
-    PostMessage(g_hwndMainWin, WMAPP_REFRESH_DEVICE, (WPARAM)pDevice, 0);
+    // Create a copy of the MMDeviceID object and pass that to the main thread.
+    // When the main thread is done, the main thread handler will free the
+    // copy of MMDeviceID.
+    MMDeviceID* pDeviceID = new MMDeviceID(deviceID);
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_DEVICE, (WPARAM)pDeviceID, 0);
 }
 
-void PostMainThreadRefreshAudioController(CMMDeviceController* pDeviceController)
+void PostMainThreadRefreshAudioController(const MMDeviceControllerID& controllerID) throw ()
 {
-    PostMessage(g_hwndMainWin, WMAPP_REFRESH_AUDIOCONTROLLER, (WPARAM)pDeviceController, 0);
+    MMDeviceControllerID* pControllerID = new MMDeviceControllerID(controllerID);
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_AUDIOCONTROLLER, (WPARAM)pControllerID, 0);
 }
 
 
@@ -454,25 +463,45 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WMAPP_REFRESH_SESSION:
     {
-        CMMSession* pSession = (CMMSession*)wParam;
-        pSession->Refresh();
-        pSession->dump();
+        std::unique_ptr<MMSessionID> spSessionID((MMSessionID*)wParam);
+        if (spSessionID)
+        {
+            CMMSession* pSession = g_pDeviceController->FindSessionByID(*spSessionID);
+            if (pSession)
+            {
+                pSession->Refresh();
+                pSession->dump();
+            }
+        }
         break;
     }
 
     case WMAPP_REFRESH_DEVICE:
     {
-        CMMDevice* pDevice = (CMMDevice*)wParam;
-        pDevice->Refresh();
-        pDevice->dump();
+        std::unique_ptr <MMDeviceID> spDeviceID( (MMDeviceID*)wParam);
+        if (spDeviceID)
+        {
+            CMMDevice* pDevice = g_pDeviceController->FindDeviceByID(*spDeviceID);
+            if (pDevice)
+            {
+                pDevice->Refresh();
+                pDevice->dump();
+            }
+        }
         break;
     }
 
     case WMAPP_REFRESH_AUDIOCONTROLLER:
     {
-        CMMDeviceController* pController = (CMMDeviceController*)wParam;
-        pController->Refresh();
-        pController->dump();
+        std::unique_ptr <MMDeviceControllerID> spControllerID((MMDeviceControllerID*)wParam);
+        if (spControllerID)
+        {
+            if (g_pDeviceController->GetID() == *spControllerID)
+            {
+                g_pDeviceController->Refresh();
+                g_pDeviceController->dump();
+            }
+        }
         break;
     }
 

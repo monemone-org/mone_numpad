@@ -13,7 +13,7 @@
 #include <strsafe.h>
 #include <system_error>
 #include <string>
-
+#include <memory>
 
 #include "LastError.h"
 

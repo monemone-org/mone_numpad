@@ -2,10 +2,13 @@
 
 #include "framework.h"
 
-class CMMDeviceController;
+//#include "CMMDevice.h"
+//#include "CMMDeviceController.h"
 
-void PostMainThreadRefreshSession(CMMSession* pSession);
-void PostMainThreadRefreshDevice(CMMDevice* pDevice);
-void PostMainThreadRefreshAudioController(CMMDeviceController* pDeviceController);
+struct MMDeviceControllerID;
+
+void PostMainThreadRefreshSession(const MMSessionID& sessionID) throw ();
+void PostMainThreadRefreshDevice(const MMDeviceID& deviceID) throw ();
+void PostMainThreadRefreshAudioController(const MMDeviceControllerID& controllerID) throw ();
 
 

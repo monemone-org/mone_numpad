@@ -3,6 +3,15 @@
 #include "GetProcessName.h"
 #include "AutoPtr.h"
 
+std::wstring CreateGUIDString()
+{
+    GUID guid = { 0 };
+    CHK_HR(CoCreateGuid(&guid));
+    CHeapPtr<TCHAR, CCoTaskAllocator> spszGuid;
+    StringFromCLSID(guid, &spszGuid);    
+    return std::wstring(spszGuid);       
+}
+
 /// <summary>
 /// Class CMMSession
 /// </summary>
@@ -19,15 +28,13 @@ CMMSession* CMMSession::CreateObject(CMMDevice* pParentDevice, IAudioSessionCont
 }
 
 CMMSession::CMMSession() :
-    m_pParentDevice(NULL),
-    m_state(AudioSessionStateInactive)
+    m_pParentDevice(NULL)
 {
 }
 
 //disable copy constructor
 CMMSession::CMMSession(const CMMSession&) :
-    m_pParentDevice(NULL),
-    m_state(AudioSessionStateInactive)
+    m_pParentDevice(NULL)
 {
     ATLASSERT(false);
 }
@@ -38,13 +45,20 @@ CMMSession::~CMMSession()
     m_pParentDevice = NULL;
 }
 
+
 void CMMSession::Initialize(CMMDevice* pParentDevice, IAudioSessionControl* pSession) throw(HRESULT)
 {
     HRESULT hr = S_OK;
 
     Uninitialize();
 
-    if (pParentDevice == NULL)
+    if (pParentDevice == NULL || pSession == NULL)
+    {
+        throw E_INVALIDARG;
+    }
+
+    CComQIPtr<IAudioSessionControl2> spSessionControl2 = pSession;
+    if (spSessionControl2 == NULL)
     {
         throw E_INVALIDARG;
     }
@@ -53,32 +67,35 @@ void CMMSession::Initialize(CMMDevice* pParentDevice, IAudioSessionControl* pSes
     
     m_spSessionControl = pSession;
 
+    // Get sessionIdentifier and process name
+    CHeapPtr<WCHAR, CCoTaskAllocator> sessionIdentifier;
+    spSessionControl2->GetSessionIdentifier(&sessionIdentifier);
+
+    m_ID = MMSessionID(pParentDevice->GetID(), sessionIdentifier);
+
+    DWORD processId = 0;
+    CHK_HR(spSessionControl2->GetProcessId(&processId));
+    this->m_sProcessName = GetProcessNameFromID(processId).c_str();
+    
     CHK_HR( CAudoSessionEvents::CreateInstance(&m_spSessionEvents) );
 
+    // Create a variable copy for passing to the lamda functions below, so they
+    // don't rely on [this] pointer which could be deleted in a multi-thread environment.
+    MMDeviceID deviceID = m_pParentDevice->GetID();
+    MMSessionID id = this->m_ID;
     CAudoSessionEvents* notifClient = dynamic_cast<CAudoSessionEvents*>(m_spSessionEvents.p);
     notifClient->Initialize(
-        [this]/*OnDisplayNameChanged*/(LPCWSTR NewDisplayName, LPCGUID EventContext) throw(HRESULT) {
-            PostMainThreadRefreshSession(this);
+        [id]/*OnDisplayNameChanged*/(LPCWSTR NewDisplayName, LPCGUID EventContext) throw(HRESULT) {
+            PostMainThreadRefreshSession(id);
         },
-        [this]/*OnStateChangedFunction*/(AudioSessionState state) throw(HRESULT)  {
-            PostMainThreadRefreshSession(this);
+        [id]/*OnStateChangedFunction*/(AudioSessionState state) throw(HRESULT)  {
+            PostMainThreadRefreshSession(id);
         },
-        [this]/*OnSessionDisconnectedFunction*/(AudioSessionDisconnectReason DisconnectReason) throw(HRESULT) {
-            if (m_pParentDevice == NULL)
-                return;
-            PostMainThreadRefreshDevice(m_pParentDevice);
+        [deviceID]/*OnSessionDisconnectedFunction*/(AudioSessionDisconnectReason DisconnectReason) throw(HRESULT) {
+            PostMainThreadRefreshDevice(deviceID);
         });
-
     CHK_HR( m_spSessionControl->RegisterAudioSessionNotification(m_spSessionEvents) );
 
-    // Get process name
-    CComQIPtr<IAudioSessionControl2> spSessionControl2 = m_spSessionControl;
-    if (spSessionControl2 != NULL)
-    {
-        DWORD processId = 0;
-        CHK_HR(spSessionControl2->GetProcessId(&processId));
-        this->m_sProcessName = GetProcessNameFromID(processId).c_str();
-    }
 
     FetchProperties();
 }
@@ -87,7 +104,6 @@ void CMMSession::Uninitialize()
 {
     m_sDisplayName.clear();
     m_sProcessName.clear();
-    m_state = AudioSessionStateInactive;
 
     if (m_spSessionControl != NULL && m_spSessionEvents != NULL)
     {
@@ -100,18 +116,6 @@ void CMMSession::Uninitialize()
 }
 
 
-bool CMMSession::IsActive() const {
-    return (m_state == AudioSessionStateActive);
-}
-
-LPCWSTR CMMSession::GetDisplayName() const {
-    if (m_sDisplayName.empty())
-    {
-        return this->m_sProcessName.c_str();
-    }
-    return m_sDisplayName.c_str();
-}
-
 void CMMSession::FetchProperties() throw (HRESULT)
 {
     HRESULT hr = S_OK;
@@ -121,20 +125,80 @@ void CMMSession::FetchProperties() throw (HRESULT)
         return;
     }
 
-    m_sDisplayName.clear();
-
     CComHeapPtr<WCHAR> sDisplayName;
     CHK_HR(m_spSessionControl->GetDisplayName(&sDisplayName));
     m_sDisplayName = sDisplayName;
 
-    AudioSessionState state = AudioSessionStateInactive;
-    CHK_HR( m_spSessionControl->GetState(&m_state) );
-
 }
 
+float CMMSession::GetVolume() const throw(HRESULT)
+{
+    CComQIPtr<ISimpleAudioVolume> spAudioVol = m_spSessionControl;
+    if (spAudioVol == NULL)
+    {
+        throw E_UNEXPECTED;
+    }
+
+    float vol = 1.0;
+    CHK_HR(spAudioVol->GetMasterVolume(&vol));
+    return vol;
+    
+}
+
+void CMMSession::SetVolume(float vol) throw(HRESULT)
+{
+    CComQIPtr<ISimpleAudioVolume> spAudioVol = m_spSessionControl;
+    if (spAudioVol == NULL)
+    {
+        throw E_UNEXPECTED;
+    }
+
+    CHK_HR(spAudioVol->SetMasterVolume(vol, NULL));
+}
+
+AudioSessionState CMMSession::GetState() const throw (HRESULT)
+{
+    AudioSessionState state = AudioSessionStateInactive;
+    CHK_HR(m_spSessionControl->GetState(&state));
+    return state;
+}
+
+bool CMMSession::IsMute() const throw(HRESULT)
+{
+    CComQIPtr<ISimpleAudioVolume> spAudioVol = m_spSessionControl;
+    if (spAudioVol == NULL)
+    {
+        throw E_UNEXPECTED;
+    }
+
+    BOOL mute = FALSE;
+    CHK_HR(spAudioVol->GetMute(&mute));
+    return (mute != FALSE);
+}
+
+void CMMSession::SetMute(bool mute) throw(HRESULT)
+{
+    CComQIPtr<ISimpleAudioVolume> spAudioVol = m_spSessionControl;
+    if (spAudioVol == NULL)
+    {
+        throw E_UNEXPECTED;
+    }
+    CHK_HR(spAudioVol->SetMute(mute, NULL));
+}
+
+
+
 void CMMSession::dump() const {
-    ATLTRACE(TEXT("Session \"%s\"\n"), this->GetDisplayName());
-    ATLTRACE(TEXT("        IsActive: \"%d\"\n"), (this->IsActive() ? 1 : 0));
+    try
+    {
+        ATLTRACE(TEXT("Session \"%s\"\n"), this->m_sProcessName.c_str());
+        ATLTRACE(TEXT("        state: \"%d\"\n"), (int)(this->GetState()));
+        ATLTRACE(TEXT("        Volume: \"%f\"\n"), this->GetVolume());
+        ATLTRACE(TEXT("        Mute: \"%d\"\n"), (this->IsMute() ? 1 : 0));
+    }
+    catch (HRESULT)
+    {
+    }
 }
 
 
@@ -178,14 +242,9 @@ CMMDevice::~CMMDevice()
 
 void CMMDevice::Uninitialize() 
 {
-    for (auto iter = m_sessions.begin(); iter != m_sessions.end(); ++iter)
-    {
-        CMMSession* session = *iter;
-        delete session;
-    }
-    m_sessions.clear();
+    ClearSessions();
 
-    m_sID.clear();
+    m_ID.clear();
     m_sDisplayName.clear();
     m_bIsInput = false;
 
@@ -200,11 +259,17 @@ void CMMDevice::Uninitialize()
 
 void CMMDevice::Initialize(IMMDevice* pDevice) throw(HRESULT)
 {
+    ATLASSERT(pDevice != NULL);
+
     HRESULT hr = S_OK;
 
     Uninitialize();
 
     m_spDevice = pDevice;
+
+    CComHeapPtr<WCHAR> sID;
+    CHK_HR(m_spDevice->GetId(&sID));
+    m_ID = MMDeviceID(sID.operator LPWSTR());
 
     ATLASSERT(m_spSessionMgr == NULL);
     CHK_HR( m_spDevice->Activate(__uuidof(IAudioSessionManager2), CLSCTX_ALL, NULL, (void**)&m_spSessionMgr) );
@@ -212,20 +277,22 @@ void CMMDevice::Initialize(IMMDevice* pDevice) throw(HRESULT)
     ATLASSERT(m_spSessionNotif == NULL);
     CHK_HR(CAudioSessionNotification::CreateInstance(&m_spSessionNotif));
 
+    // Create a variable copy for passing to the lamda functions below, so they
+    // don't rely on [this] pointer which could be deleted in a multi-thread environment.
+    MMDeviceID ID = m_ID;
     CAudioSessionNotification* sessionNotif = dynamic_cast<CAudioSessionNotification*>(m_spSessionNotif.p);
     sessionNotif->Initialize(
-        [this]/*OnSessionCreated*/(IAudioSessionControl* pSessionControl) throw(HRESULT) {
+        [ID]/*OnSessionCreated*/(IAudioSessionControl* pSessionControl) throw(HRESULT) {
             try
             {
-                if (m_spDevice == NULL)
-                    return;
-                PostMainThreadRefreshDevice(this);
+                PostMainThreadRefreshDevice(ID);
             }
             catch (HRESULT)
             {
             }
         }
     );
+    m_spSessionMgr->RegisterSessionNotification(m_spSessionNotif);    
 
     FetchProperties();
 
@@ -237,12 +304,6 @@ void CMMDevice::FetchProperties() throw(HRESULT)
 {
     HRESULT hr = S_OK;
 
-    m_sID.clear();
-
-    CComHeapPtr<WCHAR> sID;
-    CHK_HR( m_spDevice->GetId(&sID) );
-    m_sID = sID;
-
     CComPtr<IPropertyStore> spProperties;
     CHK_HR(m_spDevice->OpenPropertyStore(STGM_READ, &spProperties) );
 
@@ -251,9 +312,21 @@ void CMMDevice::FetchProperties() throw(HRESULT)
     m_sDisplayName = propVariant.pwszVal;
 }
 
+void CMMDevice::ClearSessions()
+{
+    for (auto iter = m_sessions.begin(); iter != m_sessions.end(); ++iter)
+    {
+        CMMSession* session = *iter;
+        delete session;
+    }
+    m_sessions.clear();
+}
+
 void CMMDevice::FetchSessions() throw(HRESULT)
 {
     HRESULT hr = S_OK;
+
+    ClearSessions();
 
     CComPtr< IAudioSessionEnumerator> spSessionEnum;
     CHK_HR(m_spSessionMgr->GetSessionEnumerator(&spSessionEnum));
@@ -267,6 +340,10 @@ void CMMDevice::FetchSessions() throw(HRESULT)
         CHK_HR(spSessionEnum->GetSession(i, &spSessionControl));
 
         CComQIPtr< IAudioSessionControl2> spSessionControl2 = spSessionControl;
+        if (spSessionControl2 == NULL)
+        {
+            throw E_UNEXPECTED;
+        }
         DWORD processId = 0;
         spSessionControl2->GetProcessId(&processId);
         if (processId == 0)
@@ -284,6 +361,25 @@ void CMMDevice::FetchSessions() throw(HRESULT)
         m_sessions.push_back(pSession);
     }
 }
+
+
+CMMSession* CMMDevice::FindSessionByID(const MMSessionID& sessionID) const
+{
+    if (m_ID != sessionID.deviceID) {
+        return NULL;
+    }
+
+    for (auto iter = m_sessions.begin(); iter != m_sessions.end(); ++iter)
+    {
+        if ((*iter)->GetID() == sessionID)
+        {
+            return *iter;
+        }
+    }
+
+    return NULL;
+}
+
  
 void CMMDevice::dump() const 
 {

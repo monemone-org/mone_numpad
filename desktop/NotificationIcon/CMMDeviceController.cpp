@@ -7,6 +7,8 @@ void CMMDeviceController::Initialize() throw (HRESULT)
 
     Uninitialize();
 
+    m_ID = MMDeviceControllerID( CreateGUIDString().c_str() );
+
     CHK_HR(m_cs.Init());
 
     CHK_HR(CoCreateInstance(__uuidof(MMDeviceEnumerator),
@@ -17,26 +19,25 @@ void CMMDeviceController::Initialize() throw (HRESULT)
     ATLASSERT(m_spClientNotif == NULL);
     CHK_HR(CMMNotificationClient::CreateInstance(&m_spClientNotif));
 
+    MMDeviceControllerID ID = m_ID;
     CMMNotificationClient* clientNotif = dynamic_cast<CMMNotificationClient*>(m_spClientNotif.p);
     clientNotif->Initialize(
-        [this]/*OnDeviceStateChanged*/(
+        [ID]/*OnDeviceStateChanged*/(
             _In_  LPCWSTR pwstrDeviceId,
             _In_  DWORD dwNewState) throw(HRESULT)
         {
-            if (TS_IsDefaultDeviceID(pwstrDeviceId))
-            {
-                PostMainThreadRefreshAudioController(this);
-            }
+            MMDeviceID deviceID(pwstrDeviceId);
+            PostMainThreadRefreshDevice(deviceID);
         },
-        [this]/*OnDeviceAdded*/(
+        []/*OnDeviceAdded*/(
             _In_  LPCWSTR pwstrDeviceId) throw(HRESULT)
         {
         },
-        [this]/*OnDeviceRemoved*/(
+        []/*OnDeviceRemoved*/(
             _In_  LPCWSTR pwstrDeviceId) throw(HRESULT)
         {
         },
-        [this]/*OnDefaultDeviceChanged*/(
+        [ID]/*OnDefaultDeviceChanged*/(
             _In_  EDataFlow flow,
             _In_  ERole role,
             _In_  LPCWSTR pwstrDefaultDeviceId) throw(HRESULT)
@@ -45,22 +46,20 @@ void CMMDeviceController::Initialize() throw (HRESULT)
             if (flow == DEFAULT_OUT_DATAFLOW && role == DEFAULT_OUT_ROLE)
             {
                 //changed default OUT device
-                PostMainThreadRefreshAudioController(this);
+                PostMainThreadRefreshAudioController(ID);
             }
             else if (flow == DEFAULT_IN_DATAFLOW && role == DEFAULT_IN_ROLE)
             {
                 //changed default IN device
-                PostMainThreadRefreshAudioController(this);
+                PostMainThreadRefreshAudioController(ID);
             }
         },
-        [this]/*OnPropertyValueChanged*/(
+        []/*OnPropertyValueChanged*/(
             _In_  LPCWSTR pwstrDeviceId,
             _In_  const PROPERTYKEY key) throw(HRESULT)
         {
-            if (TS_IsDefaultDeviceID(pwstrDeviceId))
-            {
-                PostMainThreadRefreshAudioController(this);
-            }
+            MMDeviceID deviceID(pwstrDeviceId);
+            PostMainThreadRefreshDevice(deviceID);
         }
     );
     CHK_HR(m_spDeviceEnumerator->RegisterEndpointNotificationCallback(m_spClientNotif));
@@ -177,12 +176,12 @@ void CMMDeviceController::TS_GetDefaultDeviceIDs(
     CComCritSecLock<CComCriticalSection> lock(m_cs);
     if (m_pDefaultOut)
     {
-        *pDefaultOutID = m_pDefaultOut->GetID();
+        *pDefaultOutID = m_pDefaultOut->GetID().ID;
     }
 
     if (m_pDefaultIn)
     {
-        *pDefaultInID = m_pDefaultIn->GetID();
+        *pDefaultInID = m_pDefaultIn->GetID().ID;
     }
 }
 
@@ -198,10 +197,6 @@ bool CMMDeviceController::TS_IsDefaultDeviceID(LPCWSTR pszDeviceID)
     return (0 == wcscmp(sDefaultOutID.c_str(), pszDeviceID))
         || (0 == wcscmp(sDefaultInID.c_str(), pszDeviceID));
 }
-
-
-
-
 
 void CMMDeviceController::dump() const {
     if (m_pDefaultOut)

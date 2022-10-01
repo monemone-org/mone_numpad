@@ -11,9 +11,98 @@
 
 #pragma warning( disable : 4290 )
 
+std::wstring CreateGUIDString();
 
 class CMMDevice;
 class CMMSession;
+
+
+typedef struct MMDeviceID
+{
+    std::wstring ID;
+
+    MMDeviceID()
+    {}
+
+    MMDeviceID(LPCWSTR pszID) :
+        ID(pszID)
+    {
+    }
+
+    MMDeviceID(const MMDeviceID& copy)
+    {
+        this->ID = copy.ID;
+    }
+
+    MMDeviceID& operator=(const MMDeviceID& copy)
+    {
+        this->ID = copy.ID;
+        return *this;
+    }
+
+    bool operator==(const MMDeviceID& copy) const
+    {
+        return this->ID == copy.ID;
+    }
+
+    bool operator!=(const MMDeviceID& copy) const
+    {
+        return !(*this == copy);
+    }
+
+    void clear()
+    {
+        this->ID.clear();
+    }
+
+}MMDeviceID;
+
+
+typedef struct MMSessionID
+{
+    MMDeviceID deviceID;
+    std::wstring ID;
+
+    MMSessionID()
+    {}
+
+    MMSessionID(const MMDeviceID& deviceID_, LPCWSTR id_):
+        deviceID(deviceID_),
+        ID(id_)
+    {}
+
+    MMSessionID(const MMSessionID& copy)
+    {
+        this->ID = copy.ID;
+        this->deviceID = copy.deviceID;
+    }
+
+    MMSessionID& operator=(const MMSessionID& copy)
+    {
+        this->ID = copy.ID;
+        this->deviceID = copy.deviceID;
+        return *this;
+    }
+
+    bool operator==(const MMSessionID& copy) const
+    {
+        return this->ID == copy.ID
+            && this->deviceID == copy.deviceID;
+    }
+
+    bool operator!=(const MMSessionID& copy) const
+    {
+        return !(*this == copy);
+    }
+
+    void clear()
+    {
+        this->ID.clear();
+        this->deviceID.clear();
+    }
+
+}MMSessionID;
+
 
 
 class CMMSession
@@ -29,8 +118,8 @@ protected:
     CComPtr<IAudioSessionControl> m_spSessionControl;
     CComPtr<IAudioSessionEvents> m_spSessionEvents;
 
+    MMSessionID m_ID;
     std::wstring m_sDisplayName;
-    AudioSessionState m_state;
     std::wstring m_sProcessName;
 
 public:
@@ -38,8 +127,32 @@ public:
 
     ~CMMSession();
 
-    bool IsActive() const;
-    LPCWSTR GetDisplayName() const;
+    const MMSessionID& GetID() const {
+        return m_ID;
+    }
+
+    LPCWSTR GetDisplayName() const
+    {
+        if (m_sDisplayName.empty())
+        {
+            return this->m_sProcessName.c_str();
+        }
+        return m_sDisplayName.c_str();
+    }
+
+    bool IsActive() const
+    {
+        return (GetState() == AudioSessionStateActive);
+    }
+
+    AudioSessionState GetState() const throw (HRESULT);
+
+    // vol is between 0 .. 1
+    float GetVolume() const throw (HRESULT);
+    void SetVolume(float vol) throw (HRESULT);
+
+    bool IsMute() const throw (HRESULT);
+    void SetMute(bool mute) throw (HRESULT);
 
     void dump() const;
 
@@ -70,7 +183,7 @@ protected:
     CComPtr<IAudioSessionManager2> m_spSessionMgr;
     CComPtr<IAudioSessionNotification> m_spSessionNotif;
 
-    std::wstring m_sID;
+    MMDeviceID m_ID;
     std::wstring m_sDisplayName;
     bool m_bIsInput;
     std::list<CMMSession*> m_sessions;
@@ -88,18 +201,8 @@ public:
         return m_sDisplayName.c_str();
     }
 
-    LPCWSTR GetID() const {
-        return m_sID.c_str();
-    }
-
-    bool HasDeviceID(LPCWSTR pszDeviceID) const 
-    {
-        if (pszDeviceID == NULL)
-            return false;
-        if (GetID() == NULL)
-            return false;
-
-        return (wcscmp(pszDeviceID, this->GetID()) == 0);
+    const MMDeviceID& GetID() const {
+        return m_ID;
     }
 
     const std::list<CMMSession*>& GetSessions() const {
@@ -117,6 +220,7 @@ public:
         }
     }
 
+    CMMSession* FindSessionByID(const MMSessionID& sessionID) const;
 
     void dump() const;
 
@@ -128,5 +232,6 @@ protected:
     
     void FetchProperties() throw (HRESULT);
     void FetchSessions() throw (HRESULT);
+    void ClearSessions();
 };
 

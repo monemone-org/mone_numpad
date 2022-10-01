@@ -35,7 +35,7 @@ protected:
 
 
 public:
-    CAudoSessionEvents()
+    CAudoSessionEvents() 
     {
         m_onDisplayNameChangedFunc = NULL;
         m_onStateChangedFunc = NULL;
@@ -94,6 +94,7 @@ public:
         _In_  LPCWSTR NewIconPath,
         _In_  LPCGUID EventContext)
     {
+        ATLTRACE(_T("CMMSession::OnIconPathChanged()\n"));
         return S_OK;
     }
 

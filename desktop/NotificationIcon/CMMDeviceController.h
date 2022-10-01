@@ -12,9 +12,50 @@ public:
 };
 
 
+typedef struct MMDeviceControllerID
+{
+    std::wstring ID;
+
+    MMDeviceControllerID() {}
+
+    MMDeviceControllerID(LPCWSTR pszID) :
+        ID(pszID)
+    {
+    }
+
+    MMDeviceControllerID(const MMDeviceControllerID& copy) :
+        ID(copy.ID)
+    {
+    }
+
+    MMDeviceControllerID& operator=(const MMDeviceControllerID& copy)
+    {
+        ID = copy.ID;
+        return *this;
+    }
+
+    bool operator==(const MMDeviceControllerID& copy) const
+    {
+        return this->ID == copy.ID;
+    }
+
+    bool operator!=(const MMDeviceControllerID& copy) const
+    {
+        return !(*this == copy);
+    }
+
+    void clear()
+    {
+        this->ID.clear();
+    }
+
+} MMDeviceControllerID;
+
 class CMMDeviceController
 {
 protected:
+    MMDeviceControllerID m_ID;
+
     CComPtr<IMMDeviceEnumerator> m_spDeviceEnumerator;
     CComPtr<IMMNotificationClient> m_spClientNotif;
 
@@ -35,6 +76,7 @@ private:
         ATLASSERT(false);
     };
     CMMDeviceController& operator=(const CMMDeviceController&) {
+        ATLASSERT(false);
         return *this;
     }
 
@@ -57,6 +99,46 @@ public:
     }
 
     void dump() const;
+
+    const MMDeviceControllerID& GetID() const 
+    {
+        return this->m_ID;
+    }
+
+    CMMSession* FindSessionByID(const MMSessionID& sessionID) const
+    {
+        CMMDevice* pDevice = FindDeviceByID(sessionID.deviceID);
+        if (pDevice == NULL)
+        {
+            return NULL;
+        }
+
+        return pDevice->FindSessionByID(sessionID);
+    }
+
+    CMMDevice* FindDeviceByID(const MMDeviceID& deviceID) const
+    {
+        if (this->m_pDefaultIn->GetID() == deviceID)
+        {
+            return m_pDefaultIn;
+        }
+        else if (this->m_pDefaultOut->GetID() == deviceID)
+        {
+            return m_pDefaultOut;
+        }
+
+        //auto found_iter = std::find_if(m_devices.begin(), m_devices.end(), [=](CMMDevice* pDevice) -> bool {
+        //    return (0 == wcscmp(pDevice->GetID(), pwszDeviceID));
+        //    });
+        //if (found_iter == m_devices.end())
+        //{
+        //    return NULL;
+        //}
+        //CMMDevice* pDisconnectedDevice = *found_iter;
+        //return pDisconnectedDevice;
+
+        return NULL;
+    }
 
     void Refresh() throw () {
         try
@@ -95,30 +177,6 @@ protected:
         }
 
         return spMMDevice;
-    }
-
-    CMMDevice* FindDeviceByID(LPCWSTR pwszDeviceID)
-    {
-        if (this->m_pDefaultIn->HasDeviceID(pwszDeviceID))
-        {
-            return m_pDefaultIn;
-        }
-        else if (this->m_pDefaultOut->HasDeviceID(pwszDeviceID))
-        {
-            return m_pDefaultOut;
-        }
-
-        //auto found_iter = std::find_if(m_devices.begin(), m_devices.end(), [=](CMMDevice* pDevice) -> bool {
-        //    return (0 == wcscmp(pDevice->GetID(), pwszDeviceID));
-        //    });
-        //if (found_iter == m_devices.end())
-        //{
-        //    return NULL;
-        //}
-        //CMMDevice* pDisconnectedDevice = *found_iter;
-        //return pDisconnectedDevice;
-
-        return NULL;
     }
 
 public:
