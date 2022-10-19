@@ -8,7 +8,7 @@ std::wstring CreateGUIDString()
     GUID guid = { 0 };
     CHK_HR(CoCreateGuid(&guid));
     CHeapPtr<TCHAR, CCoTaskAllocator> spszGuid;
-    StringFromCLSID(guid, &spszGuid);    
+    (void)StringFromCLSID(guid, &spszGuid);
     return std::wstring(spszGuid);       
 }
 
@@ -75,6 +75,7 @@ void CMMSession::Initialize(CMMDevice* pParentDevice, IAudioSessionControl* pSes
 
     DWORD processId = 0;
     CHK_HR(spSessionControl2->GetProcessId(&processId));
+    this->m_bIsSystemInOut = (processId == 0);
     this->m_sProcessName = GetProcessNameFromID(processId).c_str();
     
     CHK_HR( CAudoSessionEvents::CreateInstance(&m_spSessionEvents) );
@@ -186,13 +187,20 @@ void CMMSession::SetMute(bool mute) throw(HRESULT)
     CHK_HR(spAudioVol->SetMute(mute, NULL));
 }
 
+bool CMMSession::toggleMute() throw (HRESULT)
+{
+    bool isMute = IsMute();
+    SetMute(!isMute);
+    return IsMute();
+}
 
 
 void CMMSession::dump() const {
     try
     {
         ATLTRACE(TEXT("Session \"%s\"\n"), this->m_sProcessName.c_str());
-        ATLTRACE(TEXT("        state: \"%d\"\n"), (int)(this->GetState()));
+        ATLTRACE(TEXT("        System In/Out: \"%d\"\n"), (this->IsSystemInOut() ? 1:0));
+        ATLTRACE(TEXT("        State: \"%d\"\n"), (int)(this->GetState()));
         ATLTRACE(TEXT("        Volume: \"%f\"\n"), this->GetVolume());
         ATLTRACE(TEXT("        Mute: \"%d\"\n"), (this->IsMute() ? 1 : 0));
     }
@@ -338,19 +346,6 @@ void CMMDevice::FetchSessions() throw(HRESULT)
     {
         CComPtr< IAudioSessionControl> spSessionControl;
         CHK_HR(spSessionEnum->GetSession(i, &spSessionControl));
-
-        CComQIPtr< IAudioSessionControl2> spSessionControl2 = spSessionControl;
-        if (spSessionControl2 == NULL)
-        {
-            throw E_UNEXPECTED;
-        }
-        DWORD processId = 0;
-        spSessionControl2->GetProcessId(&processId);
-        if (processId == 0)
-        {
-            //skip process 
-            continue;
-        }
 
         CMMSession* pSession = CMMSession::CreateObject(this, spSessionControl);
         if (pSession == NULL)

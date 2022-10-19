@@ -19,6 +19,8 @@
 #include "TMMNotificationClient.h"
 #include "CMMDevice.h"
 #include "CMMDeviceController.h"
+#include "Dbt.h"
+#include <usbiodef.h>
 
 using namespace ATL;
 
@@ -27,7 +29,7 @@ HINSTANCE g_hInst = NULL;
 HWND g_hwndMainWin = NULL;
 
 CMMDeviceController* g_pDeviceController = NULL;
-
+HDEVNOTIFY g_hDeviceNotify = NULL;
 
 UINT const WMAPP_NOTIFYCALLBACK = WM_APP + 1;
 UINT const WMAPP_HIDEFLYOUT     = WM_APP + 2;
@@ -103,14 +105,9 @@ public:
         context = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
         SetThreadDpiAwarenessContext(context);
 
-        //HRESULT hr = CoInitialize(NULL);
-        //if (FAILED(hr)) {
-        //    OutputDebugString(TEXT("CoInitialize failed"));
-        //    return 1;
-        //}
-
         HRESULT hr = S_OK;
 
+        // Mone: updated GUID every time the app restarts. Otherwise
         hr = CoCreateGuid( &PrinterIconGUID );
 
         try
@@ -120,9 +117,15 @@ public:
             // print out all devices and sessions
             g_pDeviceController->dump();
         }
-        catch (HRESULT)
+        catch (HRESULT hr_)
         {
+            return hr_;
+        }
 
+        int hid_ret = hid_init();
+        if (HID_FAILED(hid_ret))
+        {
+            return E_FAIL;
         }
         
 //        g_hInst = hInstance;
@@ -140,18 +143,36 @@ public:
             //Mone: store hwnd created. Replace options dlg with this main hwnd
             g_hwndMainWin = hwnd;
 
+            // monitor USB device connection
+            DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;
+            ZeroMemory(&NotificationFilter, sizeof(NotificationFilter));
+            NotificationFilter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+            NotificationFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+            NotificationFilter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
+
+            g_hDeviceNotify = RegisterDeviceNotification(
+                g_hwndMainWin,                       // events recipient
+                &NotificationFilter,        // type of device
+                DEVICE_NOTIFY_WINDOW_HANDLE // type of recipient handle
+            );
+            if (g_hDeviceNotify == NULL)
+            {
+                return HRESULT_FROM_WIN32(GetLastError());
+            }
+            
             // Mone: hide main window on create
             //ShowWindow(hwnd, nCmdShow);
 
             // Main message loop:
             this->RunMessageLoop();
-            //MSG msg;
-            //while (GetMessage(&msg, NULL, 0, 0))
-            //{
-            //    TranslateMessage(&msg);
-            //    DispatchMessage(&msg);
-            //}
         }
+
+        if (g_hDeviceNotify)
+        {
+            UnregisterDeviceNotification(g_hDeviceNotify);
+        }
+
+        hid_exit();
 
         if (g_pDeviceController)
         {
@@ -167,10 +188,14 @@ public:
 CATLProject1Module _AtlModule;
 
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR /*lpCmdLine*/, int nCmdShow)
-{
+int WINAPI wWinMain(
+    _In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR lpCmdLine,
+    _In_ int nShowCmd
+){
     g_hInst = hInstance;
-    return _AtlModule.WinMain(nCmdShow);
+    return _AtlModule.WinMain(nShowCmd);
 
 }
 
@@ -350,6 +375,29 @@ void ShowContextMenu(HWND hwnd, POINT pt)
     }
 }
 
+
+HANDLE open_device(const wchar_t* path, BOOL open_rw)
+{
+    HANDLE handle = NULL;
+    DWORD desired_access = (open_rw) ? (GENERIC_WRITE | GENERIC_READ) : 0;
+    DWORD share_mode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+
+    handle = CreateFileW(path,
+        desired_access,
+        share_mode,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_OVERLAPPED,/*FILE_ATTRIBUTE_NORMAL,*/
+        0);
+
+    if (handle == INVALID_HANDLE_VALUE)
+    {
+        return NULL;
+    }
+
+    return handle;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static HWND s_hwndFlyout = NULL;
@@ -501,6 +549,58 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 g_pDeviceController->Refresh();
                 g_pDeviceController->dump();
             }
+        }
+        break;
+    }
+
+    case WM_DEVICECHANGE:
+    {
+        switch (wParam)
+        {
+        //case DBT_DEVNODES_CHANGED:
+        //{
+        //    ATLTRACE("DBT_DEVNODES_CHANGED");
+        //    break;
+        //}
+
+        case DBT_DEVICEARRIVAL:
+        {
+            ATLTRACE("DBT_DEVICEARRIVAL");
+            DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
+            if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+            {
+                DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
+                ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
+
+                HANDLE handle = open_device(pDevInterface->dbcc_name, TRUE);
+                if (handle != NULL)
+                {
+                    CloseHandle(handle);
+                }
+            }
+
+            break;
+        }
+
+        case DBT_DEVICEREMOVECOMPLETE:
+        {
+            ATLTRACE("DBT_DEVICEREMOVECOMPLETE");
+            DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
+            if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+            {
+                DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
+                ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
+            }
+            break;
+        }
+
+
+
+        default:
+        {
+            break;
+        }
+
         }
         break;
     }

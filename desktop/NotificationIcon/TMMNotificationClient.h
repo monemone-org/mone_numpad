@@ -236,26 +236,26 @@ class CMMNotificationClient :
 {
 public:
     typedef std::function<void(LPCWSTR, DWORD)> OnDeviceStateChangedFunction; // throw(HRESULT) 
-    //typedef int(__cdecl* OnDeviceStateChangedFunction)(
+    //typedef void(__cdecl* OnDeviceStateChangedFunction)(
     //    _In_  LPCWSTR pwstrDeviceId,
     //    _In_  DWORD dwNewState) throw(HRESULT) ;
 
     typedef std::function<void(LPCWSTR)> OnDeviceAddedFunction; // throw(HRESULT) 
-    //typedef int(__cdecl* OnDeviceAddedFunction)(
+    //typedef void(__cdecl* OnDeviceAddedFunction)(
     //    _In_  LPCWSTR pwstrDeviceId) throw(HRESULT) ;
 
     typedef std::function<void(LPCWSTR)> OnDeviceRemovedFunction; // throw(HRESULT) 
-    //typedef int(__cdecl* OnDeviceRemovedFunction)(
+    //typedef void(__cdecl* OnDeviceRemovedFunction)(
     //    _In_  LPCWSTR pwstrDeviceId) throw(HRESULT) ;
 
     typedef std::function<void(EDataFlow, ERole, LPCWSTR)> OnDefaultDeviceChangedFunction; // throw(HRESULT) 
-    //typedef int(__cdecl* OnDefaultDeviceChangedFunction)(
+    //typedef void(__cdecl* OnDefaultDeviceChangedFunction)(
     //    _In_  EDataFlow flow,
     //    _In_  ERole role,
     //    _In_  LPCWSTR pwstrDefaultDeviceId) throw(HRESULT) ;
 
     typedef std::function<void(LPCWSTR, const PROPERTYKEY)> OnPropertyValueChangedFunction; // throw(HRESULT) 
-    //typedef int(__cdecl* OnPropertyValueChangedFunction)(
+    //typedef void(__cdecl* OnPropertyValueChangedFunction)(
     //    _In_  LPCWSTR pwstrDeviceId,
     //    _In_  const PROPERTYKEY key) throw(HRESULT) ;
 

@@ -138,6 +138,7 @@
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>..\hidapi\hidapi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -160,6 +161,7 @@
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>..\hidapi\hidapi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -173,7 +175,10 @@
     <ClCompile Include="CMMDevice.cpp" />
     <ClCompile Include="CMMDeviceController.cpp" />
     <ClCompile Include="GetProcessName.cpp" />
+    <ClCompile Include="HIDDevice.cpp" />
     <ClCompile Include="LastError.cpp" />
+    <ClCompile Include="monenumpad_maxmix\assert_precond.c" />
+    <ClCompile Include="monenumpad_maxmix\structs.c" />
     <ClCompile Include="NotificationIcon.cpp" />
     <ClCompile Include="TMMNotificationClient.cpp" />
   </ItemGroup>
@@ -193,7 +198,10 @@
     <ClInclude Include="CMMDeviceController.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GetProcessName.h" />
+    <ClInclude Include="HIDDevice.h" />
     <ClInclude Include="LastError.h" />
+    <ClInclude Include="monenumpad_maxmix\assert_precond.h" />
+    <ClInclude Include="monenumpad_maxmix\structs.h" />
     <ClInclude Include="NotificationIcon.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -201,6 +209,11 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="NotificationIcon.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\hidapi\windows\hidapi.vcxproj">
+      <Project>{a107c21c-418a-4697-bb10-20c3aa60e2e4}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

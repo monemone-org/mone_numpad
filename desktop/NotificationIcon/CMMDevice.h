@@ -121,6 +121,7 @@ protected:
     MMSessionID m_ID;
     std::wstring m_sDisplayName;
     std::wstring m_sProcessName;
+    bool m_bIsSystemInOut;
 
 public:
     static CMMSession* CreateObject(CMMDevice* pParentDevice, IAudioSessionControl* pSessionControl) throw (HRESULT);
@@ -140,6 +141,10 @@ public:
         return m_sDisplayName.c_str();
     }
 
+    bool IsSystemInOut() const {
+        return m_bIsSystemInOut;
+    }
+
     bool IsActive() const
     {
         return (GetState() == AudioSessionStateActive);
@@ -153,6 +158,7 @@ public:
 
     bool IsMute() const throw (HRESULT);
     void SetMute(bool mute) throw (HRESULT);
+    bool toggleMute() throw (HRESULT);
 
     void dump() const;
 

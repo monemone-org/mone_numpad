@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="NotificationIcon.cpp" />
+    <ClCompile Include="GetProcessName.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="LastError.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="CMMDevice.cpp">
+      <Filter>audio_device</Filter>
+    </ClCompile>
+    <ClCompile Include="CMMDeviceController.cpp">
+      <Filter>audio_device</Filter>
+    </ClCompile>
+    <ClCompile Include="TMMNotificationClient.cpp">
+      <Filter>audio_device</Filter>
+    </ClCompile>
+    <ClCompile Include="monenumpad_maxmix\assert_precond.c">
+      <Filter>monenumpad\maxmix</Filter>
+    </ClCompile>
+    <ClCompile Include="monenumpad_maxmix\structs.c">
+      <Filter>monenumpad\maxmix</Filter>
+    </ClCompile>
+    <ClCompile Include="HIDDevice.cpp">
+      <Filter>monenumpad</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="NotificationIcon.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="GetProcessName.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="LastError.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="CMMDevice.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
+    <ClInclude Include="CMMDeviceController.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoPtr.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="TMMNotificationClient.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
+    <ClInclude Include="monenumpad_maxmix\assert_precond.h">
+      <Filter>monenumpad\maxmix</Filter>
+    </ClInclude>
+    <ClInclude Include="monenumpad_maxmix\structs.h">
+      <Filter>monenumpad\maxmix</Filter>
+    </ClInclude>
+    <ClInclude Include="HIDDevice.h">
+      <Filter>monenumpad</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NotificationIcon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="NotificationIcon.ico" />
+    <Image Include="printer.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="NotificationIcon.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="util">
+      <UniqueIdentifier>{cb800f71-5d78-44ba-88ae-a3dd8d8710f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="audio_device">
+      <UniqueIdentifier>{07dfc337-49ec-4439-98e8-5f54cfb4373d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="monenumpad">
+      <UniqueIdentifier>{17f9f7e9-44c9-45a1-8ef1-dc1061a47837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="monenumpad\maxmix">
+      <UniqueIdentifier>{b37a7f38-fa05-4ef0-a5ee-6c7b65f55ab5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -105,6 +105,16 @@ public:
         return this->m_ID;
     }
 
+    CMMDevice* GetDefaultIn() const
+    {
+        return this->m_pDefaultIn;
+    }
+
+    CMMDevice* GetDefaultOut() const
+    {
+        return this->m_pDefaultOut;
+    }
+
     CMMSession* FindSessionByID(const MMSessionID& sessionID) const
     {
         CMMDevice* pDevice = FindDeviceByID(sessionID.deviceID);

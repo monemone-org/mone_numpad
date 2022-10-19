@@ -17,3 +17,18 @@
 
 #include "LastError.h"
 
+#include <initguid.h>
+#include "hidapi.h"
+
+#define HID_SUCCESS		0
+
+inline bool HID_SUCCEEDED(int hid_ret)
+{
+	return HID_SUCCESS == hid_ret;
+}
+
+inline bool HID_FAILED(int hid_ret)
+{
+	return HID_SUCCESS != hid_ret;
+}
+
