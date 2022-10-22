@@ -33,7 +33,10 @@ CMMSession::CMMSession() :
 
 //disable copy constructor
 CMMSession::CMMSession(const CMMSession&) :
-    m_pParentDevice(NULL)
+    m_pParentDevice(NULL),
+    m_ID(),
+    m_bIsSystemInOut(false),
+    m_bIsInput(false)
 {
     ATLASSERT(false);
 }

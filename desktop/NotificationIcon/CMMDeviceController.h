@@ -7,7 +7,7 @@
 class CMMDeviceControllerListener
 {
 public:
-    virtual void OnAudioSessionsRefreshed() = 0;
+    virtual void OnMMSessionsRefreshed() = 0;
 };
 
 

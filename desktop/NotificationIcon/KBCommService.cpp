@@ -6,6 +6,7 @@
 #include <limits>
 #include <functional>
 #include "MarshalFunc.h"
+#include "NotificationIcon.h"
 
 
 BYTE KBCommService::DEFAULT_SESSION_ID = SESSION_ID_OUT;
@@ -14,36 +15,97 @@ BYTE KBCommService::DEFAULT_SESSION_ID = SESSION_ID_OUT;
 
 std::wstring ToString(BYTE* data, size_t cbData);
 
-void KBCommService::Connect(hid_device_info* dev_info)
+
+void on_added_monenumpad(struct hid_device_info* dev_info, void* user_data)
+{
+    KBCommService* pKBCommService = (KBCommService * )user_data;
+    pKBCommService->OpenMoneNumPad(dev_info);
+}
+
+
+KBCommService::KBCommService(CMMDeviceController* pMMDeviceController) :
+    m_audioSessionProvider(pMMDeviceController),
+    m_pConnectedDevice(NULL),
+    m_kb_protocol_version(UNKNOWN_PROTOCOL_VERSION),
+    m_curr_session_id(DEFAULT_SESSION_ID),
+    m_nIDEvent(NULL)
+    //m_pListener(NULL)
+{
+}
+
+bool KBCommService::Start()
+{
+    m_audioSessionProvider.RefreshSessions();
+
+    on_added_device_callback_entry on_added_callback = {
+        .on_added_device = on_added_monenumpad,
+        .user_data = NULL
+    };
+    hid_device_info* dev_info = hid_enumerate_ex(
+        MONENUMPAD_VENDOR_ID,
+        MONENUMPAD_PRODUCT_ID,
+        MONENUMPAD_USAGE_PAGE,
+        MONENUMPAD_USAGE,
+        on_added_callback);
+    if (dev_info)
+    {
+        OpenMoneNumPad(dev_info);
+    }
+
+    return true;
+}
+
+void KBCommService::Stop()
+{
+    CloseMoneNumPad();
+    hid_stop_enumerate_on_added_device_callback();
+}
+
+void KBCommService::OpenMoneNumPad(hid_device_info* dev_info)
 {
     if (m_pConnectedDevice != NULL) {
 
         // disconnect previously connected device before
         // making new connection
-        Disconnect();
+        CloseMoneNumPad();
     }
 
     m_pConnectedDevice = new HIDDevice();
-    m_pConnectedDevice->Open(dev_info);
-    m_pConnectedDevice->SetListener(this);
-    this->SendProtocolVersion();
+    if (m_pConnectedDevice)
+    {
+        try
+        {
+            m_pConnectedDevice->Open(dev_info);
+            m_pConnectedDevice->SetListener(this);
+            this->SendProtocolVersion();
+        }
+        catch (HRESULT hr_)
+        {
+            ATLTRACE(L"KBCommService::OpenMoneNumPad failed. hr=%08x", hr_);
+            delete m_pConnectedDevice;
+            m_pConnectedDevice = NULL;
+        }
+    }
 
 }
 
-void KBCommService::Disconnect()
+void KBCommService::CloseMoneNumPad()
 {
     StopRefreshingSessionInfoTimer();
 
     if (m_pConnectedDevice)
     {
-        m_pConnectedDevice->SetListener(NULL);
-        m_pConnectedDevice->Close();
+        try
+        {
+            m_pConnectedDevice->SetListener(NULL);
+            m_pConnectedDevice->Close();
+        }
+        catch (HRESULT hr_)
+        {
+            ATLTRACE(L"KBCommService::CloseMoneNumPad failed. hr=%08x", hr_);
+        }
         delete m_pConnectedDevice;
         m_pConnectedDevice = NULL;
-        if (m_pListener)
-        {
-            m_pListener->OnKBDisconnected(this);
-        }
     }
 
     m_curr_session_id = DEFAULT_SESSION_ID;
@@ -51,8 +113,14 @@ void KBCommService::Disconnect()
 
 }
 
-void KBCommService::OnAudioSessionsChanged()
+// AudioSessionProviderListener impl
+void KBCommService::OnAudioSessionsRefreshed()
 {
+    if (!IsConnected())
+    {
+        return;
+    }
+
     const std::vector<AudioSession>& newAudioSessions = m_audioSessionProvider.GetSessions();
     
     // check if current session no longer exists
@@ -70,8 +138,6 @@ void KBCommService::OnAudioSessionsChanged()
 // -- Internal Methods --
 //
 // 
-
-#include "NotificationIcon.h"
 
 //every 2 sec, send session_info
 //session_info also serve as a heartbeat
@@ -364,7 +430,14 @@ void KBCommService::SendMessage(
         memcpy(msgBytes + 2, data, cbData);
 #pragma warning(pop)
 
-        m_pConnectedDevice->Write(msgBytes, cbMsgBytes);
+        try
+        {
+            m_pConnectedDevice->Write(msgBytes, cbMsgBytes);
+        }
+        catch (HRESULT hr_)
+        {
+            ATLTRACE(L"m_pConnectedDevice->Write failed. hr=%08x", hr_);
+        }
 
         free(msgBytes);
     }
@@ -394,8 +467,8 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
         m_kb_protocol_version = ToUInt16(msgData);
         if (m_kb_protocol_version != MAXMIX_PROTOCOL_VERSION)
         {
-            ATLTRACE(TEXT("Incompatible protocol version. Disconnect."));
-            Disconnect();
+            ATLTRACE(TEXT("Incompatible protocol version. Close device connection."));
+            CloseMoneNumPad();
         }
         else
         {
@@ -510,7 +583,7 @@ void KBCommService::DeviceDisconnected(HIDDevice* dev)
     if (m_pConnectedDevice == dev)
     {
         ATLTRACE(TEXT("Device is disconnected."));
-        this->Disconnect();
+        this->CloseMoneNumPad();
     }
 }
 

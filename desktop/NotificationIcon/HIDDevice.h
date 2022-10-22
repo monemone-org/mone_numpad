@@ -12,8 +12,8 @@ class HIDDevice;
 class HIDDeviceListener
 {
 public:
-	virtual void DeviceDataReceived(HIDDevice* dev, BYTE* data, size_t cbData);
-	virtual void DeviceDisconnected(HIDDevice* dev);
+	virtual void DeviceDataReceived(HIDDevice* dev, BYTE* data, size_t cbData) = 0;
+	virtual void DeviceDisconnected(HIDDevice* dev) = 0;
 };
 
 class HIDDevice

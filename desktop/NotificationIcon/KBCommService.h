@@ -9,21 +9,24 @@ class HIDDevice;
 class AudioSessionProvider;
 class KBCommService;
 
-class KBCommServiceListener
-{
-public:
-	virtual void OnKBDisconnected(KBCommService* pKBCommService) = 0;
-};
+//class KBCommServiceListener
+//{
+//public:
+//	virtual void OnKBDisconnected(KBCommService* pKBCommService) = 0;
+//};
 
 class KBCommService:
-	HIDDeviceListener
+	HIDDeviceListener, // monitor if monenumpad is connected
+    AudioSessionProviderListener // monitor if audio sessions are changed.
 {
 protected:
 	static BYTE DEFAULT_SESSION_ID;
 	
 	AudioSessionProvider m_audioSessionProvider;
 
-	HIDDevice* m_pConnectedDevice;
+    //KBCommServiceListener* m_pListener;
+
+    HIDDevice* m_pConnectedDevice;
 
 	UINT16 m_kb_protocol_version;
 
@@ -31,45 +34,39 @@ protected:
 
 	UINT_PTR m_nIDEvent; //WM_TIMER
 		
-	KBCommServiceListener* m_pListener;
-
 public:
-	KBCommService(CMMDeviceController* pMMDeviceController) :
-		m_audioSessionProvider(pMMDeviceController),
-		m_pConnectedDevice(NULL),
-		m_kb_protocol_version(UNKNOWN_PROTOCOL_VERSION),
-		m_curr_session_id(DEFAULT_SESSION_ID),
-        m_nIDEvent(NULL),
-		m_pListener(NULL)
-	{
-	}
+    KBCommService(CMMDeviceController* pMMDeviceController);
 
 	~KBCommService()
 	{
-		Disconnect();
+		CloseMoneNumPad();
+        Stop();
 	}
 
-	HIDDevice* GetHIDDevice() const {
-		return m_pConnectedDevice;
-	}
+    //void SetListener(KBCommServiceListener* pListener)
+    //{
+    //    m_pListener = pListener;
+    //}
 
-    void SetListener(KBCommServiceListener* pListener)
-    {
-        m_pListener = pListener;
+    bool Start();
+    void Stop();
+
+    HIDDevice* GetMoneNumpad() const {
+        return m_pConnectedDevice;
     }
 
-    void Connect(hid_device_info* dev_info);
-
-    void Disconnect();
-
-	bool isConnected()
+    bool IsConnected()
     {
 		return m_pConnectedDevice != NULL;
 	}
 
-    void OnAudioSessionsChanged();
 
 protected:
+    friend void on_added_monenumpad(struct hid_device_info* dev_info, void* user_data);
+
+    void OpenMoneNumPad(hid_device_info* dev_info);
+    void CloseMoneNumPad();
+
     //
     // -- Internal Methods --
     //
@@ -122,6 +119,10 @@ public:
     virtual void DeviceDataReceived(HIDDevice* dev, BYTE* data, size_t cbData);
     virtual void DeviceDisconnected(HIDDevice* dev);
 	
+    // AudioSessionProviderListener
+    virtual void OnAudioSessionsRefreshed();
+
+
 
 };
 

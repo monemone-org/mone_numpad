@@ -23,6 +23,7 @@
 #include "Dbt.h"
 #include <usbiodef.h>
 #include <list>
+#include "KBCommService.h"
 
 using namespace ATL;
 
@@ -37,7 +38,8 @@ UINT const WMAPP_REFRESH_AUDIOCONTROLLER = WM_APP + 5;
 // Global variables
 HINSTANCE g_hInst = NULL;
 HWND g_hwndMainWin = NULL;
-CMMDeviceController* g_pDeviceController = NULL;
+CMMDeviceController* g_pMMDeviceController = NULL;
+KBCommService* g_pKBCommService = NULL;
 //HDEVNOTIFY g_hDeviceNotify = NULL;
 std::list<WMAPPMessageHandler> g_WMAPPMessageHanders;
 
@@ -109,8 +111,6 @@ BOOL                ShowNoInkBalloon();
 BOOL                ShowPrintJobBalloon();
 BOOL                RestoreTooltip();
 
-
-
 class CATLProject1Module : public ATL::CAtlExeModuleT< CATLProject1Module >
 {
 public:
@@ -128,25 +128,11 @@ public:
 
         // Mone: updated GUID every time the app restarts. Otherwise
         hr = CoCreateGuid( &PrinterIconGUID );
-
-        try
-        {
-            g_pDeviceController = CMMDeviceController::CreateObject();
-
-            // print out all devices and sessions
-            g_pDeviceController->dump();
-        }
-        catch (HRESULT hr_)
-        {
-            return hr_;
+        if (FAILED(hr)) {
+            ATLTRACE(L"CoCreateGuid failed");
+            return hr;
         }
 
-        int hid_ret = hid_init();
-        if (HID_FAILED(hid_ret))
-        {
-            return E_FAIL;
-        }
-        
 //        g_hInst = hInstance;
         RegisterWindowClass(szWindowClass, MAKEINTRESOURCE(IDC_NOTIFICATIONICON), WndProc);
         RegisterWindowClass(szFlyoutWindowClass, NULL, FlyoutWndProc);
@@ -162,41 +148,46 @@ public:
             //Mone: store hwnd created. Replace options dlg with this main hwnd
             g_hwndMainWin = hwnd;
 
-            //// monitor USB device connection
-            //DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;
-            //ZeroMemory(&NotificationFilter, sizeof(NotificationFilter));
-            //NotificationFilter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
-            //NotificationFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
-            //NotificationFilter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
+            int hid_ret = hid_init();
+            if (HID_FAILED(hid_ret))
+            {
+                return E_FAIL;
+            }
 
-            //g_hDeviceNotify = RegisterDeviceNotification(
-            //    g_hwndMainWin,                       // events recipient
-            //    &NotificationFilter,        // type of device
-            //    DEVICE_NOTIFY_WINDOW_HANDLE // type of recipient handle
-            //);
-            //if (g_hDeviceNotify == NULL)
-            //{
-            //    return HRESULT_FROM_WIN32(GetLastError());
-            //}
-            
+            try
+            {
+                g_pMMDeviceController = CMMDeviceController::CreateObject();
+#ifdef _DEBUG
+                // print out all devices and sessions
+                g_pMMDeviceController->dump();
+#endif
+
+                g_pKBCommService = new KBCommService(g_pMMDeviceController);
+                if (g_pKBCommService == NULL)
+                {
+                    CHK_HR(E_OUTOFMEMORY);
+                }
+                g_pKBCommService->Start();
+            }
+            catch (HRESULT hr_)
+            {
+                return hr_;
+            }
+
+
             // Mone: hide main window on create
             //ShowWindow(hwnd, nCmdShow);
 
             // Main message loop:
             this->RunMessageLoop();
-        }
-
-        //if (g_hDeviceNotify)
-        //{
-        //    UnregisterDeviceNotification(g_hDeviceNotify);
-        //}
+        } // if (hwnd)
 
         hid_exit();
 
-        if (g_pDeviceController)
+        if (g_pMMDeviceController)
         {
-            delete g_pDeviceController;
-            g_pDeviceController = NULL;
+            delete g_pMMDeviceController;
+            g_pMMDeviceController = NULL;
         }
 
         return E_FAIL;
@@ -331,9 +322,9 @@ void PositionFlyout(HWND hwnd, REFGUID guidIcon)
 
 HWND ShowFlyout(HWND hwndMainWindow)
 {
-    if (g_pDeviceController)
+    if (g_pMMDeviceController)
     {
-        g_pDeviceController->dump();
+        g_pMMDeviceController->dump();
     }
 
     // size of the bitmap image (which will be the client area of the flyout window).
@@ -484,7 +475,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case IDM_REFRESH_AUDIO:
             {
-                CMMDeviceController* pController = g_pDeviceController;
+                CMMDeviceController* pController = g_pMMDeviceController;
                 pController->Refresh();
                 pController->dump();
                 break;
@@ -544,12 +535,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         std::unique_ptr<MMSessionID> spSessionID((MMSessionID*)wParam);
         if (spSessionID)
         {
-            CMMSession* pSession = g_pDeviceController->FindSessionByID(*spSessionID);
+            CMMSession* pSession = g_pMMDeviceController->FindSessionByID(*spSessionID);
             if (pSession)
             {
                 pSession->Refresh();
                 pSession->dump();
-                g_pDeviceController->OnSessionRefreshed(pSession);
+                g_pMMDeviceController->OnSessionRefreshed(pSession);
             }
         }
         break;
@@ -560,12 +551,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         std::unique_ptr <MMDeviceID> spDeviceID( (MMDeviceID*)wParam);
         if (spDeviceID)
         {
-            CMMDevice* pDevice = g_pDeviceController->FindDeviceByID(*spDeviceID);
+            CMMDevice* pDevice = g_pMMDeviceController->FindDeviceByID(*spDeviceID);
             if (pDevice)
             {
                 pDevice->Refresh();
                 pDevice->dump();
-                g_pDeviceController->OnDeviceRefreshed(pDevice);
+                g_pMMDeviceController->OnDeviceRefreshed(pDevice);
             }
         }
         break;
@@ -576,10 +567,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         std::unique_ptr <MMDeviceControllerID> spControllerID((MMDeviceControllerID*)wParam);
         if (spControllerID)
         {
-            if (g_pDeviceController->GetID() == *spControllerID)
+            if (g_pMMDeviceController->GetID() == *spControllerID)
             {
-                g_pDeviceController->Refresh();
-                g_pDeviceController->dump();
+                g_pMMDeviceController->Refresh();
+                g_pMMDeviceController->dump();
             }
         }
         break;

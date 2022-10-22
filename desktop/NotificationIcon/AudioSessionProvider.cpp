@@ -4,6 +4,8 @@
 #include "CMMSession.h"
 #include "monenumpad_maxmix/structs.h"
 
+const AudioSession NullAudioSession = { 0 };
+
 bool IsNull(const AudioSession& audioSession)
 {
 	return audioSession.id == 0;
@@ -59,6 +61,11 @@ void AudioSessionProvider::RefreshSessions()
 
 	//clean up m_mmSessionIDToNumPadSessionIDMap
 	UpdateSessionIDsMap();
+
+	if (m_pListener)
+	{
+		m_pListener->OnAudioSessionsRefreshed();
+	}
 }
 
 AudioSession AudioSessionProvider::CreateAudioSession(CMMSession* pMMSession, uint8_t id)
@@ -103,7 +110,7 @@ uint8_t AudioSessionProvider::AppSessionIDForMMSession(const CMMSession *pMMSess
 		this->m_nextNumPadID += 1;
 		if (this->m_nextNumPadID == 0)
 		{
-			this->m_nextNumPadID = SESSION_ID_APP_FIRST; //overflow back to 1
+			this->m_nextNumPadID = SESSION_ID_APP_FIRST; //overflow back to SESSION_ID_APP_FIRST
 		}
 	}
 	else

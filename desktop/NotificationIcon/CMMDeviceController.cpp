@@ -144,7 +144,7 @@ void CMMDeviceController::FireOnSessionsRefreshed()
         ++listenerIter)
     {
         CMMDeviceControllerListener* pListener = *listenerIter;
-        pListener->OnAudioSessionsRefreshed();
+        pListener->OnMMSessionsRefreshed();
     }
 }
 
