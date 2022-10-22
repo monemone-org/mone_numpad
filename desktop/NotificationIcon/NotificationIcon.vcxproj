@@ -139,6 +139,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\hidapi\hidapi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -162,6 +163,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\hidapi\hidapi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -176,9 +178,13 @@
     <ClCompile Include="CMMDeviceController.cpp" />
     <ClCompile Include="GetProcessName.cpp" />
     <ClCompile Include="HIDDevice.cpp" />
+    <ClCompile Include="AudioSessionProvider.cpp" />
+    <ClCompile Include="KBCommService.cpp" />
     <ClCompile Include="LastError.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="monenumpad_maxmix\assert_precond.c" />
     <ClCompile Include="monenumpad_maxmix\structs.c" />
+    <ClCompile Include="CMMSession.cpp" />
     <ClCompile Include="NotificationIcon.cpp" />
     <ClCompile Include="TMMNotificationClient.cpp" />
   </ItemGroup>
@@ -199,9 +205,16 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="GetProcessName.h" />
     <ClInclude Include="HIDDevice.h" />
+    <ClInclude Include="AudioSessionProvider.h" />
+    <ClInclude Include="HIDDeviceID.h" />
+    <ClInclude Include="KBCommService.h" />
     <ClInclude Include="LastError.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="MarshalFunc.h" />
+    <ClInclude Include="MMDeviceID.h" />
     <ClInclude Include="monenumpad_maxmix\assert_precond.h" />
     <ClInclude Include="monenumpad_maxmix\structs.h" />
+    <ClInclude Include="CMMSession.h" />
     <ClInclude Include="NotificationIcon.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />

@@ -57,6 +57,9 @@ enum Command //: int8_t
 #define STRUCT_ATTR_PACKED			__attribute__((__packed__))
 #endif
 
+//
+// Mone: note USB data is in big endian format.
+// 
 
 //session_info also serve as a heartbeat
 typedef struct STRUCT_ATTR_PACKED
@@ -98,11 +101,16 @@ typedef  struct STRUCT_ATTR_PACKED
 #pragma pack(pop)
 #endif
 
-extern SessionData makeSessionData(void);
-extern SessionData makeOutSessionData(void);
-extern uint8_t isNullSession(SessionData session);
+#ifdef _MSC_VER
+#define EXTERNAL
+#else
+#define EXTERNAL extern
+#endif
+EXTERNAL SessionData makeSessionData(void);
+EXTERNAL SessionData makeOutSessionData(void);
+EXTERNAL uint8_t isNullSession(SessionData session);
 
-extern void assert_maxmix_struct_preconditions(void);
+EXTERNAL void assert_maxmix_struct_preconditions(void);
 
 
 

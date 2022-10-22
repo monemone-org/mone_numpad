@@ -17,14 +17,26 @@
     <ClCompile Include="TMMNotificationClient.cpp">
       <Filter>audio_device</Filter>
     </ClCompile>
-    <ClCompile Include="monenumpad_maxmix\assert_precond.c">
-      <Filter>monenumpad\maxmix</Filter>
-    </ClCompile>
-    <ClCompile Include="monenumpad_maxmix\structs.c">
-      <Filter>monenumpad\maxmix</Filter>
-    </ClCompile>
     <ClCompile Include="HIDDevice.cpp">
       <Filter>monenumpad</Filter>
+    </ClCompile>
+    <ClCompile Include="KBCommService.cpp">
+      <Filter>monenumpad</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioSessionProvider.cpp">
+      <Filter>monenumpad</Filter>
+    </ClCompile>
+    <ClCompile Include="CMMSession.cpp">
+      <Filter>audio_device</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="monenumpad_maxmix\assert_precond.c">
+      <Filter>monenumpad_maxmix</Filter>
+    </ClCompile>
+    <ClCompile Include="monenumpad_maxmix\structs.c">
+      <Filter>monenumpad_maxmix</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,14 +62,35 @@
     <ClInclude Include="TMMNotificationClient.h">
       <Filter>audio_device</Filter>
     </ClInclude>
-    <ClInclude Include="monenumpad_maxmix\assert_precond.h">
-      <Filter>monenumpad\maxmix</Filter>
-    </ClInclude>
-    <ClInclude Include="monenumpad_maxmix\structs.h">
-      <Filter>monenumpad\maxmix</Filter>
-    </ClInclude>
     <ClInclude Include="HIDDevice.h">
       <Filter>monenumpad</Filter>
+    </ClInclude>
+    <ClInclude Include="KBCommService.h">
+      <Filter>monenumpad</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioSessionProvider.h">
+      <Filter>monenumpad</Filter>
+    </ClInclude>
+    <ClInclude Include="CMMSession.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
+    <ClInclude Include="MMDeviceID.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
+    <ClInclude Include="HIDDeviceID.h">
+      <Filter>monenumpad</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="monenumpad_maxmix\assert_precond.h">
+      <Filter>monenumpad_maxmix</Filter>
+    </ClInclude>
+    <ClInclude Include="monenumpad_maxmix\structs.h">
+      <Filter>monenumpad_maxmix</Filter>
+    </ClInclude>
+    <ClInclude Include="MarshalFunc.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,8 +116,8 @@
     <Filter Include="monenumpad">
       <UniqueIdentifier>{17f9f7e9-44c9-45a1-8ef1-dc1061a47837}</UniqueIdentifier>
     </Filter>
-    <Filter Include="monenumpad\maxmix">
-      <UniqueIdentifier>{b37a7f38-fa05-4ef0-a5ee-6c7b65f55ab5}</UniqueIdentifier>
+    <Filter Include="monenumpad_maxmix">
+      <UniqueIdentifier>{5be6a34e-837f-4332-bedd-e4333cd473c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

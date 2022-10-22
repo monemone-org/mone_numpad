@@ -1,9 +1,34 @@
 #include "LastError.h"
 #include "AutoPtr.h"
 
+bool GetWinLastErrorrMessage(
+    __out HRESULT* pHR,
+    __out CHeapPtr<TCHAR, CLocalAllocator>& o_msgBufPtr)
+{
+    // Retrieve the system error message for the last-error code
+
+    LPTSTR lpMsgBuf = NULL;
+    DWORD dw = GetLastError();
+
+    DWORD ret = FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR)&lpMsgBuf,
+        0, NULL);
+
+    o_msgBufPtr.Attach(lpMsgBuf);
+
+    return (ret != 0);
+}
+
+
 #pragma warning( push )
 #pragma warning( disable : 6255 )
-void ThrowHR(LPSTR pszFileName, int line, LPSTR lpszFunction, HRESULT hr, LPCTSTR pszMsg) throw (HRESULT)
+void ThrowHR(LPCSTR pszFileName, int line, LPCSTR lpszFunction, HRESULT hr, LPCTSTR pszMsg) throw (HRESULT)
 {
     USES_CONVERSION;
 
@@ -27,27 +52,13 @@ void ThrowHR(LPSTR pszFileName, int line, LPSTR lpszFunction, HRESULT hr, LPCTST
 }
 #pragma warning( pop )
 
-void ThrowWinLastError(LPSTR pszFileName, int line, LPSTR lpszFunction) throw (HRESULT)
+void ThrowWinLastError(LPCSTR pszFileName, int line, LPCSTR lpszFunction) throw (HRESULT)
 {
-    // Retrieve the system error message for the last-error code
-    LPTSTR lpMsgBuf = NULL;
-    DWORD dw = GetLastError();
-
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        dw,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR)&lpMsgBuf,
-        0, NULL);
-
     // attach point and free on exit function
+    HRESULT hr = S_OK;
     CHeapPtr<TCHAR, CLocalAllocator> msgBufPtr;
-    msgBufPtr.Attach(lpMsgBuf);
-
-    HRESULT hr = HRESULT_FROM_WIN32(dw);
-    ThrowHR(pszFileName, line, lpszFunction, hr, lpMsgBuf);
+    GetWinLastErrorrMessage(&hr, msgBufPtr);
+    
+    ThrowHR(pszFileName, line, lpszFunction, hr, msgBufPtr);
 }
 

@@ -1,5 +1,5 @@
 #include "CMMDeviceController.h"
-
+#include "CMMSession.h"
 
 void CMMDeviceController::Initialize() throw (HRESULT)
 {
@@ -124,44 +124,64 @@ void CMMDeviceController::LoadDefaultDevices() throw (HRESULT)
     {
         m_pDefaultIn = CMMDevice::CreateObject(spDefaultInDevice);
     }
+
+    FireOnSessionsRefreshed();
 }
 
-//CComPtr<IMMDevice> CMMDeviceController::GetMMDeviceByID(LPCWSTR pwszDeviceID) throw (HRESULT)
-//{
-//    CComPtr<IMMDevice> spMMDevice;
-//    HRESULT hr = this->m_spDeviceEnumerator->GetDevice(pwszDeviceID, &spMMDevice);
-//    if (FAILED(hr))
-//    {
-//        throw hr;
-//    }
-//
-//    return spMMDevice;
-//}
+void CMMDeviceController::OnSessionRefreshed(CMMSession* pSession)
+{
+}
 
-//CMMDevice* CMMDeviceController::FindDeviceByID(LPCWSTR pwszDeviceID)
-//{
-//    if (this->m_pDefaultIn->HasDeviceID(pwszDeviceID))
-//    {
-//        return m_pDefaultIn;
-//    }
-//    else if (this->m_pDefaultOut->HasDeviceID(pwszDeviceID))
-//    {
-//        return m_pDefaultOut;
-//    }
-//
-//    //auto found_iter = std::find_if(m_devices.begin(), m_devices.end(), [=](CMMDevice* pDevice) -> bool {
-//    //    return (0 == wcscmp(pDevice->GetID(), pwszDeviceID));
-//    //    });
-//    //if (found_iter == m_devices.end())
-//    //{
-//    //    return NULL;
-//    //}
-//    //CMMDevice* pDisconnectedDevice = *found_iter;
-//    //return pDisconnectedDevice;
-//
-//    return NULL;
-//}
+void CMMDeviceController::OnDeviceRefreshed(CMMDevice* pDevice)
+{
+    FireOnSessionsRefreshed();
+}
 
+void CMMDeviceController::FireOnSessionsRefreshed()
+{
+    for (auto listenerIter = m_listeners.begin();
+        listenerIter != m_listeners.end();
+        ++listenerIter)
+    {
+        CMMDeviceControllerListener* pListener = *listenerIter;
+        pListener->OnAudioSessionsRefreshed();
+    }
+}
+
+CMMSession* CMMDeviceController::FindSessionByID(const MMSessionID& sessionID) const
+{
+    CMMDevice* pDevice = FindDeviceByID(sessionID.deviceID);
+    if (pDevice == NULL)
+    {
+        return NULL;
+    }
+
+    return pDevice->FindSessionByID(sessionID);
+}
+
+CMMDevice* CMMDeviceController::FindDeviceByID(const MMDeviceID& deviceID) const
+{
+    if (this->m_pDefaultIn->GetID() == deviceID)
+    {
+        return m_pDefaultIn;
+    }
+    else if (this->m_pDefaultOut->GetID() == deviceID)
+    {
+        return m_pDefaultOut;
+    }
+
+    //auto found_iter = std::find_if(m_devices.begin(), m_devices.end(), [=](CMMDevice* pDevice) -> bool {
+    //    return (0 == wcscmp(pDevice->GetID(), pwszDeviceID));
+    //    });
+    //if (found_iter == m_devices.end())
+    //{
+    //    return NULL;
+    //}
+    //CMMDevice* pDisconnectedDevice = *found_iter;
+    //return pDisconnectedDevice;
+
+    return NULL;
+}
 
 //thread safe version
 void CMMDeviceController::TS_GetDefaultDeviceIDs(

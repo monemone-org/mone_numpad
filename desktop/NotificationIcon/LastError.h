@@ -2,6 +2,7 @@
 #include "framework.h"
 
 #pragma warning( disable : 4290 )
+#pragma warning( disable : 5040 )
 
 #define str(s) TEXT(#s)
 
@@ -28,8 +29,20 @@
         ThrowWinLastError(__FILE__, __LINE__, __FUNCTION__);\
     }
 
+#define THROW_E_FAIL(msg) \
+    {\
+        ThrowHR(__FILE__, __LINE__, __FUNCTION__, E_FAIL, msg);\
+    }
 
-void ThrowHR(LPSTR pszFileName, int line, LPSTR lpszFunction, HRESULT err, LPCTSTR pszMsg) throw (HRESULT);
-void ThrowWinLastError(LPSTR pszFileName, int line, LPSTR lpszFunction) throw (HRESULT);
+#define THROW_HR(hr, msg) \
+    {\
+        ThrowHR(__FILE__, __LINE__, __FUNCTION__, (hr), msg);\
+    }
 
+void ThrowHR(LPCSTR pszFileName, int line, LPCSTR lpszFunction, HRESULT err, LPCTSTR pszMsg) throw (HRESULT);
+void ThrowWinLastError(LPCSTR pszFileName, int line, LPCSTR lpszFunction) throw (HRESULT);
+
+bool GetWinLastErrorrMessage(
+    __out HRESULT* pHR,
+    __out CHeapPtr<TCHAR, CLocalAllocator>& p_msgBufPtr);
 

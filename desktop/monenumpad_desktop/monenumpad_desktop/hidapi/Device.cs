@@ -49,7 +49,7 @@ namespace hidapi
             this.id = dev.device_id;
 
             HidAPI.hid_register_read_callback(_device, hid_on_read_callback);
-            HidAPI.hid_register_disconnected_callback(_device, hid_on_disconnecte_callback);
+            HidAPI.hid_register_disconnected_callback(_device, hid_on_disconnected_callback);
         }
 
         void hid_on_read_callback(IntPtr device, IntPtr data, uint length)
@@ -58,7 +58,7 @@ namespace hidapi
             this.DataReceived(this, new DataEventArgs(bytes));
         }
 
-        void hid_on_disconnecte_callback(IntPtr device)
+        void hid_on_disconnected_callback(IntPtr device)
         {
             this.Disconnected(this, new EventArgs());
         }
@@ -232,28 +232,28 @@ namespace hidapi
 
         #endregion Interop
 
-        #region Constructors
-        public static Device GetDevice(ushort vid, ushort pid)
-        {
-            try
-            {
-                Device layer = new Device();
-                layer.Open(vid, pid, null);
-                return layer._device == IntPtr.Zero ? null : layer;
-            }
-            catch (System.BadImageFormatException)
-            {
-                //Custom logging
-                return null;
-            }
-            catch (Exception)
-            {
-                //Custom logging
-                return null;
-            }
-        }
+        //#region Constructors
+        //public static Device GetDevice(ushort vid, ushort pid)
+        //{
+        //    try
+        //    {
+        //        Device layer = new Device();
+        //        layer.Open(vid, pid, null);
+        //        return layer._device == IntPtr.Zero ? null : layer;
+        //    }
+        //    catch (System.BadImageFormatException)
+        //    {
+        //        //Custom logging
+        //        return null;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        //Custom logging
+        //        return null;
+        //    }
+        //}
 
-        #endregion Constructors
+        //#endregion Constructors
 
         #region ICommunicationLayer
 
@@ -280,29 +280,29 @@ namespace hidapi
         //    }
         //}
 
-        public bool SendData(byte[] data)
-        {
-            try
-            {
-                MemoryStream stream = new MemoryStream(HID_MAX_PACKET_SIZE + 1);
-                stream.WriteByte(0);
-                stream.Write(data, 0, HID_MAX_PACKET_SIZE);
+        //public bool SendData(byte[] data)
+        //{
+        //    try
+        //    {
+        //        MemoryStream stream = new MemoryStream(HID_MAX_PACKET_SIZE + 1);
+        //        stream.WriteByte(0);
+        //        stream.Write(data, 0, HID_MAX_PACKET_SIZE);
 
-                var dataToWrite = stream.ToArray();
-                int ret = Write(dataToWrite, dataToWrite.Length);
-                if (ret >= 0)
-                    return true;
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                //Custom logging
-                return false;
-            }
-        }
+        //        var dataToWrite = stream.ToArray();
+        //        int ret = Write(dataToWrite, dataToWrite.Length);
+        //        if (ret >= 0)
+        //            return true;
+        //        else
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        //Custom logging
+        //        return false;
+        //    }
+        //}
 
         public event EventHandler<DataEventArgs> DataReceived;
 

@@ -32,3 +32,6 @@ inline bool HID_FAILED(int hid_ret)
 	return HID_SUCCESS != hid_ret;
 }
 
+
+#pragma warning( disable : 5040 )
+

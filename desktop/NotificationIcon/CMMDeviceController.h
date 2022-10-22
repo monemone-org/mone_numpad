@@ -7,8 +7,7 @@
 class CMMDeviceControllerListener
 {
 public:
-    virtual void OnDeviceChanged() = 0;
-    virtual void OnAudioSessionChanged() = 0;
+    virtual void OnAudioSessionsRefreshed() = 0;
 };
 
 
@@ -68,6 +67,15 @@ protected:
     // the main UI thread.
     CComCriticalSection m_cs;
 
+    std::list< CMMDeviceControllerListener*> m_listeners;
+
+public:
+    static const EDataFlow DEFAULT_OUT_DATAFLOW = eRender;
+    static const ERole DEFAULT_OUT_ROLE = eConsole;
+
+    static const EDataFlow DEFAULT_IN_DATAFLOW = eCapture;
+    static const ERole DEFAULT_IN_ROLE = eCommunications;
+
 private:
     CMMDeviceController(const CMMDeviceController&) :
         m_pDefaultOut(NULL),
@@ -115,40 +123,18 @@ public:
         return this->m_pDefaultOut;
     }
 
-    CMMSession* FindSessionByID(const MMSessionID& sessionID) const
+    void AddListener(CMMDeviceControllerListener *pListener)
     {
-        CMMDevice* pDevice = FindDeviceByID(sessionID.deviceID);
-        if (pDevice == NULL)
-        {
-            return NULL;
-        }
-
-        return pDevice->FindSessionByID(sessionID);
+        m_listeners.push_back(pListener);
     }
 
-    CMMDevice* FindDeviceByID(const MMDeviceID& deviceID) const
+    void RemoveListener(CMMDeviceControllerListener* pListener)
     {
-        if (this->m_pDefaultIn->GetID() == deviceID)
-        {
-            return m_pDefaultIn;
-        }
-        else if (this->m_pDefaultOut->GetID() == deviceID)
-        {
-            return m_pDefaultOut;
-        }
-
-        //auto found_iter = std::find_if(m_devices.begin(), m_devices.end(), [=](CMMDevice* pDevice) -> bool {
-        //    return (0 == wcscmp(pDevice->GetID(), pwszDeviceID));
-        //    });
-        //if (found_iter == m_devices.end())
-        //{
-        //    return NULL;
-        //}
-        //CMMDevice* pDisconnectedDevice = *found_iter;
-        //return pDisconnectedDevice;
-
-        return NULL;
+        m_listeners.remove(pListener);
     }
+
+    CMMSession* FindSessionByID(const MMSessionID& sessionID) const;
+    CMMDevice* FindDeviceByID(const MMDeviceID& deviceID) const;
 
     void Refresh() throw () {
         try
@@ -160,17 +146,14 @@ public:
         }
     }
 
+    void OnSessionRefreshed(CMMSession *pSession);
+    void OnDeviceRefreshed(CMMDevice* pDevice);
+
 protected:
     CMMDeviceController() :
         m_pDefaultOut(NULL),
         m_pDefaultIn(NULL)
     {}
-
-    static const EDataFlow DEFAULT_OUT_DATAFLOW = eRender;
-    static const ERole DEFAULT_OUT_ROLE = eConsole;
-
-    static const EDataFlow DEFAULT_IN_DATAFLOW = eCapture;
-    static const ERole DEFAULT_IN_ROLE = eCommunications;
 
     void Initialize() throw (HRESULT);
     void Uninitialize();
@@ -188,6 +171,8 @@ protected:
 
         return spMMDevice;
     }
+
+    void FireOnSessionsRefreshed();
 
 public:
 

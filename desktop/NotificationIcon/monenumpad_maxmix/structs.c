@@ -23,8 +23,8 @@ SessionInfo makeSessionInfo(void) {
 VolumeData makeVolumeData() {
     VolumeData o = {
         .unknown = (true),
-        .volume = (0), 
-        .isMuted = (false)
+        .isMuted = (false),
+        .volume = (0)
  	};
  	return o;
 }

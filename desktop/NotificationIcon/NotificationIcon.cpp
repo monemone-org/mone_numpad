@@ -17,26 +17,29 @@
 #include <strsafe.h>
 #include <Mmdeviceapi.h>
 #include "TMMNotificationClient.h"
+#include "CMMSession.h"
 #include "CMMDevice.h"
 #include "CMMDeviceController.h"
 #include "Dbt.h"
 #include <usbiodef.h>
+#include <list>
 
 using namespace ATL;
 
-
-HINSTANCE g_hInst = NULL;
-HWND g_hwndMainWin = NULL;
-
-CMMDeviceController* g_pDeviceController = NULL;
-HDEVNOTIFY g_hDeviceNotify = NULL;
-
+// Custom windows messages
 UINT const WMAPP_NOTIFYCALLBACK = WM_APP + 1;
 UINT const WMAPP_HIDEFLYOUT     = WM_APP + 2;
 
 UINT const WMAPP_REFRESH_SESSION = WM_APP + 3;
 UINT const WMAPP_REFRESH_DEVICE = WM_APP + 4;
 UINT const WMAPP_REFRESH_AUDIOCONTROLLER = WM_APP + 5;
+
+// Global variables
+HINSTANCE g_hInst = NULL;
+HWND g_hwndMainWin = NULL;
+CMMDeviceController* g_pDeviceController = NULL;
+//HDEVNOTIFY g_hDeviceNotify = NULL;
+std::list<WMAPPMessageHandler> g_WMAPPMessageHanders;
 
 void PostMainThreadRefreshSession(const MMSessionID& sessionID) throw ()
 {
@@ -62,6 +65,22 @@ void PostMainThreadRefreshAudioController(const MMDeviceControllerID& controller
     PostMessage(g_hwndMainWin, WMAPP_REFRESH_AUDIOCONTROLLER, (WPARAM)pControllerID, 0);
 }
 
+HWND GetAppHWND()
+{
+    return g_hwndMainWin;
+}
+
+void AddWMAPPMessageHander(const WMAPPMessageHandler& handler)
+{
+    g_WMAPPMessageHanders.push_back( handler );
+}
+
+void RemoveWMAPPMessageHanderByID(DWORD_PTR handlerID)
+{
+    g_WMAPPMessageHanders.remove_if([handlerID](const WMAPPMessageHandler& handler) -> bool {
+            return handler.id == handlerID;
+        });
+}
 
 
 UINT_PTR const HIDEFLYOUT_TIMER_ID = 1;
@@ -143,22 +162,22 @@ public:
             //Mone: store hwnd created. Replace options dlg with this main hwnd
             g_hwndMainWin = hwnd;
 
-            // monitor USB device connection
-            DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;
-            ZeroMemory(&NotificationFilter, sizeof(NotificationFilter));
-            NotificationFilter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
-            NotificationFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
-            NotificationFilter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
+            //// monitor USB device connection
+            //DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;
+            //ZeroMemory(&NotificationFilter, sizeof(NotificationFilter));
+            //NotificationFilter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+            //NotificationFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+            //NotificationFilter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
 
-            g_hDeviceNotify = RegisterDeviceNotification(
-                g_hwndMainWin,                       // events recipient
-                &NotificationFilter,        // type of device
-                DEVICE_NOTIFY_WINDOW_HANDLE // type of recipient handle
-            );
-            if (g_hDeviceNotify == NULL)
-            {
-                return HRESULT_FROM_WIN32(GetLastError());
-            }
+            //g_hDeviceNotify = RegisterDeviceNotification(
+            //    g_hwndMainWin,                       // events recipient
+            //    &NotificationFilter,        // type of device
+            //    DEVICE_NOTIFY_WINDOW_HANDLE // type of recipient handle
+            //);
+            //if (g_hDeviceNotify == NULL)
+            //{
+            //    return HRESULT_FROM_WIN32(GetLastError());
+            //}
             
             // Mone: hide main window on create
             //ShowWindow(hwnd, nCmdShow);
@@ -167,10 +186,10 @@ public:
             this->RunMessageLoop();
         }
 
-        if (g_hDeviceNotify)
-        {
-            UnregisterDeviceNotification(g_hDeviceNotify);
-        }
+        //if (g_hDeviceNotify)
+        //{
+        //    UnregisterDeviceNotification(g_hDeviceNotify);
+        //}
 
         hid_exit();
 
@@ -376,32 +395,43 @@ void ShowContextMenu(HWND hwnd, POINT pt)
 }
 
 
-HANDLE open_device(const wchar_t* path, BOOL open_rw)
-{
-    HANDLE handle = NULL;
-    DWORD desired_access = (open_rw) ? (GENERIC_WRITE | GENERIC_READ) : 0;
-    DWORD share_mode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-
-    handle = CreateFileW(path,
-        desired_access,
-        share_mode,
-        NULL,
-        OPEN_EXISTING,
-        FILE_FLAG_OVERLAPPED,/*FILE_ATTRIBUTE_NORMAL,*/
-        0);
-
-    if (handle == INVALID_HANDLE_VALUE)
-    {
-        return NULL;
-    }
-
-    return handle;
-}
+//HANDLE open_device(const wchar_t* path, BOOL open_rw)
+//{
+//    HANDLE handle = NULL;
+//    DWORD desired_access = (open_rw) ? (GENERIC_WRITE | GENERIC_READ) : 0;
+//    DWORD share_mode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+//
+//    handle = CreateFileW(path,
+//        desired_access,
+//        share_mode,
+//        NULL,
+//        OPEN_EXISTING,
+//        FILE_FLAG_OVERLAPPED,/*FILE_ATTRIBUTE_NORMAL,*/
+//        0);
+//
+//    if (handle == INVALID_HANDLE_VALUE)
+//    {
+//        return NULL;
+//    }
+//
+//    return handle;
+//}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static HWND s_hwndFlyout = NULL;
     static BOOL s_fCanShowFlyout = TRUE;
+
+    for (auto iter = g_WMAPPMessageHanders.begin();
+        iter != g_WMAPPMessageHanders.end();
+        ++iter)
+    {
+        WMAPPMessageHandler msgHandler = *iter;
+        if (msgHandler.handler(message, wParam, lParam))
+        {
+            return 0;
+        }
+    }
 
     switch (message)
     {
@@ -519,6 +549,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 pSession->Refresh();
                 pSession->dump();
+                g_pDeviceController->OnSessionRefreshed(pSession);
             }
         }
         break;
@@ -534,6 +565,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 pDevice->Refresh();
                 pDevice->dump();
+                g_pDeviceController->OnDeviceRefreshed(pDevice);
             }
         }
         break;
@@ -553,57 +585,57 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    case WM_DEVICECHANGE:
-    {
-        switch (wParam)
-        {
-        //case DBT_DEVNODES_CHANGED:
-        //{
-        //    ATLTRACE("DBT_DEVNODES_CHANGED");
-        //    break;
-        //}
+    //case WM_DEVICECHANGE:
+    //{
+    //    switch (wParam)
+    //    {
+    //    //case DBT_DEVNODES_CHANGED:
+    //    //{
+    //    //    ATLTRACE("DBT_DEVNODES_CHANGED");
+    //    //    break;
+    //    //}
 
-        case DBT_DEVICEARRIVAL:
-        {
-            ATLTRACE("DBT_DEVICEARRIVAL");
-            DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
-            if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
-            {
-                DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
-                ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
+    //    case DBT_DEVICEARRIVAL:
+    //    {
+    //        ATLTRACE("DBT_DEVICEARRIVAL");
+    //        DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
+    //        if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+    //        {
+    //            DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
+    //            ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
 
-                HANDLE handle = open_device(pDevInterface->dbcc_name, TRUE);
-                if (handle != NULL)
-                {
-                    CloseHandle(handle);
-                }
-            }
+    //            HANDLE handle = open_device(pDevInterface->dbcc_name, TRUE);
+    //            if (handle != NULL)
+    //            {
+    //                CloseHandle(handle);
+    //            }
+    //        }
 
-            break;
-        }
+    //        break;
+    //    }
 
-        case DBT_DEVICEREMOVECOMPLETE:
-        {
-            ATLTRACE("DBT_DEVICEREMOVECOMPLETE");
-            DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
-            if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
-            {
-                DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
-                ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
-            }
-            break;
-        }
+    //    case DBT_DEVICEREMOVECOMPLETE:
+    //    {
+    //        ATLTRACE("DBT_DEVICEREMOVECOMPLETE");
+    //        DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
+    //        if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
+    //        {
+    //            DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
+    //            ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
+    //        }
+    //        break;
+    //    }
 
 
 
-        default:
-        {
-            break;
-        }
+    //    default:
+    //    {
+    //        break;
+    //    }
 
-        }
-        break;
-    }
+    //    }
+    //    break;
+    //}
 
     case WM_TIMER:
         if (wParam == HIDEFLYOUT_TIMER_ID)
@@ -613,10 +645,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             s_fCanShowFlyout = TRUE;
         }
         break;
+
     case WM_DESTROY:
         DeleteNotificationIcon();
         PostQuitMessage(0);
         break;
+    
     default:
         return DefWindowProc(hwnd, message, wParam, lParam);
     }
