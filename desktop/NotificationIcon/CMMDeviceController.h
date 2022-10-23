@@ -7,7 +7,7 @@
 class CMMDeviceControllerListener
 {
 public:
-    virtual void OnMMSessionsRefreshed() = 0;
+    virtual void OnMMSessionsAddedRemoved() = 0;
 };
 
 
@@ -53,8 +53,6 @@ typedef struct MMDeviceControllerID
 class CMMDeviceController
 {
 protected:
-    MMDeviceControllerID m_ID;
-
     CComPtr<IMMDeviceEnumerator> m_spDeviceEnumerator;
     CComPtr<IMMNotificationClient> m_spClientNotif;
 
@@ -108,11 +106,6 @@ public:
 
     void dump() const;
 
-    const MMDeviceControllerID& GetID() const 
-    {
-        return this->m_ID;
-    }
-
     CMMDevice* GetDefaultIn() const
     {
         return this->m_pDefaultIn;
@@ -133,21 +126,11 @@ public:
         m_listeners.remove(pListener);
     }
 
-    CMMSession* FindSessionByID(const MMSessionID& sessionID) const;
-    CMMDevice* FindDeviceByID(const MMDeviceID& deviceID) const;
-
-    void Refresh() throw () {
-        try
-        {
-            this->LoadDefaultDevices();
-        }
-        catch (HRESULT)
-        {
-        }
-    }
-
-    void OnSessionRefreshed(CMMSession *pSession);
-    void OnDeviceRefreshed(CMMDevice* pDevice);
+    void RefreshSession(const MMSessionID& sessionID);
+    void RefreshDeviceSessions(const MMDeviceID& deviceID);
+    void RefreshDeviceProperties(const MMDeviceID& deviceID);
+    void Refresh();
+    
 
 protected:
     CMMDeviceController() :
@@ -172,7 +155,10 @@ protected:
         return spMMDevice;
     }
 
-    void FireOnSessionsRefreshed();
+    CMMSession* FindSessionByID(const MMSessionID& sessionID) const;
+    CMMDevice* FindDeviceByID(const MMDeviceID& deviceID) const;
+
+    void FireOnMMSessionsAddedRemoved();
 
 public:
 

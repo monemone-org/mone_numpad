@@ -41,6 +41,11 @@ typedef struct MMDeviceID
         this->ID.clear();
     }
 
-}MMDeviceID;
+    LPCWSTR ToString() const
+    {
+        return this->ID.c_str();
+    }
+
+} MMDeviceID;
 
 

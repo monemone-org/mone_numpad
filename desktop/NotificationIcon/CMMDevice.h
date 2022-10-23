@@ -58,6 +58,28 @@ public:
         {
             this->FetchProperties();
             this->FetchSessions();
+            this->dump();
+        }
+        catch (HRESULT)
+        {
+        }
+    }
+
+    void RefreshSessions() throw () {
+        try
+        {
+            this->FetchSessions();
+            this->dump();
+        }
+        catch (HRESULT)
+        {
+        }
+    }
+
+    void RefreshProperties() throw () {
+        try
+        {
+            this->FetchProperties();
         }
         catch (HRESULT)
         {

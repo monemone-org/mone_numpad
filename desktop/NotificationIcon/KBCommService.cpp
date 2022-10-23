@@ -81,7 +81,7 @@ void KBCommService::OpenMoneNumPad(hid_device_info* dev_info)
         }
         catch (HRESULT hr_)
         {
-            ATLTRACE(L"KBCommService::OpenMoneNumPad failed. hr=%08x", hr_);
+            ATLTRACE(L"KBCommService::OpenMoneNumPad failed. hr=%08x\n", hr_);
             delete m_pConnectedDevice;
             m_pConnectedDevice = NULL;
         }
@@ -102,7 +102,7 @@ void KBCommService::CloseMoneNumPad()
         }
         catch (HRESULT hr_)
         {
-            ATLTRACE(L"KBCommService::CloseMoneNumPad failed. hr=%08x", hr_);
+            ATLTRACE(L"KBCommService::CloseMoneNumPad failed. hr=%08x\n", hr_);
         }
         delete m_pConnectedDevice;
         m_pConnectedDevice = NULL;
@@ -328,7 +328,7 @@ void KBCommService::SendSessionDatas(bool curr_only /*= false*/)
     SessionData curr_session_data = MakeSessionData(curr_session_index);
     {
         USES_CONVERSION;
-        ATLTRACE(TEXT("sendSessionData(curr = \"%s\"). has_prev=%d. has_next=%d."), static_cast<LPCWSTR>(CA2W(curr_session_data.name)),
+        ATLTRACE(TEXT("sendSessionData(curr = \"%s\"). has_prev=%d. has_next=%d.\n"), static_cast<LPCWSTR>(CA2W(curr_session_data.name)),
             curr_session_data.has_prev, curr_session_data.has_next);
     }
     SendStructMessage(CURRENT_SESSION, curr_session_data);
@@ -343,7 +343,7 @@ void KBCommService::SendSessionDatas(bool curr_only /*= false*/)
             {
                 {
                     USES_CONVERSION;
-                    ATLTRACE(TEXT("sendSessionData(prev = \"%s\")"), static_cast<LPCWSTR>(CA2W(prev_session_data.name)));
+                    ATLTRACE(TEXT("sendSessionData(prev = \"%s\")\n"), static_cast<LPCWSTR>(CA2W(prev_session_data.name)));
                 }
                 SendStructMessage(PREVIOUS_SESSION, prev_session_data);
             }
@@ -357,7 +357,7 @@ void KBCommService::SendSessionDatas(bool curr_only /*= false*/)
             {
                 {
                     USES_CONVERSION;
-                    ATLTRACE(TEXT("sendSessionData(next = \"%s\")"), static_cast<LPCWSTR>(CA2W(next_session_data.name)));
+                    ATLTRACE(TEXT("sendSessionData(next = \"%s\")\n"), static_cast<LPCWSTR>(CA2W(next_session_data.name)));
                 }
                 SendStructMessage(NEXT_SESSION, next_session_data);
             }
@@ -412,7 +412,7 @@ void KBCommService::SendMessage(
 
     if (command != SESSION_INFO)
     {
-        ATLTRACE(TEXT("Sending cmd=%d"), (int)command);
+        ATLTRACE(TEXT("Sending cmd=%d\n"), (int)command);
     }
 
     // 1 : MSG_ID_PREFIX 0xFD
@@ -436,7 +436,7 @@ void KBCommService::SendMessage(
         }
         catch (HRESULT hr_)
         {
-            ATLTRACE(L"m_pConnectedDevice->Write failed. hr=%08x", hr_);
+            ATLTRACE(L"m_pConnectedDevice->Write failed. hr=%08x\n", hr_);
         }
 
         free(msgBytes);
@@ -459,7 +459,7 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
         return;
     }
 
-    ATLTRACE(TEXT("Device_DataReceived(%d)"), (int)command_id);
+    ATLTRACE(TEXT("Device_DataReceived(%d)\n"), (int)command_id);
 
     BYTE* msgData = data + 2;
     if (command_id == PROTOCOL_VERSION_EXCHANGE)
@@ -467,7 +467,7 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
         m_kb_protocol_version = ToUInt16(msgData);
         if (m_kb_protocol_version != MAXMIX_PROTOCOL_VERSION)
         {
-            ATLTRACE(TEXT("Incompatible protocol version. Close device connection."));
+            ATLTRACE(TEXT("Incompatible protocol version. Close device connection.\n"));
             CloseMoneNumPad();
         }
         else
@@ -538,7 +538,7 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
         {
             if (command_id != CMD_OK)
             {
-                ATLTRACE(TEXT("Reading cmd=%d curr_session_id =%d"),
+                ATLTRACE(TEXT("Reading cmd=%d curr_session_id =%d\n"),
                     (int)command_id, (int)new_curr_session_id);
             }
 
@@ -557,14 +557,14 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
         }
         else // !msgRead
         {
-            ATLTRACE("Unknown message cmd=%d", (int)command_id);
+            ATLTRACE("Unknown message cmd=%d\n", (int)command_id);
         }
 
     } // else if is_protocol_compatible()                    
     else
     {
         std::wstring data_str = ToString(data, cbData);
-        ATLTRACE("Reading unrecognized data=\"%s\"", data_str.c_str());
+        ATLTRACE("Reading unrecognized data=\"%s\"\n", data_str.c_str());
     }
 } // void deviceDataRead
 
@@ -582,7 +582,7 @@ void KBCommService::DeviceDisconnected(HIDDevice* dev)
 {
     if (m_pConnectedDevice == dev)
     {
-        ATLTRACE(TEXT("Device is disconnected."));
+        ATLTRACE(TEXT("Device is disconnected.\n"));
         this->CloseMoneNumPad();
     }
 }

@@ -73,7 +73,7 @@ public:
 	void RefreshSessions();
 
 	// impl CMMDeviceControllerListener
-	virtual void OnMMSessionsRefreshed()
+	virtual void OnMMSessionsAddedRemoved()
 	{
 		RefreshSessions();
 	}

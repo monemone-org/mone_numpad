@@ -91,13 +91,13 @@ void CMMSession::Initialize(CMMDevice* pParentDevice, IAudioSessionControl* pSes
     CAudoSessionEvents* notifClient = dynamic_cast<CAudoSessionEvents*>(m_spSessionEvents.p);
     notifClient->Initialize(
         [id]/*OnDisplayNameChanged*/(LPCWSTR NewDisplayName, LPCGUID EventContext) throw(HRESULT) {
-            PostMainThreadRefreshSession(id);
+            PostMainThreadRefreshSession(id, L"CAudoSessionEvents::OnDisplayNameChanged");
         },
         [id]/*OnStateChangedFunction*/(AudioSessionState state) throw(HRESULT) {
-            PostMainThreadRefreshSession(id);
+            PostMainThreadRefreshSession(id, L"CAudoSessionEvents::OnStateChangedFunction");
         },
-            [deviceID]/*OnSessionDisconnectedFunction*/(AudioSessionDisconnectReason DisconnectReason) throw(HRESULT) {
-            PostMainThreadRefreshDevice(deviceID);
+        [deviceID]/*OnSessionDisconnectedFunction*/(AudioSessionDisconnectReason DisconnectReason) throw(HRESULT) {
+            PostMainThreadRefreshDeviceSessions(deviceID, L"CAudoSessionEvents::OnSessionDisconnectedFunction");
         });
     CHK_HR(m_spSessionControl->RegisterAudioSessionNotification(m_spSessionEvents));
 
@@ -198,15 +198,30 @@ bool CMMSession::toggleMute() throw (HRESULT)
     return IsMute();
 }
 
+void CMMSession::Refresh() throw () {
+    try
+    {
+        this->FetchProperties();
+        if (this->GetState() == AudioSessionStateExpired)
+        {
+            PostMainThreadRefreshDeviceSessions(m_ID.deviceID, L"CMMSession::Refresh(), State is changed to AudioSessionStateExpired.");
+        }
+
+    }
+    catch (HRESULT)
+    {
+    }
+}
 
 void CMMSession::dump() const {
     try
     {
-        ATLTRACE(TEXT("Session \"%s\"\n"), this->m_sProcessName.c_str());
+        ATLTRACE(TEXT("<-- Dump Session \"%s\"\n"), this->m_sProcessName.c_str());
         ATLTRACE(TEXT("        System In/Out: \"%d\"\n"), (this->IsSystemInOut() ? 1 : 0));
         ATLTRACE(TEXT("        State: \"%d\"\n"), (int)(this->GetState()));
         ATLTRACE(TEXT("        Volume: \"%f\"\n"), this->GetVolume());
         ATLTRACE(TEXT("        Mute: \"%d\"\n"), (this->IsMute() ? 1 : 0));
+        ATLTRACE(TEXT("-->\n"));
     }
     catch (HRESULT)
     {

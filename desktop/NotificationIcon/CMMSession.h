@@ -49,7 +49,12 @@ typedef struct MMSessionID
         this->deviceID.clear();
     }
 
-}MMSessionID;
+    LPCWSTR ToString() const
+    {
+        return this->ID.c_str();
+    }
+
+} MMSessionID;
 
 
 
@@ -115,15 +120,7 @@ public:
 
     void dump() const;
 
-    void Refresh() throw () {
-        try
-        {
-            this->FetchProperties();
-        }
-        catch (HRESULT)
-        {
-        }
-    }
+    void Refresh() throw ();
 
 protected:
     CMMSession();

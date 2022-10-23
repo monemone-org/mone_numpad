@@ -2,6 +2,7 @@
 
 #include "framework.h"
 #include <functional>
+#include <string>
 
 //#include "CMMDevice.h"
 //#include "CMMDeviceController.h"
@@ -9,9 +10,10 @@
 struct MMSessionID;
 struct MMDeviceControllerID;
 
-void PostMainThreadRefreshSession(const MMSessionID& sessionID) throw ();
-void PostMainThreadRefreshDevice(const MMDeviceID& deviceID) throw ();
-void PostMainThreadRefreshAudioController(const MMDeviceControllerID& controllerID) throw ();
+void PostMainThreadRefreshSession(MMSessionID sessionID, LPCWSTR pszReason) throw ();
+void PostMainThreadRefreshDeviceSessions(MMDeviceID deviceID, LPCWSTR pszReason) throw ();
+void PostMainThreadRefreshDeviceProperties(MMDeviceID deviceID, LPCWSTR pszReason) throw ();
+void PostMainThreadRefreshAudioController(LPCWSTR pszReason) throw ();
 
 //return true if handled message
 typedef struct WMAPPMessageHandler

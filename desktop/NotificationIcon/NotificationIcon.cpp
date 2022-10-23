@@ -32,8 +32,9 @@ UINT const WMAPP_NOTIFYCALLBACK = WM_APP + 1;
 UINT const WMAPP_HIDEFLYOUT     = WM_APP + 2;
 
 UINT const WMAPP_REFRESH_SESSION = WM_APP + 3;
-UINT const WMAPP_REFRESH_DEVICE = WM_APP + 4;
-UINT const WMAPP_REFRESH_AUDIOCONTROLLER = WM_APP + 5;
+UINT const WMAPP_REFRESH_DEVICE_SESSIONS = WM_APP + 4;
+UINT const WMAPP_REFRESH_DEVICE_PROPERTIES = WM_APP + 5;
+UINT const WMAPP_REFRESH_AUDIOCONTROLLER = WM_APP + 6;
 
 // Global variables
 HINSTANCE g_hInst = NULL;
@@ -43,28 +44,72 @@ KBCommService* g_pKBCommService = NULL;
 //HDEVNOTIFY g_hDeviceNotify = NULL;
 std::list<WMAPPMessageHandler> g_WMAPPMessageHanders;
 
-void PostMainThreadRefreshSession(const MMSessionID& sessionID) throw ()
+typedef struct RefreshSessionData
 {
-    // Create a copy of the MMSessionID object and pass that to the main thread.
-    // When the main thread is done, the main thread handler will free the
-    // copy of MMSessionID.
-    MMSessionID* pSessionID = new MMSessionID(sessionID);
-    PostMessage(g_hwndMainWin, WMAPP_REFRESH_SESSION, (WPARAM)pSessionID, 0);
+    MMSessionID sessionID;
+    std::wstring reason;
+} RefreshSessionData;
+
+typedef struct RefreshDeviceData
+{
+    MMDeviceID deviceID;
+    std::wstring reason;
+} RefreshDeviceData;
+
+typedef struct RefreshControllerData
+{
+    std::wstring reason;
+} RefreshControllerData;
+
+void PostMainThreadRefreshSession(MMSessionID sessionID, LPCWSTR pszReason) throw ()
+{
+    ATLTRACE(L"PostMainThreadRefreshSession(MSSessionID=%s, reason=%s)\n", sessionID.ToString(), pszReason);
+
+    // pRefreshData object will be passed to the main thread.
+    // When the main thread is done, the main thread handler will 
+    // delete pRefreshData
+    RefreshSessionData* pRefreshData = new RefreshSessionData();
+    pRefreshData->sessionID = sessionID;
+    pRefreshData->reason = pszReason;
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_SESSION, (WPARAM)pRefreshData, 0);
 }
 
-void PostMainThreadRefreshDevice(const MMDeviceID& deviceID) throw ()
+void PostMainThreadRefreshDeviceProperties(MMDeviceID deviceID, LPCWSTR pszReason) throw ()
 {
-    // Create a copy of the MMDeviceID object and pass that to the main thread.
-    // When the main thread is done, the main thread handler will free the
-    // copy of MMDeviceID.
-    MMDeviceID* pDeviceID = new MMDeviceID(deviceID);
-    PostMessage(g_hwndMainWin, WMAPP_REFRESH_DEVICE, (WPARAM)pDeviceID, 0);
+    ATLTRACE(L"PostMainThreadRefreshDeviceProperties(MMDeviceID=%s, reason=%s)\n", deviceID.ToString(), pszReason);
+
+    // pRefreshData object will be passed to the main thread.
+    // When the main thread is done, the main thread handler will 
+    // delete pRefreshData
+    RefreshDeviceData* pRefreshData = new RefreshDeviceData();
+    pRefreshData->deviceID = deviceID;
+    pRefreshData->reason = pszReason;
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_DEVICE_PROPERTIES, (WPARAM)pRefreshData, 0);
 }
 
-void PostMainThreadRefreshAudioController(const MMDeviceControllerID& controllerID) throw ()
+void PostMainThreadRefreshDeviceSessions(MMDeviceID deviceID, LPCWSTR pszReason) throw ()
 {
-    MMDeviceControllerID* pControllerID = new MMDeviceControllerID(controllerID);
-    PostMessage(g_hwndMainWin, WMAPP_REFRESH_AUDIOCONTROLLER, (WPARAM)pControllerID, 0);
+    ATLTRACE(L"PostMainThreadRefreshDeviceSessions(MMDeviceID=%s, reason=%s)\n", deviceID.ToString(), pszReason);
+
+    // pRefreshData object will be passed to the main thread.
+    // When the main thread is done, the main thread handler will 
+    // delete pRefreshData
+    RefreshDeviceData* pRefreshData = new RefreshDeviceData();
+    pRefreshData->deviceID = deviceID;
+    pRefreshData->reason = pszReason;
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_DEVICE_SESSIONS, (WPARAM)pRefreshData, 0);
+}
+
+void PostMainThreadRefreshAudioController(LPCWSTR pszReason) throw ()
+{
+    ATLTRACE(L"PostMainThreadRefreshAudioController(reason=%s)\n", pszReason);
+
+    // pRefreshData object will be passed to the main thread.
+    // When the main thread is done, the main thread handler will 
+    // delete pRefreshData
+    RefreshControllerData* pRefreshData = new RefreshControllerData();
+    pRefreshData->reason = pszReason;
+    PostMessage(g_hwndMainWin, WMAPP_REFRESH_AUDIOCONTROLLER, (WPARAM)pRefreshData, 0);
 }
 
 HWND GetAppHWND()
@@ -129,7 +174,7 @@ public:
         // Mone: updated GUID every time the app restarts. Otherwise
         hr = CoCreateGuid( &PrinterIconGUID );
         if (FAILED(hr)) {
-            ATLTRACE(L"CoCreateGuid failed");
+            ATLTRACE(L"CoCreateGuid failed\n");
             return hr;
         }
 
@@ -477,7 +522,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 CMMDeviceController* pController = g_pMMDeviceController;
                 pController->Refresh();
-                pController->dump();
                 break;
             }
 
@@ -532,46 +576,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WMAPP_REFRESH_SESSION:
     {
-        std::unique_ptr<MMSessionID> spSessionID((MMSessionID*)wParam);
-        if (spSessionID)
+        RefreshSessionData* pRefreshData = (RefreshSessionData*)wParam;
+        if (pRefreshData)
         {
-            CMMSession* pSession = g_pMMDeviceController->FindSessionByID(*spSessionID);
-            if (pSession)
-            {
-                pSession->Refresh();
-                pSession->dump();
-                g_pMMDeviceController->OnSessionRefreshed(pSession);
-            }
+            g_pMMDeviceController->RefreshSession(pRefreshData->sessionID);
+            delete pRefreshData;
         }
         break;
     }
 
-    case WMAPP_REFRESH_DEVICE:
+    case WMAPP_REFRESH_DEVICE_SESSIONS:
     {
-        std::unique_ptr <MMDeviceID> spDeviceID( (MMDeviceID*)wParam);
-        if (spDeviceID)
+        RefreshDeviceData* pRefreshData = (RefreshDeviceData*)wParam;
+        if (pRefreshData)
         {
-            CMMDevice* pDevice = g_pMMDeviceController->FindDeviceByID(*spDeviceID);
-            if (pDevice)
-            {
-                pDevice->Refresh();
-                pDevice->dump();
-                g_pMMDeviceController->OnDeviceRefreshed(pDevice);
-            }
+            g_pMMDeviceController->RefreshDeviceSessions(pRefreshData->deviceID);
+            delete pRefreshData;
+        }
+        break;
+    }
+
+    case WMAPP_REFRESH_DEVICE_PROPERTIES:
+    {
+        RefreshDeviceData* pRefreshData = (RefreshDeviceData*)wParam;
+        if (pRefreshData)
+        {
+            g_pMMDeviceController->RefreshDeviceProperties(pRefreshData->deviceID);
+            delete pRefreshData;
         }
         break;
     }
 
     case WMAPP_REFRESH_AUDIOCONTROLLER:
     {
-        std::unique_ptr <MMDeviceControllerID> spControllerID((MMDeviceControllerID*)wParam);
-        if (spControllerID)
+        RefreshControllerData* pRefreshData = (RefreshControllerData*)wParam;
+        if (pRefreshData)
         {
-            if (g_pMMDeviceController->GetID() == *spControllerID)
-            {
-                g_pMMDeviceController->Refresh();
-                g_pMMDeviceController->dump();
-            }
+            g_pMMDeviceController->Refresh();
+            delete pRefreshData;
         }
         break;
     }
@@ -582,18 +624,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     //    {
     //    //case DBT_DEVNODES_CHANGED:
     //    //{
-    //    //    ATLTRACE("DBT_DEVNODES_CHANGED");
+    //    //    ATLTRACE("DBT_DEVNODES_CHANGED\n");
     //    //    break;
     //    //}
 
     //    case DBT_DEVICEARRIVAL:
     //    {
-    //        ATLTRACE("DBT_DEVICEARRIVAL");
+    //        ATLTRACE("DBT_DEVICEARRIVAL\n");
     //        DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
     //        if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
     //        {
     //            DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
-    //            ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
+    //            ATLTRACE(TEXT("    dbcc_name: %s\n"), pDevInterface->dbcc_name);
 
     //            HANDLE handle = open_device(pDevInterface->dbcc_name, TRUE);
     //            if (handle != NULL)
@@ -607,12 +649,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     //    case DBT_DEVICEREMOVECOMPLETE:
     //    {
-    //        ATLTRACE("DBT_DEVICEREMOVECOMPLETE");
+    //        ATLTRACE("DBT_DEVICEREMOVECOMPLETE\n");
     //        DEV_BROADCAST_HDR* pDevHDR = (DEV_BROADCAST_HDR*)lParam;
     //        if (pDevHDR->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
     //        {
     //            DEV_BROADCAST_DEVICEINTERFACE* pDevInterface = (DEV_BROADCAST_DEVICEINTERFACE*)pDevHDR;
-    //            ATLTRACE(TEXT("    dbcc_name: %s"), pDevInterface->dbcc_name);
+    //            ATLTRACE(TEXT("    dbcc_name: %s\n"), pDevInterface->dbcc_name);
     //        }
     //        break;
     //    }

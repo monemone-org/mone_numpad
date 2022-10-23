@@ -97,7 +97,7 @@ void CMMDevice::Initialize(IMMDevice* pDevice) throw(HRESULT)
         [ID]/*OnSessionCreated*/(IAudioSessionControl* pSessionControl) throw(HRESULT) {
             try
             {
-                PostMainThreadRefreshDevice(ID);
+                PostMainThreadRefreshDeviceSessions(ID, L"CAudioSessionNotification::OnSessionCreated()");
             }
             catch (HRESULT)
             {
@@ -166,6 +166,14 @@ void CMMDevice::FetchSessions() throw(HRESULT)
         CComPtr< IAudioSessionControl> spSessionControl;
         CHK_HR(spSessionEnum->GetSession(i, &spSessionControl));
 
+        AudioSessionState state = AudioSessionStateInactive;
+        spSessionControl->GetState(&state);
+        if (state == AudioSessionStateExpired)
+        {
+            // skip expired sessions
+            continue;
+        }
+
         CMMSession* pSession = CMMSession::CreateObject(this, spSessionControl);
         if (pSession == NULL)
         {
@@ -197,12 +205,13 @@ CMMSession* CMMDevice::FindSessionByID(const MMSessionID& sessionID) const
  
 void CMMDevice::dump() const 
 {
-    ATLTRACE(TEXT("Device \"%s\"\n"), this->GetDisplayName());
+    ATLTRACE(TEXT("<-- Dump Device \"%s\"\n"), this->GetDisplayName());
     for (auto iter = m_sessions.begin(); iter != m_sessions.end(); ++iter)
     {
         CMMSession* pSession = *iter;
         pSession->dump();
     }
+    ATLTRACE(L"-->\n");
 }
 
 

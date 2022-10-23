@@ -26,9 +26,6 @@
     <ClCompile Include="AudioSessionProvider.cpp">
       <Filter>monenumpad</Filter>
     </ClCompile>
-    <ClCompile Include="CMMSession.cpp">
-      <Filter>audio_device</Filter>
-    </ClCompile>
     <ClCompile Include="Log.cpp">
       <Filter>util</Filter>
     </ClCompile>
@@ -37,6 +34,9 @@
     </ClCompile>
     <ClCompile Include="monenumpad_maxmix\structs.c">
       <Filter>monenumpad_maxmix</Filter>
+    </ClCompile>
+    <ClCompile Include="CMMSession.cpp">
+      <Filter>audio_device</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -71,9 +71,6 @@
     <ClInclude Include="AudioSessionProvider.h">
       <Filter>monenumpad</Filter>
     </ClInclude>
-    <ClInclude Include="CMMSession.h">
-      <Filter>audio_device</Filter>
-    </ClInclude>
     <ClInclude Include="MMDeviceID.h">
       <Filter>audio_device</Filter>
     </ClInclude>
@@ -92,6 +89,9 @@
     <ClInclude Include="MarshalFunc.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="CMMSession.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NotificationIcon.rc" />
@@ -99,9 +99,6 @@
   <ItemGroup>
     <Image Include="NotificationIcon.ico" />
     <Image Include="printer.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Midl Include="NotificationIcon.idl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

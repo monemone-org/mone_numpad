@@ -7,8 +7,6 @@ void CMMDeviceController::Initialize() throw (HRESULT)
 
     Uninitialize();
 
-    m_ID = MMDeviceControllerID( CreateGUIDString().c_str() );
-
     CHK_HR(m_cs.Init());
 
     CHK_HR(CoCreateInstance(__uuidof(MMDeviceEnumerator),
@@ -19,15 +17,14 @@ void CMMDeviceController::Initialize() throw (HRESULT)
     ATLASSERT(m_spClientNotif == NULL);
     CHK_HR(CMMNotificationClient::CreateInstance(&m_spClientNotif));
 
-    MMDeviceControllerID ID = m_ID;
     CMMNotificationClient* clientNotif = dynamic_cast<CMMNotificationClient*>(m_spClientNotif.p);
     clientNotif->Initialize(
-        [ID]/*OnDeviceStateChanged*/(
+        []/*OnDeviceStateChanged*/(
             _In_  LPCWSTR pwstrDeviceId,
             _In_  DWORD dwNewState) throw(HRESULT)
         {
             MMDeviceID deviceID(pwstrDeviceId);
-            PostMainThreadRefreshDevice(deviceID);
+            PostMainThreadRefreshDeviceProperties(deviceID, L"CMMNotificationClient::OnDeviceStateChanged()");
         },
         []/*OnDeviceAdded*/(
             _In_  LPCWSTR pwstrDeviceId) throw(HRESULT)
@@ -37,7 +34,7 @@ void CMMDeviceController::Initialize() throw (HRESULT)
             _In_  LPCWSTR pwstrDeviceId) throw(HRESULT)
         {
         },
-        [ID]/*OnDefaultDeviceChanged*/(
+        []/*OnDefaultDeviceChanged*/(
             _In_  EDataFlow flow,
             _In_  ERole role,
             _In_  LPCWSTR pwstrDefaultDeviceId) throw(HRESULT)
@@ -46,12 +43,12 @@ void CMMDeviceController::Initialize() throw (HRESULT)
             if (flow == DEFAULT_OUT_DATAFLOW && role == DEFAULT_OUT_ROLE)
             {
                 //changed default OUT device
-                PostMainThreadRefreshAudioController(ID);
+                PostMainThreadRefreshAudioController(L"OnDefaultDeviceChanged(DEFAULT_OUT_DATAFLOW, DEFAULT_OUT_ROLE)");
             }
             else if (flow == DEFAULT_IN_DATAFLOW && role == DEFAULT_IN_ROLE)
             {
                 //changed default IN device
-                PostMainThreadRefreshAudioController(ID);
+                PostMainThreadRefreshAudioController(L"OnDefaultDeviceChanged(DEFAULT_IN_DATAFLOW, DEFAULT_IN_ROLE)");
             }
         },
         []/*OnPropertyValueChanged*/(
@@ -59,7 +56,7 @@ void CMMDeviceController::Initialize() throw (HRESULT)
             _In_  const PROPERTYKEY key) throw(HRESULT)
         {
             MMDeviceID deviceID(pwstrDeviceId);
-            PostMainThreadRefreshDevice(deviceID);
+            PostMainThreadRefreshDeviceProperties(deviceID, L"CMMNotificationClient::OnPropertyValueChanged");
         }
     );
     CHK_HR(m_spDeviceEnumerator->RegisterEndpointNotificationCallback(m_spClientNotif));
@@ -125,26 +122,70 @@ void CMMDeviceController::LoadDefaultDevices() throw (HRESULT)
         m_pDefaultIn = CMMDevice::CreateObject(spDefaultInDevice);
     }
 
-    FireOnSessionsRefreshed();
 }
 
-void CMMDeviceController::OnSessionRefreshed(CMMSession* pSession)
+void CMMDeviceController::RefreshSession(const MMSessionID& sessionID)
 {
+    ATLTRACE(TEXT("CMMDeviceController::RefreshSession(id=%s)\n"),
+        sessionID.ID.c_str());
+
+    CMMSession* pSession = this->FindSessionByID(sessionID);
+    if (pSession)
+    {
+        pSession->Refresh();
+    }
+
 }
 
-void CMMDeviceController::OnDeviceRefreshed(CMMDevice* pDevice)
+void CMMDeviceController::RefreshDeviceSessions(const MMDeviceID& deviceID)
 {
-    FireOnSessionsRefreshed();
+    ATLTRACE(TEXT("CMMDeviceController::RefreshDevice(id=%s)\n"),
+        deviceID.ID.c_str());
+
+    CMMDevice* pDevice = this->FindDeviceByID(deviceID);
+    if (pDevice)
+    {
+        pDevice->RefreshSessions();
+        this->FireOnMMSessionsAddedRemoved(); //MMSession(s) maybe added/removed.
+    }
 }
 
-void CMMDeviceController::FireOnSessionsRefreshed()
+void CMMDeviceController::RefreshDeviceProperties(const MMDeviceID& deviceID)
+{
+    ATLTRACE(TEXT("CMMDeviceController::RefreshDevice(id=%s)\n"),
+        deviceID.ID.c_str());
+
+    CMMDevice* pDevice = this->FindDeviceByID(deviceID);
+    if (pDevice)
+    {
+        pDevice->RefreshProperties();
+    }
+}
+
+
+void CMMDeviceController::Refresh()
+{
+    ATLTRACE(TEXT("CMMDeviceController::Refresh()\n"));
+    try
+    {
+        this->LoadDefaultDevices();
+        this->FireOnMMSessionsAddedRemoved(); //MMSession(s) maybe added/removed.
+        this->dump();
+    }
+    catch (HRESULT)
+    {
+    }
+}
+
+
+void CMMDeviceController::FireOnMMSessionsAddedRemoved()
 {
     for (auto listenerIter = m_listeners.begin();
         listenerIter != m_listeners.end();
         ++listenerIter)
     {
         CMMDeviceControllerListener* pListener = *listenerIter;
-        pListener->OnMMSessionsRefreshed();
+        pListener->OnMMSessionsAddedRemoved();
     }
 }
 
@@ -169,17 +210,6 @@ CMMDevice* CMMDeviceController::FindDeviceByID(const MMDeviceID& deviceID) const
     {
         return m_pDefaultOut;
     }
-
-    //auto found_iter = std::find_if(m_devices.begin(), m_devices.end(), [=](CMMDevice* pDevice) -> bool {
-    //    return (0 == wcscmp(pDevice->GetID(), pwszDeviceID));
-    //    });
-    //if (found_iter == m_devices.end())
-    //{
-    //    return NULL;
-    //}
-    //CMMDevice* pDisconnectedDevice = *found_iter;
-    //return pDisconnectedDevice;
-
     return NULL;
 }
 
@@ -219,6 +249,7 @@ bool CMMDeviceController::TS_IsDefaultDeviceID(LPCWSTR pszDeviceID)
 }
 
 void CMMDeviceController::dump() const {
+    ATLTRACE(L"<-- Dump CMMDeviceController\n");
     if (m_pDefaultOut)
     {
         ATLTRACE(TEXT("Default Out Device\n"));
@@ -230,6 +261,7 @@ void CMMDeviceController::dump() const {
         ATLTRACE(TEXT("Default In Device\n"));
         m_pDefaultIn->dump();
     }
+    ATLTRACE(L"-->\n");
 }
 
 
