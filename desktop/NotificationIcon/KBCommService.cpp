@@ -21,7 +21,10 @@ std::wstring ToString(BYTE* data, size_t cbData);
 void on_added_monenumpad(struct hid_device_info* dev_info, void* user_data)
 {
     KBCommService* pKBCommService = (KBCommService * )user_data;
-    pKBCommService->OpenMoneNumPad(dev_info);
+    if (pKBCommService)
+    {
+        pKBCommService->OpenMoneNumPad(dev_info);
+    }
 }
 
 
@@ -33,12 +36,14 @@ KBCommService::KBCommService(CMMDeviceController* pMMDeviceController) :
     m_nIDEvent(NULL)
     //m_pListener(NULL)
 {
+    m_audioSessionProvider.SetListener(this);
 }
 
 KBCommService::~KBCommService()
 {
     CloseMoneNumPad();
     Stop();
+    m_audioSessionProvider.SetListener(NULL);
 }
 
 bool KBCommService::Start()
@@ -57,7 +62,7 @@ void KBCommService::FindAndOpenMoneNumPad()
 
     on_added_device_callback_entry on_added_callback = {
         .on_added_device = on_added_monenumpad,
-        .user_data = NULL
+        .user_data = this
     };
     hid_device_info* dev_info = hid_enumerate_ex(
         MONENUMPAD_VENDOR_ID,
