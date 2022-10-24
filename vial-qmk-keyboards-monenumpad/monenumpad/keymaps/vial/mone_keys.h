@@ -6,6 +6,8 @@ enum mone_keys {
    //YouTube Layer
    MK_FIRST = SAFE_RANGE,
 
+   MK_FN,  //Function key to switch mode
+
    MK_YT_REWIND = MK_FIRST,  //YouTube Rewind
    MK_YT_FASTFORWD,  //YouTube Fast forward
    MK_YT_SPEEDUP, //YouTube Speed up

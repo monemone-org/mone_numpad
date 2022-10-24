@@ -47,12 +47,29 @@ bool maxmix_is_running(void)
 		timer_elapsed(timer_received_session_info) <= 2000;
 }
 
-void edit_next_session() 
+void edit_next_session(bool loopBack) 
 {
+	if (!maxmix_is_running())
+	{
+		return;
+	}
+
 	if (!curr_session_data.has_next) {
-#ifdef DEBUG_MAXMIX
-		uprintf("KL: %s returns - !curr.has_next\n", __FUNCTION__);
-#endif 
+
+		if (loopBack)
+		{
+	#ifdef DEBUG_MAXMIX_DEBUG
+			uprintf("KL: %s returns - !curr.has_next. LoopBack\n", __FUNCTION__);
+	#endif 		
+			send_maxmix_command(EDIT_FIRST_SESSION);
+		}
+		else
+		{
+	#ifdef DEBUG_MAXMIX_DEBUG
+			uprintf("KL: %s returns - !curr.has_next\n", __FUNCTION__);
+	#endif 		
+		}
+
 		return;
 	}
 
@@ -64,6 +81,11 @@ void edit_next_session()
 
 void edit_prev_session()
 {
+	if (!maxmix_is_running())
+	{
+		return;
+	}
+
 	if (!curr_session_data.has_prev) {
 #ifdef DEBUG_MAXMIX
 		uprintf("KL: %s returns - !curr.has_prev\n", __FUNCTION__);
@@ -114,8 +136,16 @@ void toggle_curr_session_mute()
 #ifdef DEBUG_MAXMIX
 uprintf("KL: %s(curr.id=%d)\n", __FUNCTION__, (int)curr_session_data.id);
 #endif 
-	send_maxmix_command(TOGGLE_MUTE);
+	if (maxmix_is_running())
+	{
+		send_maxmix_command(TOGGLE_MUTE);
+	}
+	else
+	{
+		SEND_STRING(SS_TAP(X_MUTE));
+	}
 }
+
 
 void send_maxmix_command(uint8_t command_id)
 {
@@ -150,6 +180,15 @@ void send_maxmix_command(uint8_t command_id)
 			#endif 
     	}
     	break;
+
+	case EDIT_FIRST_SESSION:
+		*command_data = 0;
+		#ifdef DEBUG_MAXMIX_DEBUG
+		uprintf("KL: %s - command_id=%d\n", __FUNCTION__,
+				(int)command_id);
+		#endif 
+		raw_hid_send(data, length);
+		break;
 
     default:
 		#ifdef DEBUG_MAXMIX

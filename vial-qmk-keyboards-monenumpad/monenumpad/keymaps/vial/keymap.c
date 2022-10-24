@@ -74,11 +74,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // KC_MUTE,   KC_P1,  KC_P2,   KC_P3, 
 // KC_BSPACE, KC_P0,  KC_PDOT, KC_PENT),
     [_BASE] = LAYOUT(
-           KC_DLR, KC_PERC, KC_PSLS, KC_PAST, 
-           KC_7,  KC_8,   KC_9,   KC_PMNS, 
-           KC_4,  KC_5,   KC_6,   KC_PPLS, 
-KC_MUTE,   KC_1,  KC_2,   KC_3, 
-KC_BSPACE,        KC_0, KC_DOT,   KC_PENT),
+           KC_DLR, KC_PERC, KC_PSLS,     KC_PAST, 
+           KC_7,   KC_8,    KC_9,        KC_PMNS, 
+           KC_4,   KC_5,    KC_6,        KC_PPLS, 
+KC_MUTE,   KC_1,   KC_2,    KC_3, 
+MK_FN,             KC_0,    KC_KP_DOT,   KC_PENT),
 
 // YouTube layer
     [_FN1] = LAYOUT(
@@ -97,18 +97,18 @@ KC_BSPACE,        KC_0, KC_DOT,   KC_PENT),
               MK_IOS_PREVAPP,     KC_UP,       MK_IOS_NEXTAPP,      MK_IOS_BRIDOWN, 
               KC_LEFT,            MK_IOS_PLAY, KC_RIGHT,            MK_IOS_BRIDUP, 
  _______,     MK_IOS_PREVTRACK,   KC_DOWN,     MK_IOS_NEXTTRACK,  
- KC_APPLE_FN,                     _______,     MK_IOS_QUICKNOTE,    _______),
+ _______,                         _______,     MK_IOS_QUICKNOTE,    _______),
 
 
 /*
     FUNC Key Layer
 */
     [_FN3] = LAYOUT(
-              _______, _______, _______, _______, 
+              KC_F10,  KC_F11,  KC_F12, _______, 
               KC_F7,   KC_F8,   KC_F9,   MK_IOS_BRIDOWN, 
               KC_F4,   KC_F5,   KC_F6,   MK_IOS_BRIDUP, 
  _______,     KC_F1,   KC_F2,   KC_F3,  
- KC_APPLE_FN,          _______, _______, _______)
+ _______,              _______, _______, _______)
 
 };
 
@@ -129,14 +129,22 @@ void switchToNextLayer(bool advance);
 layer_state_t getNextLayer(bool advance);
 
 
-bool process_hold_switch_layer_key(uint16_t keycode);
-bool process_tap_switch_layer_key(uint16_t keycode);
+// bool process_hold_switch_layer_key(uint16_t keycode);
+// bool process_tap_switch_layer_key(uint16_t keycode);
+
 bool process_hold_rotary_encoder_key(uint16_t keycode);
 bool process_tap_rotary_encoder_key(uint16_t keycode);
 
-const keypos_t switch_layer_combo_key_keypos = { .row= 4, .col= 0 };
-const keypos_t switch_layer_keypos = { .row= 0, .col= 4 };
-press_and_hold_key_t switch_layer_key;
+bool process_hold_fn_key(uint16_t keycode);
+bool process_tap_fn_key(uint16_t keycode);
+
+const keypos_t asterisk_keypos = { .row= 0, .col= 4 };  // * key
+const keypos_t fn_keypos = { .row= 4, .col= 0 }; //Fn
+press_and_hold_key_t fn_key;
+
+// const keypos_t switch_layer_keypos = { .row= 0, .col= 4 };  // * key
+// press_and_hold_key_t switch_layer_key;
+
 const keypos_t rotary_encoder_keypos = { .row= 3, .col= 0 };
 press_and_hold_key_t rotary_encoder_key;
 
@@ -153,12 +161,17 @@ void keyboard_post_init_user(void)
 
   read_user_config();
 
-  switch_layer_key = make_press_and_hold_key(
-        switch_layer_keypos,
-        process_hold_switch_layer_key,
-        process_tap_switch_layer_key
-    );
+//   switch_layer_key = make_press_and_hold_key(
+//         switch_layer_keypos,
+//         process_hold_switch_layer_key,
+//         process_tap_switch_layer_key
+//     );
 
+    fn_key = make_press_and_hold_key(
+        fn_keypos,
+        process_hold_fn_key,
+        process_tap_fn_key
+    );
 
   rotary_encoder_key = make_press_and_hold_key(
         rotary_encoder_keypos,
@@ -179,7 +192,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
     keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
 #endif 
 
-    if (! process_press_and_hold_key(&switch_layer_key, keycode, record))
+    if (! process_press_and_hold_key(&fn_key, keycode, record))
     {
         return false;
     }
@@ -191,15 +204,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
  
     if (record->event.pressed)
     {
-        // pressing key(c=0,r=4) (the del key on the left bottom corner)
-        //  while holding switchLayerKey will switch between Win and Mac mode.
-        if (record->event.key.col == switch_layer_combo_key_keypos.col
-            && record->event.key.row == switch_layer_combo_key_keypos.row
-            && press_and_hold_key_is_pressed(&switch_layer_key))
+        // pressing key(c=0,r=4) (the Fn key on the left bottom corner)
+        //  while holding asterisk key will switch between Win and Mac mode.
+        if (record->event.key.col == asterisk_keypos.col
+            && record->event.key.row == asterisk_keypos.row
+            && press_and_hold_key_is_pressed(&fn_key))
         {
             user_config.is_win_mode = !user_config.is_win_mode;
             save_user_config();
-            set_press_and_hold_key_to_handled(&switch_layer_key);
+            set_press_and_hold_key_to_handled(&fn_key);
             return false;
         }
 
@@ -371,27 +384,46 @@ bool oled_task_user(void) {
 
 #endif //OLED_ENABLE
 
-
-
-// return true if qmk should continue processing the pressed key 
-bool process_hold_switch_layer_key(uint16_t keycode)
+bool process_hold_fn_key(uint16_t keycode)
 {
-#ifdef DEBUG_LAYER
+#ifdef DEBUG_FNKEY
     uprintf("KL: %s\n", __FUNCTION__),
 #endif    
-
+    //hold fn to switch layer
     switchToNextLayer(true);
     return false;
 }
 
-// return true if qmk should continue processing the pressed key 
-bool process_tap_switch_layer_key(uint16_t keycode)
+bool process_tap_fn_key(uint16_t keycode)
 {
-#ifdef DEBUG_LAYER
-    uprintf("KL: %s\n",__FUNCTION__);
+    //tap fn to edit next session
+#ifdef DEBUG_FNKEY
+    uprintf("KL: %s\n", __FUNCTION__),
 #endif    
-    return true;
+    edit_next_session(true/**loop back to the first session if reach the last session*/);
+    return false;
 }
+
+
+// // return true if qmk should continue processing the pressed key 
+// bool process_hold_switch_layer_key(uint16_t keycode)
+// {
+// #ifdef DEBUG_LAYER
+//     uprintf("KL: %s\n", __FUNCTION__),
+// #endif    
+
+//     switchToNextLayer(true);
+//     return false;
+// }
+
+// // return true if qmk should continue processing the pressed key 
+// bool process_tap_switch_layer_key(uint16_t keycode)
+// {
+// #ifdef DEBUG_LAYER
+//     uprintf("KL: %s\n",__FUNCTION__);
+// #endif    
+//     return true;
+// }
 
 
 // return true if qmk should continue processing the pressed key 
@@ -408,7 +440,7 @@ bool process_hold_rotary_encoder_key(uint16_t keycode)
 bool process_tap_rotary_encoder_key(uint16_t keycode)
 {
 #ifdef DEBUG_LAYER
-    uprintf("KL: %s switch_layer_key.state=%d\n", __FUNCTION__, (int)switch_layer_key.state);
+    uprintf("KL: %s fn_key.state=%d\n", __FUNCTION__, (int)fn_key.state);
 #endif     
 
     if (editing_session_mode)
@@ -459,12 +491,12 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
         }
         else
         {
-            edit_next_session();
+            edit_next_session(false/*if reach the last session, do not loop back.*/);
         }
         return true;
     }
-    //  also handle switchLayerKey_pressed_and_handled, because the dial can be turnt more than once
-    else if (press_and_hold_key_is_pressed(&switch_layer_key)) 
+    //  also handle fnKey_pressed_and_handled, because the dial can be turnt more than once
+    else if (press_and_hold_key_is_pressed(&fn_key)) 
     {
 #ifdef DEBUG_LAYER
         uprintf("KL: %s: switchLayerKey_pressed, changing layer\n", __FUNCTION__);
@@ -478,7 +510,7 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
             switchToNextLayer(true);
         }
 
-        set_press_and_hold_key_to_handled(&switch_layer_key);
+        set_press_and_hold_key_to_handled(&fn_key);
 
         return true;
     }

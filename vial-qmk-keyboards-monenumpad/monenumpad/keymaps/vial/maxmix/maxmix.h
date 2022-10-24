@@ -8,7 +8,10 @@ void initialize_maxmix(void);
 
 bool maxmix_is_running(void);
 
-void edit_next_session(void);
+// loopBack:
+//      true: if current session is the last session, goto the 1st session.
+//      false: if current session is the last session, stay at the last session.
+void edit_next_session(bool loopBack);
 void edit_prev_session(void);
 void inc_curr_session_volumne(void);
 void dec_curr_session_volumne(void);

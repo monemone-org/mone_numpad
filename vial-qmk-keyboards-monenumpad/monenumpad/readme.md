@@ -31,7 +31,14 @@ See [VIAL Porting Build](https://get.vial.today/docs/)
 Enter the bootloader in one of the following ways:
 
 * **Physical reset button**: Briefly press the button on the back of the PCB - some may have pads you must short instead
-* **Ground reset pin**: Short GND and RESET pin on the micro controller
+* **Ground reset pin**: Short GND and RESET pin on the micro controller (the right top 2 pin when view from the bottom of the numpad)
+
+Behaviour:
+
+1. rotary encoder: change current session volume
+2. press and hold fn key: switch to next layer
+3. press fn: switch to next session
+4. press asterisk while holding fn key: switch between win/mac mode
 
 
 

@@ -495,6 +495,17 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
             new_curr_session_id = *msgData;
             break;
         }
+
+        case EDIT_FIRST_SESSION:
+        {
+            if (!m_audioSessionProvider.GetSessions().empty())
+            {
+                AudioSession audioSession = *(m_audioSessionProvider.GetSessions().begin());
+                new_curr_session_id = audioSession.id;
+            }
+            break;
+        }
+
         case VOLUME_UP:
         {
             new_curr_session_id = *msgData;

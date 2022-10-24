@@ -45,6 +45,7 @@ enum Command //: int8_t
     VOLUME_UP,          // data: uint8_t session_id
     VOLUME_DOWN,        // data: uint8_t session_id
     TOGGLE_MUTE,        // data: uint8_t session_id
+    EDIT_FIRST_SESSION, // Go back to edit the first session. data: void
 
     CMD_DEBUG = 50//DEBUG
 };
