@@ -50,8 +50,19 @@ enum Command //: int8_t
 };
 #define Command_t int8_t
 
+#if defined(_MSC_VER)
+#define STRUCT_ATTR_PACKED 
+#pragma pack(push, 1)
+#else
+#define STRUCT_ATTR_PACKED			__attribute__((__packed__))
+#endif
+
+//
+// Mone: note USB data is in big endian format.
+// 
+
 //session_info also serve as a heartbeat
-typedef struct __attribute__((__packed__)) 
+typedef struct STRUCT_ATTR_PACKED
 {
     uint8_t count;           // 8 bits, total count of session
     // 8 bits - 1 byte
@@ -61,36 +72,45 @@ typedef struct __attribute__((__packed__))
 extern SessionInfo makeSessionInfo(void);
 
 
-typedef struct __attribute__((__packed__))
+typedef struct STRUCT_ATTR_PACKED
 {
-    uint8_t unknown: 1;    // if true, then we don't have the correct values of isMuted and volume.
+    uint8_t unknown: 1;    // 1 bit.  if true, then we don't have the correct values of isMuted and volume.
     uint8_t isMuted : 1;   // 1 bit
     uint8_t volume;        // 8 bits
-    // 10 bits
+    // 10 bits -> 2 bytes
 } VolumeData;
 #define VolumeData_Size       2
 
 
 extern VolumeData makeVolumeData(void);
 
-#define SessionData_Name_Size    20
-typedef  struct __attribute__((__packed__)) 
+#define SessionData_Name_Size    25
+typedef  struct STRUCT_ATTR_PACKED
 {
     uint8_t id;    // 8 bits, session id
-    char name[SessionData_Name_Size]; // 20 bytes - 160 bits
+    char name[SessionData_Name_Size]; // 25 bytes - 200 bits
     uint8_t has_prev : 1; // 1 bit
     uint8_t has_next : 1; // 1 bit
     VolumeData volume; // VolumeData_Size * 8 bits = 16 bits
 
-    // 186 bits - 24 bytes
+    // 226 bits -> 24 bytes
 } SessionData;
-#define SessionData_Size        24
+#define SessionData_Size        29
 
-extern SessionData makeSessionData(void);
-extern SessionData makeOutSessionData(void);
-extern uint8_t isNullSession(SessionData session);
+#if defined(_MSC_VER)
+#pragma pack(pop)
+#endif
 
-extern void assert_maxmix_struct_preconditions(void);
+#ifdef _MSC_VER
+#define EXTERNAL
+#else
+#define EXTERNAL extern
+#endif
+EXTERNAL SessionData makeSessionData(void);
+EXTERNAL SessionData makeOutSessionData(void);
+EXTERNAL uint8_t isNullSession(SessionData session);
+
+EXTERNAL void assert_maxmix_struct_preconditions(void);
 
 
 

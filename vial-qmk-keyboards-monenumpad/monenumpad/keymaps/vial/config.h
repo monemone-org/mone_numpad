@@ -25,3 +25,19 @@
 // reduce RAM and EEPROM usage
 #define VIAL_COMBO_ENTRIES 4
 
+
+
+#ifdef CONSOLE_ENABLE
+#define DEBUG_EDIT_SESSION
+#define DEBUG_MAXMIX
+#define DEBUG_RECEIVE_KB
+// #define DEBUG_LAYER
+// #define DEBUG_SUBMIT_WEBPAGE_TIMING
+// #define DEBUG_PRESS_AND_HOLD    1
+
+
+#endif
+
+#define DEBUG_EDIT_SESSION
+#define DEBUG_RECEIVE_KB
+//#define DEBUG_MAXMIX

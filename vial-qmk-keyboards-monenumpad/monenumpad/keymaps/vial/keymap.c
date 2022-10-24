@@ -4,18 +4,15 @@
 #include QMK_KEYBOARD_H
 
 #include <stdio.h>
+#include <string.h>
 
 #include "user_config.h"
 #include "press_and_hold_key.h"
 #include "mone_keys.h"
 #include "maxmix/maxmix.h"
 
-#ifdef CONSOLE_ENABLE
-//#define DEBUG_EDIT_SESSION
-//#define DEBUG_MAXMIX
-//#define DEBUG_RECEIVE_KB
-//#define DEBUG_LAYER
-#endif
+#define min(a, b) \
+    ((a) < (b) ? (a) : (b));
 
 /**
  * Behaviour descriptions:
@@ -178,7 +175,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 
   // If console is enabled, it will print the matrix position and status of each key pressed
 #ifdef CONSOLE_ENABLE
-    uprintf("KL: kc: 0x%04X, c: %u, r: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
+    uprintf("KL: kc: 0x%04X, c: %u, r: %u, pressed: %b, tm: %u, int: %b, cnt: %u\n",
     keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
 #endif 
 
@@ -243,7 +240,7 @@ layer_state_t getNextLayer(bool advance)
     }
 
 #ifdef DEBUG_LAYER
-    uprintf("getNextLayer(%d): %d\n", advance, next_layer);
+    uprintf("%s(%d): %d\n", __FUNCTION__, advance, next_layer);
 #endif 
 
     return next_layer;
@@ -258,7 +255,7 @@ void switchToNextLayer(bool advance)
     layer_on(next_layer);
 
 #ifdef DEBUG_LAYER
-   uprintf("KL: switchToNextLayer: layer_on = _BASE + %u\n", get_highest_layer(layer_state));
+   uprintf("KL: %s: layer_on = _BASE + %u\n", __FUNCTION__, get_highest_layer(layer_state));
 #endif 
 }
 
@@ -270,64 +267,86 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 }
 
 // default screen size: 128x32 
+//                char size: 20x4
+#define OLED_MAX_WIDTH_IN_CHARS   20
+char szLine[OLED_MAX_WIDTH_IN_CHARS + 1]; //space firmware size
 
-void render_status(void) {
+// return # of lines it rendered
+int render_session_name(char* name, int maxLines)
+{
+    int nLinesRendered = 0;
+    size_t nNameLen = strlen(curr_session_data.name);
 
+    size_t nLine1Len = min( strlen(curr_session_data.name), OLED_MAX_WIDTH_IN_CHARS );
+    strncpy(szLine, curr_session_data.name, nLine1Len);
+    szLine[nLine1Len] = 0; 
+    oled_write_ln(szLine, false);
+    nLinesRendered += 1;
+
+    if (nNameLen > OLED_MAX_WIDTH_IN_CHARS && maxLines > nLinesRendered)
+    {
+        //wrap to line2
+        size_t nLine2Len = nNameLen - nLine1Len;
+        strncpy(szLine, curr_session_data.name+nLine1Len, nLine2Len);
+        szLine[nLine2Len] = 0; 
+        oled_write_ln(szLine, false);
+        
+        nLinesRendered += 1;
+    }
+
+    return nLinesRendered;
+}
+
+void render_status(void) 
+{
     // Host Keyboard Layer Status
     if (editing_session_mode)
     {
         oled_write_ln_P(PSTR("Choosing Audio"), false);
-        oled_write_ln_P(PSTR("Session"), false);
-        oled_write_P(PSTR("Audio: "), false);
-        oled_write_ln(curr_session_data.name, false);        
-        oled_write_ln_P(PSTR(""), false);
+        oled_write_ln_P(PSTR("Session:"), false);
+        // line 3, 4
+        int nLinesRendered = render_session_name(curr_session_data.name, 2);
+        if (nLinesRendered == 1)
+        {
+            //line 4
+            oled_write_ln_P(PSTR(""), false);
+        }
     }
     else
     {
         //oled_write_P(PSTR("Hi Mone!\n"), false);
 
+        // line 1
         oled_write_P(user_config.is_win_mode ? PSTR("Mode: Win\n"): PSTR("Mode: Mac\n"), false);
 
+        // line 2
         oled_write_P(PSTR("Layer: "), false);
 
         int layer = get_highest_layer(layer_state);
         const char *layer_name = layer_names[layer];
         oled_write_ln(layer_name, false);
 
-        // switch (get_highest_layer(layer_state)) {
-        //     case _BASE:
-        //         oled_write_P(PSTR("Base\n"), false);
-        //         break;
-        //     case _FN1:
-        //         oled_write_P(PSTR("YouTube\n"), false);
-        //         break;
-        //     case _FN2:
-        //         oled_write_P(PSTR("iOS\n"), false);
-        //         break;
-        //     case _FN3:
-        //         oled_write_P(PSTR("Fn Keys\n"), false);
-        //         break;
-        //     default:
-        //         // Or use the write_ln shortcut over adding '\n' to the end of your string
-        //         oled_write_ln_P(PSTR("Undefined"), false);
-        // }
-
-        oled_write_P(PSTR("Audio: "), false);
-        oled_write_ln(curr_session_data.name, false);
+        // line 3
+        render_session_name(curr_session_data.name, 1);
 
         // we only know the volumne data if maxmix is sending us those data.
         if (maxmix_is_running() && !curr_session_data.volume.unknown)
         {
-            uint8_t vol = curr_session_data.volume.volume;
-            if (vol > 100) {
-                vol = 100;
+            if (curr_session_data.volume.isMuted)
+            {
+                oled_write_ln_P(PSTR("Muted"), false);
             }
-            char szVol[10] = {0};
-            itoa( (int)curr_session_data.volume.volume, szVol, 10 );
-            oled_write_P(PSTR("Vol: "), false);
-            oled_write(szVol, false);
-            oled_write_P(PSTR(", "), false);
-            oled_write_ln_P(curr_session_data.volume.isMuted ? PSTR("Muted"):PSTR("Unmuted"), false);
+            else
+            {
+                uint8_t vol = curr_session_data.volume.volume;
+                if (vol > 100) {
+                    vol = 100;
+                }
+                memset(szLine, 0, sizeof(szLine));
+                itoa( (int)curr_session_data.volume.volume, szLine, 10 );
+                oled_write_P(PSTR("Vol: "), false);
+                oled_write_ln(szLine, false);
+            }            
         }
         else
         {
@@ -358,7 +377,7 @@ bool oled_task_user(void) {
 bool process_hold_switch_layer_key(uint16_t keycode)
 {
 #ifdef DEBUG_LAYER
-    uprintf("KL: process_hold_switch_layer_key\n"),
+    uprintf("KL: %s\n", __FUNCTION__),
 #endif    
 
     switchToNextLayer(true);
@@ -369,7 +388,7 @@ bool process_hold_switch_layer_key(uint16_t keycode)
 bool process_tap_switch_layer_key(uint16_t keycode)
 {
 #ifdef DEBUG_LAYER
-    uprintf("KL: process_tap_switch_layer_key\n");
+    uprintf("KL: %s\n",__FUNCTION__);
 #endif    
     return true;
 }
@@ -379,7 +398,7 @@ bool process_tap_switch_layer_key(uint16_t keycode)
 bool process_hold_rotary_encoder_key(uint16_t keycode)
 {
 #ifdef DEBUG_EDIT_SESSION
-    uprintf("KL: rotaryEncoderKey_Pos is hold, TODO: change audio channel\n");
+//    uprintf("KL: TODO: change audio channel\n");
 #endif 
     editing_session_mode = !editing_session_mode;
     return false;
@@ -389,13 +408,13 @@ bool process_hold_rotary_encoder_key(uint16_t keycode)
 bool process_tap_rotary_encoder_key(uint16_t keycode)
 {
 #ifdef DEBUG_LAYER
-    uprintf("KL: rotaryEncoderKey_Pos is pressed, switch_layer_key.state=%d\n", (int)switch_layer_key.state);
+    uprintf("KL: %s switch_layer_key.state=%d\n", __FUNCTION__, (int)switch_layer_key.state);
 #endif     
 
     if (editing_session_mode)
     {
 #ifdef DEBUG_EDIT_SESSION
-    uprintf("KL: rotaryEncoderKey_Pos is pressed, editing_session_mode=%d\n", (int)editing_session_mode);
+    uprintf("KL: %s editing_session_mode=%d\n", __FUNCTION__, (int)editing_session_mode);
 #endif 
 
         editing_session_mode = false;        
@@ -426,13 +445,13 @@ bool encoder_update_kb(uint8_t index, bool clockwise)
 bool mone_encoder_update(uint8_t index, bool clockwise) 
 {
 #ifdef DEBUG_EDIT_SESSION
-        uprintf("KL: mone_encoder_update(index=%d, clockwise=%d)\n", (int)index, (int)clockwise);
+        uprintf("KL: %s(i=%d, clockwise=%d)\n", __FUNCTION__, (int)index, (int)clockwise);
 #endif 
 
     if (editing_session_mode)
     {
 #ifdef DEBUG_EDIT_SESSION
-        uprintf("KL: mone_encoder_update: editing_session_mode == true, changing curr session\n");
+        uprintf("KL: %s: change curr session\n", __FUNCTION__);
 #endif 
         if (clockwise)
         {
@@ -448,7 +467,7 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
     else if (press_and_hold_key_is_pressed(&switch_layer_key)) 
     {
 #ifdef DEBUG_LAYER
-        uprintf("KL: mone_encoder_update: switchLayerKey_state == switchLayerKey_pressed, changing layer\n");
+        uprintf("KL: %s: switchLayerKey_pressed, changing layer\n", __FUNCTION__);
 #endif 
         if (clockwise)
         {
@@ -469,7 +488,7 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
         if (! maxmix_is_running())
         {
 #ifdef DEBUG_MAXMIX
-            uprintf("KL: mone_encoder_update !maxmix_is_running\n");
+            uprintf("KL: %s: !maxmix_is_running\n", __FUNCTION__);
 #endif 
             return vial_encoder_update(index, clockwise);
         }
@@ -479,7 +498,7 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
         if (! encoder_is_volumne_control)
         {
 #ifdef DEBUG_MAXMIX
-            uprintf("KL: mone_encoder_update !encoder_is_volumne_control\n");
+            uprintf("KL: %s: !encoder_is_volumne_control\n", __FUNCTION__);
 #endif 
             return vial_encoder_update(index, clockwise);
         }        
@@ -502,13 +521,14 @@ bool mone_encoder_update(uint8_t index, bool clockwise)
 void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
 
 #ifdef DEBUG_RECEIVE_KB
-    uprintf("KL: raw_hid_receive_kb(length=%d)\n", (int)length);
+    uprintf("KL: %s(length=%d data=%02X %02X %02X %02X %02X)\n", __FUNCTION__, (int)length,
+        data[0], data[1], data[2], data[3], data[4]);
 #endif 
 
     uint8_t *command_id = &data[0];
 
 #ifdef DEBUG_RECEIVE_KB
-    uprintf("KL: raw_hid_receive_kb(command_id=0x%02X)\n", *command_id);
+    uprintf("KL: %s: raw_hid_receive_kb(command_id=0x%02X)\n", __FUNCTION__, *command_id);
 #endif 
 
     if (*command_id != id_mone_prefix) {

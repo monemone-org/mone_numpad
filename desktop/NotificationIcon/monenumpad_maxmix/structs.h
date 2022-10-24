@@ -74,28 +74,28 @@ extern SessionInfo makeSessionInfo(void);
 
 typedef struct STRUCT_ATTR_PACKED
 {
-    uint8_t unknown: 1;    // if true, then we don't have the correct values of isMuted and volume.
+    uint8_t unknown: 1;    // 1 bit.  if true, then we don't have the correct values of isMuted and volume.
     uint8_t isMuted : 1;   // 1 bit
     uint8_t volume;        // 8 bits
-    // 10 bits
+    // 10 bits -> 2 bytes
 } VolumeData;
 #define VolumeData_Size       2
 
 
 extern VolumeData makeVolumeData(void);
 
-#define SessionData_Name_Size    20
+#define SessionData_Name_Size    25
 typedef  struct STRUCT_ATTR_PACKED
 {
     uint8_t id;    // 8 bits, session id
-    char name[SessionData_Name_Size]; // 20 bytes - 160 bits
+    char name[SessionData_Name_Size]; // 25 bytes - 200 bits
     uint8_t has_prev : 1; // 1 bit
     uint8_t has_next : 1; // 1 bit
     VolumeData volume; // VolumeData_Size * 8 bits = 16 bits
 
-    // 186 bits - 24 bytes
+    // 226 bits -> 24 bytes
 } SessionData;
-#define SessionData_Size        24
+#define SessionData_Size        29
 
 #if defined(_MSC_VER)
 #pragma pack(pop)

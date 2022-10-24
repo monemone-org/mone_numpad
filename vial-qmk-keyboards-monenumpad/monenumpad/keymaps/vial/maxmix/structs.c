@@ -1,5 +1,13 @@
 //structs.c
+#ifdef VIA_ENABLE
 #include QMK_KEYBOARD_H
+#endif
+
+
+#ifdef _MSC_VER
+#include <stdbool.h>
+#endif
+
 
 #include "structs.h"
 #include "assert_precond.h"
@@ -15,8 +23,8 @@ SessionInfo makeSessionInfo(void) {
 VolumeData makeVolumeData() {
     VolumeData o = {
         .unknown = (true),
-        .volume = (0), 
-        .isMuted = (false)
+        .isMuted = (false),
+        .volume = (0)
  	};
  	return o;
 }

@@ -8,8 +8,7 @@
 #include "raw_hid.h"
 
 #ifdef CONSOLE_ENABLE
-//#define DEBUG_MAXMIX
-//void print_byte_array(uint8_t* bytes, uint8_t cb);
+void print_byte_array(uint8_t* bytes, uint8_t cb);
 #endif
 
 
@@ -52,7 +51,7 @@ void edit_next_session()
 {
 	if (!curr_session_data.has_next) {
 #ifdef DEBUG_MAXMIX
-		uprintf("KL: edit_next_session returns - !curr.has_next\n");
+		uprintf("KL: %s returns - !curr.has_next\n", __FUNCTION__);
 #endif 
 		return;
 	}
@@ -67,7 +66,7 @@ void edit_prev_session()
 {
 	if (!curr_session_data.has_prev) {
 #ifdef DEBUG_MAXMIX
-		uprintf("KL: edit_prev_session returns - !curr.has_prev\n");
+		uprintf("KL: %s returns - !curr.has_prev\n", __FUNCTION__);
 #endif 
 		return;
 	}
@@ -82,7 +81,7 @@ void edit_prev_session()
 void inc_curr_session_volumne()
 {
 #ifdef DEBUG_MAXMIX
-uprintf("KL: inc_curr_session_volumne(curr.id=%d)\n", (int)curr_session_data.id);
+uprintf("KL: %s(curr.id=%d)\n", __FUNCTION__, (int)curr_session_data.id);
 #endif 
 
 	if (maxmix_is_running())
@@ -98,7 +97,7 @@ uprintf("KL: inc_curr_session_volumne(curr.id=%d)\n", (int)curr_session_data.id)
 void dec_curr_session_volumne()
 {
 #ifdef DEBUG_MAXMIX
-uprintf("KL: dec_curr_session_volumne(curr.id=%d)\n", (int)curr_session_data.id);
+uprintf("KL: %s(curr.id=%d)\n", __FUNCTION__, (int)curr_session_data.id);
 #endif 
 	if (maxmix_is_running())
 	{
@@ -113,7 +112,7 @@ uprintf("KL: dec_curr_session_volumne(curr.id=%d)\n", (int)curr_session_data.id)
 void toggle_curr_session_mute()
 {
 #ifdef DEBUG_MAXMIX
-uprintf("KL: toggle_curr_session_volumne(curr.id=%d)\n", (int)curr_session_data.id);
+uprintf("KL: %s(curr.id=%d)\n", __FUNCTION__, (int)curr_session_data.id);
 #endif 
 	send_maxmix_command(TOGGLE_MUTE);
 }
@@ -139,7 +138,7 @@ void send_maxmix_command(uint8_t command_id)
     	{
     		*command_data = curr_session_data.id;
 			#ifdef DEBUG_MAXMIX
-			uprintf("KL: send_maxmix_command - command_id=%d, curr.id=%d.\n",
+			uprintf("KL: %s - command_id=%d, curr.id=%d.\n", __FUNCTION__,
 					(int)command_id, (int)curr_session_data.id);
 			#endif 
 			raw_hid_send(data, length);
@@ -147,14 +146,14 @@ void send_maxmix_command(uint8_t command_id)
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: send_maxmix_command - ASSERT command_data_len < 1.\n");
+        	uprintf("KL: %s - ASSERT command_data_len < 1.\n", __FUNCTION__);
 			#endif 
     	}
     	break;
 
     default:
 		#ifdef DEBUG_MAXMIX
-    	uprintf("KL: send_maxmix_command - ASSERT unknown command: %d.\n", (int)command_id);
+    	uprintf("KL: %s - ASSERT unknown command: %d.\n", __FUNCTION__, (int)command_id);
 		#endif 
     	break;
 	};		
@@ -179,7 +178,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
 			desktop_client_protocol_version = (command_data[0] << 8) | command_data[1];
 
 			#ifdef DEBUG_MAXMIX
-			uprintf("KL: handle_maxmix_command(PROTOCOL_VERSION_EXCHANGE)=0x%04X.\n", 
+			uprintf("KL: %s(PROTOCOL_VERSION_EXCHANGE)=0x%04X.\n", __FUNCTION__, 
 					(int)desktop_client_protocol_version);
 			#endif 
 
@@ -195,14 +194,14 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     		memcpy(&session_info, command_data, sizeof(session_info));
     		*command_id = CMD_OK;
 			#ifdef DEBUG_MAXMIX
-			// uprintf("KL: handle_maxmix_command(SESSION_INFO), session_info(count=%d).\n", 
+			// uprintf("KL: %s(SESSION_INFO), session_info(count=%d).\n",  __FUNCTION__
 			// 		(int)session_info.count);
 			#endif 
     	}
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(SESSION_INFO) - ERROR command_data_len < sizeof(session_info).\n");
+        	uprintf("KL: %s(SESSION_INFO) - ERROR command_data_len < sizeof(session_info).\n", __FUNCTION__);
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -227,7 +226,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     		memcpy(&curr_session_data, command_data, sizeof(curr_session_data));
     		*command_id = CMD_OK;
 			#ifdef DEBUG_MAXMIX
-			uprintf("KL: handle_maxmix_command(CURRENT_SESSION), curr(id=%d, name=%s, vol=%d, isMuted=%d).\n", 
+			uprintf("KL: %s(CURRENT_SESSION), curr(id=%d, name=%s, vol=%d, isMuted=%d).\n", __FUNCTION__, 
 					(int)curr_session_data.id, curr_session_data.name,
 					(int)curr_session_data.volume.volume, (int)curr_session_data.volume.isMuted);
 			#endif 
@@ -235,7 +234,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(CURRENT_SESSION) - ERROR command_data_len < sizeof(SessionData).\n");
+        	uprintf("KL: %s(CURRENT_SESSION) - ERROR command_data_len < sizeof(SessionData).\n", __FUNCTION__);
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -247,14 +246,14 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     		memcpy(&prev_session_data, command_data, sizeof(prev_session_data));
     		*command_id = CMD_OK;
 			#ifdef DEBUG_MAXMIX
-			uprintf("KL: handle_maxmix_command(PREVIOUS_SESSION), prev(id=%d, name=%s).\n", 
+			uprintf("KL: %s(PREVIOUS_SESSION), prev(id=%d, name=%s).\n", __FUNCTION__, 
 					(int)prev_session_data.id, prev_session_data.name);
 			#endif 
     	}
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(PREVIOUS_SESSION) - ERROR command_data_len < sizeof(SessionData).\n");
+        	uprintf("KL: %s(PREVIOUS_SESSION) - ERROR command_data_len < sizeof(SessionData).\n", __FUNCTION__);
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -266,14 +265,14 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
     		memcpy(&next_session_data, command_data, sizeof(next_session_data));
     		*command_id = CMD_OK;
 			#ifdef DEBUG_MAXMIX
-			uprintf("KL: handle_maxmix_command(NEXT_SESSION), next(id=%d, name=%s).\n", 
+			uprintf("KL: %s(NEXT_SESSION), next(id=%d, name=%s).\n", __FUNCTION__, 
 					(int)next_session_data.id, next_session_data.name);
 			#endif 
     	}
     	else 
     	{
 			#ifdef DEBUG_MAXMIX
-        	uprintf("KL: handle_maxmix_command(NEXT_SESSION) - ERROR command_data_len < sizeof(SessionData).\n");
+        	uprintf("KL: %s(NEXT_SESSION) - ERROR command_data_len < sizeof(SessionData).\n"), __FUNCTION__;
 			#endif 
 			*command_id = CMD_ERR;
     	}
@@ -281,7 +280,7 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
 
     default:
 		#ifdef DEBUG_MAXMIX
-    	uprintf("KL: handle_maxmix_command - ERROR unknown cmd: %d.\n", (int)command_id);
+    	uprintf("KL: %s - ERROR unknown cmd: %d.\n", __FUNCTION__, (int)command_id);
 		#endif 
 		*command_id = CMD_ERR;
     	break;
@@ -290,40 +289,40 @@ void handle_maxmix_command(uint8_t *data, uint8_t length)
 }
 
 #ifdef CONSOLE_ENABLE
-// static uint8_t bitFlags[8] = {
-// 	1 << 7,
-// 	1 << 6,
-// 	1 << 5,
-// 	1 << 4,
-// 	1 << 3,
-// 	1 << 2,
-// 	1 << 1,
-// 	1
-// };
+static uint8_t bitFlags[8] = {
+	1 << 7,
+	1 << 6,
+	1 << 5,
+	1 << 4,
+	1 << 3,
+	1 << 2,
+	1 << 1,
+	1
+};
 
-// void print_byte_array(uint8_t* bytes, uint8_t cb)
-// {
-// 	uprintf("KL: print_byte_array <----");
-// 	for (int i=0; i<cb; ++i)
-// 	{
-// 		char strByte[9] = {};
-// 		uint8_t b = bytes[i];
-// 		for (int j=0; j<8; ++j)
-// 		{
-// 			if (b & bitFlags[j])
-// 			{
-// 				strByte[j] = '1';
-// 			}
-// 			else
-// 			{
-// 				strByte[j] = '0';
-// 			}
-// 		}
-// 		uprintf("%s ", strByte );
-// 	}
-// 	uprintf("---->");
+void print_byte_array(uint8_t* bytes, uint8_t cb)
+{
+	uprintf("KL: print_byte_array <----");
+	for (int i=0; i<cb; ++i)
+	{
+		char strByte[9] = {};
+		uint8_t b = bytes[i];
+		for (int j=0; j<8; ++j)
+		{
+			if (b & bitFlags[j])
+			{
+				strByte[j] = '1';
+			}
+			else
+			{
+				strByte[j] = '0';
+			}
+		}
+		uprintf("%s ", strByte );
+	}
+	uprintf("---->");
 
-// }
+}
 
 #endif
 

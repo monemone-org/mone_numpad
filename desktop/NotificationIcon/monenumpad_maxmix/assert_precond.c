@@ -11,7 +11,7 @@
 
 #include "assert_precond.h"
 
-void assert_precond(bool cond, char* message)
+void assert_precond(bool cond, const char* message)
 {
 #ifdef CONSOLE_ENABLE
 	if (!cond)  

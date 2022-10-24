@@ -3,10 +3,6 @@
 #include "press_and_hold_key.h"
 #include "mone_keys.h"
 
-#ifdef CONSOLE_ENABLE
-#define DEBUG_PRESS_AND_HOLD    1
-#endif
-
 
 #define HOLD_DETECTION_DURATION     500
 
@@ -59,7 +55,7 @@ bool process_press_and_hold_key(
     }
 
 // #ifdef DEBUG_PRESS_AND_HOLD
-//     uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - key->pos matched\n",
+//     uprintf("KL: %s(c: %u, r: %u) - key->pos matched\n", __FUNCTION__,
 //    		key->pos.row, key->pos.col);
 // #endif    
 
@@ -69,7 +65,7 @@ bool process_press_and_hold_key(
         if (key->state == key_not_pressed) 
         {
 #ifdef DEBUG_PRESS_AND_HOLD
-		    uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - key->state == key_not_pressed. Changed state to pressed.\n",
+		    uprintf("KL: %s(c: %u, r: %u) - key->state == key_not_pressed. Changed state to pressed.\n", __FUNCTION__,
         			key->pos.row, key->pos.col);
 #endif    
             key->state = key_pressed;
@@ -86,7 +82,7 @@ bool process_press_and_hold_key(
             if (timer_elapsed(key->timer) < HOLD_DETECTION_DURATION)
             {
 #ifdef DEBUG_PRESS_AND_HOLD
-    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) < HOLD_DETECTION_DURATION. invoke procees_tap().\n",
+    			uprintf("KL: %s(c: %u, r: %u) - timer_elapsed(key->timer) < HOLD_DETECTION_DURATION. invoke procees_tap().\n", __FUNCTION__,
     				key->pos.row, key->pos.col);
 #endif    
 
@@ -95,7 +91,7 @@ bool process_press_and_hold_key(
             else //(timer_elapsed(key.timer) >= HOLD_DETECTION_DURATION)
             {
 #ifdef DEBUG_PRESS_AND_HOLD
-    			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - timer_elapsed(key->timer) >= HOLD_DETECTION_DURATION. invoke procees_hold().\n",
+    			uprintf("KL: %s(c: %u, r: %u) - timer_elapsed(key->timer) >= HOLD_DETECTION_DURATION. invoke procees_hold().\n", __FUNCTION__,
     				key->pos.row, key->pos.col);
 #endif    
                 result = key->process_hold(keycode);
@@ -105,7 +101,7 @@ bool process_press_and_hold_key(
         if (result) 
         {
 #ifdef DEBUG_PRESS_AND_HOLD
-   			uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - result == false, process_mone_key() and tap_code16().\n",
+   			uprintf("KL: %s(c: %u, r: %u) - result == false, process_mone_key() and tap_code16().\n", __FUNCTION__,
    				key->pos.row, key->pos.col);
 #endif    
 		    if (process_mone_key(keycode)) 
@@ -115,7 +111,7 @@ bool process_press_and_hold_key(
         }
 	
 #ifdef DEBUG_PRESS_AND_HOLD
-		uprintf("KL: process_press_and_hold_key(c: %u, r: %u) - restore key->state = key_not_pressed.\n",
+		uprintf("KL: %s(c: %u, r: %u) - restore key->state = key_not_pressed.\n", __FUNCTION__,
 			key->pos.row, key->pos.col);
 #endif    
         key->state = key_not_pressed;

@@ -7,11 +7,6 @@
 #define MACRO_TIMER 10
 
 
-// #ifdef CONSOLE_ENABLE
-// #define DEBUG_SUBMIT_WEBPAGE_TIMING
-// #endif
-
-
 #define DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME  70  //choose 70ms for Brave on iPad to work
 #define DEFAULT_POSTSUBMIT_WEBPAGE_WAIT_TIME  10
 uint64_t presubmit_webpage_wait_time = DEFAULT_PRESUBMIT_WEBPAGE_WAIT_TIME;
