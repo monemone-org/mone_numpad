@@ -59,6 +59,7 @@ public:
 protected:
     friend void on_added_monenumpad(struct hid_device_info* dev_info, void* user_data);
 
+    void FindAndOpenMoneNumPad();
     void OpenMoneNumPad(hid_device_info* dev_info);
     void CloseMoneNumPad();
 
@@ -112,6 +113,7 @@ protected:
 public:
 	//HIDDeviceListener Impl
     virtual void DeviceDataReceived(HIDDevice* dev, BYTE* data, size_t cbData);
+    virtual void DeviceDataReadFailure(HIDDevice* dev, const wchar_t* pszMessage);
     virtual void DeviceDisconnected(HIDDevice* dev);
 	
     // AudioSessionProviderListener

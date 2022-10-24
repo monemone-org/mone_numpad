@@ -12,7 +12,8 @@
 
 BYTE KBCommService::DEFAULT_SESSION_ID = SESSION_ID_OUT;
 
-#define MAX_VOLUME 100
+#define NUMPAD_MAX_VOLUME 100
+#define NUMPAD_VOLUME_STEP 1
 
 std::wstring ToString(BYTE* data, size_t cbData);
 
@@ -45,6 +46,15 @@ bool KBCommService::Start()
     m_audioSessionProvider.RefreshSessions();
     m_audioSessionProvider.dump();
 
+    this->FindAndOpenMoneNumPad();
+
+    return true;
+}
+
+void KBCommService::FindAndOpenMoneNumPad()
+{
+    hid_stop_enumerate_on_added_device_callback();
+
     on_added_device_callback_entry on_added_callback = {
         .on_added_device = on_added_monenumpad,
         .user_data = NULL
@@ -59,8 +69,6 @@ bool KBCommService::Start()
     {
         OpenMoneNumPad(dev_info);
     }
-
-    return true;
 }
 
 void KBCommService::Stop()
@@ -272,9 +280,9 @@ SessionData KBCommService::MakeSessionData(
 
     if (!IsNull(audioSession))
     {
-        int vol = max(0, (int)(audioSession.pMMSession->GetVolume() * MAX_VOLUME));
-        vol = min(MAX_VOLUME, vol);
-        bool muted = audioSession.pMMSession->IsMute();
+        int vol = max(0, (int)roundf(audioSession.pVolControl->GetVolume() * NUMPAD_MAX_VOLUME));
+        vol = min(NUMPAD_MAX_VOLUME, vol);
+        bool muted = audioSession.pVolControl->IsMute();
 
         SessionData sessionData = {
             .id = audioSession.id,
@@ -493,8 +501,8 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
             AudioSession curr_session = m_audioSessionProvider.GetSessionByID(new_curr_session_id);
             if (!IsNull(curr_session))
             {
-                float new_vol = min(MAX_VOLUME, curr_session.pMMSession->GetVolume() + ((float)5.0/ MAX_VOLUME));
-                curr_session.pMMSession->SetVolume(new_vol);
+                float new_vol = min((float)1.0, curr_session.pVolControl->GetVolume() + ((float)NUMPAD_VOLUME_STEP/NUMPAD_MAX_VOLUME));
+                curr_session.pVolControl->SetVolume(new_vol);
                 volChanged = true;
             }
             break;
@@ -505,8 +513,8 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
             AudioSession curr_session = m_audioSessionProvider.GetSessionByID(new_curr_session_id);
             if (!IsNull(curr_session))
             {
-                float new_vol = min(MAX_VOLUME, curr_session.pMMSession->GetVolume() - ((float)5.0 / MAX_VOLUME));
-                curr_session.pMMSession->SetVolume(new_vol);
+                float new_vol = min((float)1.0, curr_session.pVolControl->GetVolume() - ((float)NUMPAD_VOLUME_STEP/NUMPAD_MAX_VOLUME));
+                curr_session.pVolControl->SetVolume(new_vol);
                 volChanged = true;
             }
             break;
@@ -517,7 +525,7 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
             AudioSession curr_session = m_audioSessionProvider.GetSessionByID(new_curr_session_id);
             if (!IsNull(curr_session))
             {
-                curr_session.pMMSession->SetMute(!curr_session.pMMSession->IsMute());
+                curr_session.pVolControl->toggleMute();
                 volChanged = true;
             }
             break;
@@ -572,6 +580,17 @@ void KBCommService::DeviceDataReceived(HIDDevice* dev, BYTE* data, size_t cbData
     if (m_pConnectedDevice == dev)
     {
         this->HandleDeviceDataReceived(data, cbData);
+    }
+}
+
+void KBCommService::DeviceDataReadFailure(HIDDevice* dev, const wchar_t* pszMessage)
+{
+    if (m_pConnectedDevice == dev)
+    {
+        //Close and try to reconnect
+        this->CloseMoneNumPad();
+        this->FindAndOpenMoneNumPad();
+
     }
 }
 

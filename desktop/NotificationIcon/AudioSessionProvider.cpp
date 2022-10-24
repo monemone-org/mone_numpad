@@ -15,7 +15,7 @@ void AudioSession::dump() const
 {
 	ATLTRACE(TEXT("<-- Dump AudioSession\n"));
 	ATLTRACE(TEXT("        id: \"%d\"\n"), (this->id));
-	ATLTRACE(TEXT("        name: \"%s\"\n"), this->pMMSession->GetDisplayName());
+	ATLTRACE(TEXT("        name: \"%s\"\n"), this->pVolControl->GetDisplayName());
 	ATLTRACE(TEXT("-->\n"));
 }
 
@@ -33,29 +33,20 @@ void AudioSessionProvider::RefreshSessions()
 	CMMDevice* pInDevice = m_mmdeviceController->GetDefaultIn();
 	const std::list<CMMSession*> defaultInSessions = pInDevice->GetSessions();
 
-	auto addSystemInOutFunc = [this](const std::list<CMMSession*> sessions)
+	auto addSystemInOutFunc = [this](CMMDevice* pMMDevice)
 	{
-		auto defaultSessionIter = std::find_if(sessions.begin(), sessions.end(),
-			[](CMMSession* pSession) -> bool {
-				return pSession->IsSystemInOut();
-			});
-		if (defaultSessionIter != sessions.end())
+		LPCSTR name = NULL;
+		uint8_t id = 0;
+		CW2A aName = pMMDevice->GetDisplayName();
+		if (pMMDevice->IsInput())
 		{
-			CMMSession* pMMSession = *defaultSessionIter;
-			LPCSTR name = NULL;
-			uint8_t id = 0;
-			if (pMMSession->IsInput())
-			{
-				name = "Windows System Input to test long name handling";
-				id = SESSION_ID_IN;
-			}
-			else
-			{
-				name = "Output";
-				id = SESSION_ID_OUT;
-			}
-			m_sessions.push_back(CreateAudioSession(pMMSession, name, id));
+			id = SESSION_ID_IN;
 		}
+		else
+		{
+			id = SESSION_ID_OUT;
+		}
+		m_sessions.push_back(CreateAudioSession(pMMDevice, aName, id));
 	};
 
 	auto addAppsInOutFunc = [this](const std::list<CMMSession*> sessions)
@@ -79,8 +70,8 @@ void AudioSessionProvider::RefreshSessions()
 	//  output apps ...
 	//  //input apps ...
 	//]
-	addSystemInOutFunc(defaultOutSessions);
-	addSystemInOutFunc(defaultInSessions);
+	addSystemInOutFunc(pOutDevice);
+	addSystemInOutFunc(pInDevice);
 	addAppsInOutFunc(defaultOutSessions);
 	//addAppsInOutFunc(defaultInSessions);
 
@@ -93,13 +84,13 @@ void AudioSessionProvider::RefreshSessions()
 	}
 }
 
-AudioSession AudioSessionProvider::CreateAudioSession(CMMSession* pMMSession, LPCSTR pszName, uint8_t id)
+AudioSession AudioSessionProvider::CreateAudioSession(IMMVolumeControl *pVolControl, LPCSTR pszName, uint8_t id)
 {
 	AudioSession audioSession =
 	{
 		.id = id,
 		.name = pszName,
-		.pMMSession = pMMSession
+		.pVolControl = pVolControl
 	};
 	return audioSession;
 }
@@ -115,24 +106,24 @@ void AudioSessionProvider::UpdateSessionIDsMap()
 		++iter)
 	{
 		const AudioSession& audioSession = *iter;
-		newMap[audioSession.pMMSession->GetID().ID] = audioSession.id;
+		newMap[audioSession.pVolControl->GetVolControlID()] = audioSession.id;
 	}
 
-	m_mmSessionIDToNumPadSessionIDMap = newMap;
+	m_mmVolControlIDToNumPadSessionIDMap = newMap;
 }
 
-uint8_t AudioSessionProvider::AppSessionIDForMMSession(const CMMSession *pMMSession)
+uint8_t AudioSessionProvider::AppSessionIDForMMSession(IMMVolumeControl *pVolControl)
 {
 	uint8_t sessionID;
 
-	const std::wstring& mmSessionID = pMMSession->GetID().ID;
+	std::wstring volControlID = pVolControl->GetVolControlID();
 
-	auto iter = m_mmSessionIDToNumPadSessionIDMap.find(mmSessionID);
-	if (iter == m_mmSessionIDToNumPadSessionIDMap.end())
+	auto iter = m_mmVolControlIDToNumPadSessionIDMap.find(volControlID);
+	if (iter == m_mmVolControlIDToNumPadSessionIDMap.end())
 	{
 		// assign new uint8_t session ID 
 		sessionID = this->m_nextNumPadID;
-		m_mmSessionIDToNumPadSessionIDMap[mmSessionID] = sessionID;
+		m_mmVolControlIDToNumPadSessionIDMap[volControlID] = sessionID;
 		this->m_nextNumPadID += 1;
 		if (this->m_nextNumPadID == 0)
 		{

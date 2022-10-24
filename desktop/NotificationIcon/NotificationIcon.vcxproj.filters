@@ -92,6 +92,9 @@
     <ClInclude Include="CMMSession.h">
       <Filter>audio_device</Filter>
     </ClInclude>
+    <ClInclude Include="IMMVolumeControl.h">
+      <Filter>audio_device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NotificationIcon.rc" />

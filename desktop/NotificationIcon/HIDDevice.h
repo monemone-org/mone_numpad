@@ -13,6 +13,7 @@ class HIDDeviceListener
 {
 public:
 	virtual void DeviceDataReceived(HIDDevice* dev, BYTE* data, size_t cbData) = 0;
+	virtual void DeviceDataReadFailure(HIDDevice* dev, const wchar_t* pszMessage) = 0;
 	virtual void DeviceDisconnected(HIDDevice* dev) = 0;
 };
 
@@ -80,5 +81,6 @@ public:
 
 	void OnDisconnectedCallback();
 	void OnReadCallback(unsigned char* data, size_t cbData);
+	void OnReadFailureCallback(const wchar_t* pszMessage);
 
 };

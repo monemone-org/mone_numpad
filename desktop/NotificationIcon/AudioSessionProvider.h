@@ -11,7 +11,7 @@ struct AudioSession
 {
 	uint8_t id; // session id to communicate with monenum_pad
 	std::string name;
-	CMMSession* pMMSession;
+	IMMVolumeControl *pVolControl;
 
 	void dump() const;
 };
@@ -32,7 +32,7 @@ class AudioSessionProvider: CMMDeviceControllerListener
 protected:
 	CMMDeviceController* m_mmdeviceController;
 	uint8_t m_nextNumPadID;
-	std::map<std::wstring, uint8_t> m_mmSessionIDToNumPadSessionIDMap;
+	std::map<std::wstring, uint8_t> m_mmVolControlIDToNumPadSessionIDMap;
 	std::vector<AudioSession> m_sessions;
 	AudioSessionProviderListener* m_pListener;
 
@@ -90,9 +90,9 @@ public:
 	void dump() const;
 
 protected:
-	uint8_t AppSessionIDForMMSession(const CMMSession* pMMSession);
+	uint8_t AppSessionIDForMMSession(IMMVolumeControl *pVolControl);
 	void UpdateSessionIDsMap();
 
-	AudioSession CreateAudioSession(CMMSession* pMMSession, LPCSTR pszName, uint8_t id);
+	AudioSession CreateAudioSession(IMMVolumeControl *pVolControl, LPCSTR pszName, uint8_t id);
 };
 

@@ -202,6 +202,7 @@
     <ClInclude Include="AutoPtr.h" />
     <ClInclude Include="CMMDevice.h" />
     <ClInclude Include="CMMDeviceController.h" />
+    <ClInclude Include="IMMVolumeControl.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GetProcessName.h" />
     <ClInclude Include="HIDDevice.h" />

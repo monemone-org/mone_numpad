@@ -3,6 +3,7 @@
 #include "framework.h"
 #include "MMDeviceID.h"
 #include <audiopolicy.h>
+#include "IMMVolumeControl.h"
 
 class CMMDevice;
 
@@ -58,7 +59,8 @@ typedef struct MMSessionID
 
 
 
-class CMMSession
+class CMMSession:
+    public IMMVolumeControl
 {
 private:
     //disable copy constructor
@@ -110,13 +112,18 @@ public:
 
     AudioSessionState GetState() const throw (HRESULT);
 
+    // --- interface IMMVolumeControl ---
     // vol is between 0 .. 1
     float GetVolume() const throw (HRESULT);
     void SetVolume(float vol) throw (HRESULT);
 
     bool IsMute() const throw (HRESULT);
     void SetMute(bool mute) throw (HRESULT);
-    bool toggleMute() throw (HRESULT);
+    void toggleMute() throw (HRESULT);
+
+    virtual LPCWSTR GetVolControlID() const {
+        return m_ID.ID.c_str();
+    }
 
     void dump() const;
 

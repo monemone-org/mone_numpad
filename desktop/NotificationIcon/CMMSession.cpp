@@ -197,11 +197,10 @@ void CMMSession::SetMute(bool mute) throw(HRESULT)
     CHK_HR(spAudioVol->SetMute(mute, NULL));
 }
 
-bool CMMSession::toggleMute() throw (HRESULT)
+void CMMSession::toggleMute() throw (HRESULT)
 {
     bool isMute = IsMute();
     SetMute(!isMute);
-    return IsMute();
 }
 
 void CMMSession::Refresh() throw () {

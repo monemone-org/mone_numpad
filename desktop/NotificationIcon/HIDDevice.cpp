@@ -16,6 +16,12 @@ void hid_on_read_callback(hid_device* dev, unsigned char* data, size_t cbData, v
 	hidDev->OnReadCallback(data, cbData);
 }
 
+void hid_on_read_failure_callback(hid_device* dev, const wchar_t* pszMessage, void* user_data)
+{
+	HIDDevice* hidDev = (HIDDevice*)user_data;
+	hidDev->OnReadFailureCallback(pszMessage);
+}
+
 void HIDDevice::Open(unsigned short vendor_id, unsigned short product_id, const wchar_t* serial_number) throw (HRESULT)
 {
 	if (m_dev != NULL)
@@ -79,7 +85,8 @@ void HIDDevice::RegisterCallbacks()
 {
 	on_read_callback_entry on_read = {
 		.user_data = this,
-		.on_read = hid_on_read_callback
+		.on_read = hid_on_read_callback,
+		.on_read_failure = hid_on_read_failure_callback
 	};
 	on_disconnected_callback_entry on_disconnect = {
 		.user_data = this,
@@ -105,6 +112,15 @@ void HIDDevice::OnReadCallback(unsigned char* data, size_t cbData)
 	{
 		m_listener->DeviceDataReceived(this, data, cbData);
 	}
+}
+
+void HIDDevice::OnReadFailureCallback(const wchar_t* pszMessage)
+{
+	if (m_listener)
+	{
+		m_listener->DeviceDataReadFailure(this, pszMessage);
+	}
+
 }
 
 std::wstring HIDDevice::GetProductString() const throw (HRESULT)

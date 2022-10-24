@@ -10,6 +10,8 @@
 #include "TMMNotificationClient.h"
 #include "MMDeviceID.h"
 #include "CMMSession.h"
+#include "IMMVolumeControl.h"
+#include <endpointvolume.h>
 
 #pragma warning( disable : 4290 )
 
@@ -18,12 +20,14 @@ std::wstring CreateGUIDString();
 class CMMDevice;
 class CMMSession;
 
-class CMMDevice
+class CMMDevice: 
+    public IMMVolumeControl
 {
 protected:
     CComPtr<IMMDevice> m_spDevice;
     CComPtr<IAudioSessionManager2> m_spSessionMgr;
-    CComPtr<IAudioSessionNotification> m_spSessionNotif;
+    CComPtr<IAudioSessionNotification> m_spSessionNotif;    
+    CComPtr<IAudioEndpointVolume> m_spEndpointVolume;
 
     MMDeviceID m_ID;
     std::wstring m_sDisplayName;
@@ -87,6 +91,17 @@ public:
     }
 
     CMMSession* FindSessionByID(const MMSessionID& sessionID) const;
+
+    // --- interface IMMVolumeControl
+    // vol is between 0 .. 1
+    float GetVolume() const throw (HRESULT);
+    void SetVolume(float vol) throw (HRESULT);
+    bool IsMute() const throw (HRESULT);
+    void SetMute(bool mute) throw (HRESULT);
+    void toggleMute() throw (HRESULT);
+    virtual LPCWSTR GetVolControlID() const {
+        return m_ID.ID.c_str();
+    }
 
     void dump() const;
 

@@ -66,6 +66,8 @@ void CMMDevice::Uninitialize()
     m_spSessionMgr = NULL;
     m_spSessionNotif = NULL;
 
+    m_spEndpointVolume = NULL;
+
     m_spDevice = NULL;
 }
 
@@ -82,6 +84,9 @@ void CMMDevice::Initialize(IMMDevice* pDevice) throw(HRESULT)
     CComHeapPtr<WCHAR> sID;
     CHK_HR(m_spDevice->GetId(&sID));
     m_ID = MMDeviceID(sID.operator LPWSTR());
+
+    ATLASSERT(m_spEndpointVolume == NULL);
+    CHK_HR(m_spDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&m_spEndpointVolume));
 
     ATLASSERT(m_spSessionMgr == NULL);
     CHK_HR( m_spDevice->Activate(__uuidof(IAudioSessionManager2), CLSCTX_ALL, NULL, (void**)&m_spSessionMgr) );
@@ -213,6 +218,42 @@ void CMMDevice::dump() const
     }
     ATLTRACE(L"-->\n");
 }
+
+
+// IMMVolumeControl
+// vol is between 0 .. 1
+float CMMDevice::GetVolume() const throw (HRESULT)
+{
+    float vol = 0;
+    m_spEndpointVolume->GetMasterVolumeLevelScalar(&vol);
+    return vol;
+}
+
+void CMMDevice::SetVolume(float vol) throw (HRESULT)
+{
+    vol = max((float)0, vol);
+    vol = min(vol, (float)1.0);
+
+    CHK_HR(m_spEndpointVolume->SetMasterVolumeLevelScalar(vol, NULL));
+}
+
+bool CMMDevice::IsMute() const throw (HRESULT)
+{
+    BOOL bMute = FALSE;
+    m_spEndpointVolume->GetMute(&bMute);
+    return (bMute != FALSE);
+}
+
+void CMMDevice::SetMute(bool mute) throw (HRESULT)
+{
+    CHK_HR(m_spEndpointVolume->SetMute( (mute?TRUE:FALSE), NULL));
+}
+
+void CMMDevice::toggleMute() throw (HRESULT)
+{
+    this->SetMute(!this->IsMute());
+}
+
 
 
 
