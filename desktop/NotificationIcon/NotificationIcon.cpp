@@ -204,6 +204,7 @@ public:
                 g_pMMDeviceController = CMMDeviceController::CreateObject();
 #ifdef _DEBUG
                 // print out all devices and sessions
+                ATLTRACE(TEXT("CMMDeviceController::CreateObject\n"));
                 g_pMMDeviceController->dump();
 #endif
 
@@ -227,13 +228,21 @@ public:
             this->RunMessageLoop();
         } // if (hwnd)
 
-        hid_exit();
+        if (g_pKBCommService)
+        {
+            g_pKBCommService->Stop();
+            delete g_pKBCommService;
+            g_pKBCommService = NULL;
+        }
 
         if (g_pMMDeviceController)
         {
             delete g_pMMDeviceController;
             g_pMMDeviceController = NULL;
         }
+
+        hid_exit();
+
 
         return E_FAIL;
 

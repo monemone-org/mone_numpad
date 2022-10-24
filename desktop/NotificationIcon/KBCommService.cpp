@@ -7,7 +7,8 @@
 #include <functional>
 #include "MarshalFunc.h"
 #include "NotificationIcon.h"
-
+#include "monenumpad_maxmix/structs.c"
+#include "monenumpad_maxmix/assert_precond.c"
 
 BYTE KBCommService::DEFAULT_SESSION_ID = SESSION_ID_OUT;
 
@@ -33,9 +34,16 @@ KBCommService::KBCommService(CMMDeviceController* pMMDeviceController) :
 {
 }
 
+KBCommService::~KBCommService()
+{
+    CloseMoneNumPad();
+    Stop();
+}
+
 bool KBCommService::Start()
 {
     m_audioSessionProvider.RefreshSessions();
+    m_audioSessionProvider.dump();
 
     on_added_device_callback_entry on_added_callback = {
         .on_added_device = on_added_monenumpad,
@@ -120,6 +128,9 @@ void KBCommService::OnAudioSessionsRefreshed()
     {
         return;
     }
+
+    ATLTRACE(TEXT("OnAudioSessionsRefreshed\n"));
+    m_audioSessionProvider.dump();
 
     const std::vector<AudioSession>& newAudioSessions = m_audioSessionProvider.GetSessions();
     
@@ -277,31 +288,16 @@ SessionData KBCommService::MakeSessionData(
                 }
         };
 
-        USES_CONVERSION;
-        std::wstring sSessionName = audioSession.pMMSession->GetDisplayName();
-        char* pszSessionName = CW2A(sSessionName.c_str());
-        if (pszSessionName)
-        {
-            strncpy_s(sessionData.name, pszSessionName, SessionData_Name_Size - 1);
-        }
-
+        //// Mone: a work around that the OLE display in Monenumpad can't display 
+        //// session names that have more than 13 chars.
+        //// It should be fixed in the fireware but it's easier to do it here...
+        //const size_t MONENUMPAD_OLE_DISPLAY_MAX_NCHARS = 13;
+        strncpy_s(sessionData.name, audioSession.name.c_str(), SessionData_Name_Size-1);
         return sessionData;
     }
     else
     {
-        VolumeData v = {
-            .unknown = (true),
-            .isMuted = (false),
-            .volume = (0)
-        };
-        SessionData o = {
-            .id = (SESSION_ID_NULL),
-            .name = {0},
-            .has_prev = false,
-            .has_next = false,
-            .volume = v
-        };
-        return o; //makeSessionData(); //return an empty SessionData
+        return makeSessionData(); //return an empty SessionData
     }
 }
 
@@ -321,7 +317,7 @@ void KBCommService::SendSessionDatas(bool curr_only /*= false*/)
     int curr_session_index = 0;
     if (sessionIter != audioSessions.end())
     {
-        curr_session_index = (int)(audioSessions.end() - sessionIter);
+        curr_session_index = (int)(sessionIter - audioSessions.begin());
     }
 
     bool bSucceeded = false;
@@ -415,19 +411,20 @@ void KBCommService::SendMessage(
         ATLTRACE(TEXT("Sending cmd=%d\n"), (int)command);
     }
 
+    // 1 :'0'
     // 1 : MSG_ID_PREFIX 0xFD
     // 1 : command id
     // data
 
-    size_t cbMsgBytes = static_cast<size_t>(1) + 1 + cbData;
+    size_t cbMsgBytes = static_cast<size_t>(1) + 1 + 1 + cbData;
     BYTE* msgBytes = (BYTE*)malloc(cbMsgBytes);
     if (msgBytes)
     {
 #pragma warning(push)
 #pragma warning(disable: 6386)
-        msgBytes[0] = MSG_ID_PREFIX;
-        msgBytes[1] = (byte)command;
-        memcpy(msgBytes + 2, data, cbData);
+        msgBytes[1] = MSG_ID_PREFIX;
+        msgBytes[2] = (byte)command;
+        memcpy(msgBytes + 3, data, cbData);
 #pragma warning(pop)
 
         try
@@ -459,7 +456,7 @@ void KBCommService::HandleDeviceDataReceived(BYTE* data, size_t cbData)
         return;
     }
 
-    ATLTRACE(TEXT("Device_DataReceived(%d)\n"), (int)command_id);
+    ATLTRACE(TEXT("Device_DataReceived(command_id=%d)\n"), (int)command_id);
 
     BYTE* msgData = data + 2;
     if (command_id == PROTOCOL_VERSION_EXCHANGE)

@@ -52,7 +52,10 @@ void CMMSession::Initialize(CMMDevice* pParentDevice, IAudioSessionControl* pSes
 {
     HRESULT hr = S_OK;
 
-    Uninitialize();
+    if (m_pParentDevice)
+    {
+        throw E_UNEXPECTED;
+    }
 
     if (pParentDevice == NULL || pSession == NULL)
     {
@@ -152,6 +155,9 @@ float CMMSession::GetVolume() const throw(HRESULT)
 
 void CMMSession::SetVolume(float vol) throw(HRESULT)
 {
+    vol = max((float)0, vol);
+    vol = min(vol, (float)1.0);
+
     CComQIPtr<ISimpleAudioVolume> spAudioVol = m_spSessionControl.p;
     if (spAudioVol == NULL)
     {

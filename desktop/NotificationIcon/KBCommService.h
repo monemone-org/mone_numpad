@@ -36,12 +36,7 @@ protected:
 		
 public:
     KBCommService(CMMDeviceController* pMMDeviceController);
-
-	~KBCommService()
-	{
-		CloseMoneNumPad();
-        Stop();
-	}
+    ~KBCommService();
 
     //void SetListener(KBCommServiceListener* pListener)
     //{

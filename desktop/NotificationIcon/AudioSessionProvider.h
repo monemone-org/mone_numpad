@@ -10,7 +10,10 @@
 struct AudioSession
 {
 	uint8_t id; // session id to communicate with monenum_pad
+	std::string name;
 	CMMSession* pMMSession;
+
+	void dump() const;
 };
 
 extern const AudioSession NullAudioSession;
@@ -39,7 +42,13 @@ public:
 		m_pListener(NULL),
 		m_nextNumPadID(SESSION_ID_APP_FIRST)
 	{
+		m_mmdeviceController->AddListener(this);
 	}
+	~AudioSessionProvider()
+	{
+		m_mmdeviceController->RemoveListener(this);
+	}
+
 
 	void SetListener(AudioSessionProviderListener* pListener)
 	{
@@ -78,10 +87,12 @@ public:
 		RefreshSessions();
 	}
 
+	void dump() const;
+
 protected:
 	uint8_t AppSessionIDForMMSession(const CMMSession* pMMSession);
 	void UpdateSessionIDsMap();
 
-	AudioSession CreateAudioSession(CMMSession* pMMSession, uint8_t id);
+	AudioSession CreateAudioSession(CMMSession* pMMSession, LPCSTR pszName, uint8_t id);
 };
 

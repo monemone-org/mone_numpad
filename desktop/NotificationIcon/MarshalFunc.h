@@ -18,16 +18,8 @@ typedef struct UINT16_Bytes
 
 } UINT16_Bytes;
 
-inline UINT16 ToBigEndianUInt16(BYTE* data)
-{
-    UINT16 b0 = data[0];
-    UINT16 b1 = data[1];
-    UINT16 value = ((UINT16)((b0 << 8) | b1));
-    return value;
-}
-
 // in network order (big-endian)
-inline UINT16_Bytes FromBigEndianUInt16(UINT16 value)
+inline UINT16_Bytes UInt16ToBigEndian(UINT16 value)
 {
     byte b0 = (byte)(value >> 8);
     byte b1 = (byte)(value & 0xFF);
@@ -37,45 +29,33 @@ inline UINT16_Bytes FromBigEndianUInt16(UINT16 value)
     return bytes;
 }
 
-inline UINT16 ToLittleEndianUInt16(BYTE* data)
+inline UINT16_Bytes UInt16ToLittleEndian(UINT16 value)
 {
-    UINT16 b0 = data[0];
-    UINT16 b1 = data[1];
-    UINT16 value = ((UINT16)((b1 << 8) | b0));
-    return value;
-}
-
-inline UINT16_Bytes FromLittleEndianUInt16(UINT16 value)
-{
-    byte b0 = (byte)(value & 0xFF);
-    byte b1 = (byte)(value >> 8);
+    byte b0 = (byte)(value >> 8);
+    byte b1 = (byte)(value & 0xFF);
     UINT16_Bytes bytes = {
-       .data = { b0, b1 }
+       .data = { b1, b0 }
     };
     return bytes;
 }
 
-inline UINT16 ToUInt16(BYTE* data)
+inline UINT16 ToUInt16(BYTE* data) //data is in big endian format
 {
-    if (IsPlatformBigEndian())
-    {
-        return ToBigEndianUInt16(data);
-    }
-    else
-    {
-        return ToLittleEndianUInt16(data);
-    }
+    UINT16 b0 = data[0];
+    UINT16 b1 = data[1];
+    UINT16 value = (UINT16)((b0<< 8) | b1);
+    return value;
 }
 
 inline UINT16_Bytes FromUInt16(UINT16 value)
 {
     if (IsPlatformBigEndian())
     {
-        return FromBigEndianUInt16(value);
+        return UInt16ToBigEndian(value);
     }
     else
     {
-        return FromLittleEndianUInt16(value);
+        return UInt16ToLittleEndian(value);
     }
 }
 

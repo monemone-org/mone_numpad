@@ -11,6 +11,18 @@ bool IsNull(const AudioSession& audioSession)
 	return audioSession.id == 0;
 }
 
+void AudioSession::dump() const
+{
+	ATLTRACE(TEXT("<-- Dump AudioSession\n"));
+	ATLTRACE(TEXT("        id: \"%d\"\n"), (this->id));
+	ATLTRACE(TEXT("        name: \"%s\"\n"), this->pMMSession->GetDisplayName());
+	ATLTRACE(TEXT("-->\n"));
+}
+
+/*
+* class AudioSessionProvider
+*	provide monenumpad with a collection of audio sessions
+*/
 void AudioSessionProvider::RefreshSessions()
 {
 	m_sessions.clear();
@@ -30,7 +42,19 @@ void AudioSessionProvider::RefreshSessions()
 		if (defaultSessionIter != sessions.end())
 		{
 			CMMSession* pMMSession = *defaultSessionIter;
-			m_sessions.push_back(CreateAudioSession(pMMSession, (pMMSession->IsInput() ? SESSION_ID_IN:SESSION_ID_OUT)));
+			LPCSTR name = NULL;
+			uint8_t id = 0;
+			if (pMMSession->IsInput())
+			{
+				name = "Windows System Input to test long name handling";
+				id = SESSION_ID_IN;
+			}
+			else
+			{
+				name = "Output";
+				id = SESSION_ID_OUT;
+			}
+			m_sessions.push_back(CreateAudioSession(pMMSession, name, id));
 		}
 	};
 
@@ -42,7 +66,8 @@ void AudioSessionProvider::RefreshSessions()
 			if (!pMMSession->IsSystemInOut())
 			{
 				uint8_t id = AppSessionIDForMMSession(pMMSession);
-				m_sessions.push_back(CreateAudioSession(pMMSession, id));
+				CW2A aName = pMMSession->GetDisplayName();
+				m_sessions.push_back(CreateAudioSession(pMMSession, aName, id));
 			}
 		}
 	};
@@ -68,11 +93,12 @@ void AudioSessionProvider::RefreshSessions()
 	}
 }
 
-AudioSession AudioSessionProvider::CreateAudioSession(CMMSession* pMMSession, uint8_t id)
+AudioSession AudioSessionProvider::CreateAudioSession(CMMSession* pMMSession, LPCSTR pszName, uint8_t id)
 {
 	AudioSession audioSession =
 	{
 		.id = id,
+		.name = pszName,
 		.pMMSession = pMMSession
 	};
 	return audioSession;
@@ -120,3 +146,16 @@ uint8_t AudioSessionProvider::AppSessionIDForMMSession(const CMMSession *pMMSess
 
 	return sessionID;
 }
+
+void AudioSessionProvider::dump() const
+{
+	ATLTRACE(L"<-- Dump AudioSessionProvider\n");
+	for (auto sessionIter = m_sessions.begin();
+		sessionIter != m_sessions.end();
+		++sessionIter)
+	{
+		sessionIter->dump();
+	}
+	ATLTRACE(L"-->\n");
+}
+
