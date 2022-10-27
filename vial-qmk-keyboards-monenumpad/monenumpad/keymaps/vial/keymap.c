@@ -83,10 +83,10 @@ MK_FN,             KC_0,    KC_KP_DOT,   KC_PENT),
 // YouTube layer
     [_FN1] = LAYOUT(
             MK_YT_HOME,        MK_YT_SUBSCRIPTNS,  MK_YT_WATCHLATER, MK_YT_HISTORY, 
-            MK_YT_PREVCH,      KC_UP,              MK_YT_NEXTCH,     MK_IOS_BRIDOWN, 
-            MK_YT_REWIND,      MK_YT_PLAY,         MK_YT_FASTFORWD,  MK_IOS_BRIDUP, 
- _______,   MK_YT_SPEEDDOWN,   KC_DOWN,            MK_YT_SPEEDUP,  
- _______,                      MK_YT_FULLSCVW,     MK_YT_THEATERVW,  _______),
+            MK_YT_PREVCH,      MK_YT_SPEEDUP,      MK_YT_NEXTCH,     KC_BRID, 
+            MK_YT_REWIND,      MK_YT_PLAY,         MK_YT_FASTFORWD,  KC_BRIU, 
+ _______,   MK_YT_PREVCH,      MK_YT_SPEEDDOWN,    MK_YT_NEXTCH,         
+ _______,                      MK_YT_CYCLEVW,      MK_YT_FULLSCVW,   MK_YT_PLAY),
 
 
 /* iPad Layer   
@@ -94,8 +94,8 @@ MK_FN,             KC_0,    KC_KP_DOT,   KC_PENT),
 */
     [_FN2] = LAYOUT(
               MK_IOS_APPSWITCHER, MK_IOS_HOME, MK_IOS_NOTIFICATION, MK_IOS_CONTROLCENTER, 
-              MK_IOS_PREVAPP,     KC_UP,       MK_IOS_NEXTAPP,      MK_IOS_BRIDOWN, 
-              KC_LEFT,            MK_IOS_PLAY, KC_RIGHT,            MK_IOS_BRIDUP, 
+              MK_IOS_PREVAPP,     KC_UP,       MK_IOS_NEXTAPP,      KC_BRID, 
+              KC_LEFT,            MK_IOS_PLAY, KC_RIGHT,            KC_BRIU, 
  _______,     MK_IOS_PREVTRACK,   KC_DOWN,     MK_IOS_NEXTTRACK,  
  _______,                         _______,     MK_IOS_QUICKNOTE,    _______),
 
@@ -105,10 +105,10 @@ MK_FN,             KC_0,    KC_KP_DOT,   KC_PENT),
 */
     [_FN3] = LAYOUT(
               KC_F10,  KC_F11,  KC_F12, _______, 
-              KC_F7,   KC_F8,   KC_F9,   MK_IOS_BRIDOWN, 
-              KC_F4,   KC_F5,   KC_F6,   MK_IOS_BRIDUP, 
+              KC_F7,   KC_F8,   KC_F9,   KC_BRID, 
+              KC_F4,   KC_F5,   KC_F6,   KC_BRIU, 
  _______,     KC_F1,   KC_F2,   KC_F3,  
- _______,              _______, _______, _______)
+ _______,              KC_INS,  KC_DEL, _______)
 
 };
 
@@ -206,14 +206,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
     {
         // pressing key(c=0,r=4) (the Fn key on the left bottom corner)
         //  while holding asterisk key will switch between Win and Mac mode.
-        if (record->event.key.col == asterisk_keypos.col
-            && record->event.key.row == asterisk_keypos.row
-            && press_and_hold_key_is_pressed(&fn_key))
+        if (press_and_hold_key_is_pressed(&fn_key))
         {
-            user_config.is_win_mode = !user_config.is_win_mode;
-            save_user_config();
-            set_press_and_hold_key_to_handled(&fn_key);
-            return false;
+            if (record->event.key.col == asterisk_keypos.col
+                && record->event.key.row == asterisk_keypos.row)
+            {
+                user_config.is_win_mode = !user_config.is_win_mode;
+                save_user_config();
+                set_press_and_hold_key_to_handled(&fn_key); //set to handled so it won't process fn when key is up or when key is hold
+                return false;
+            }
+            else if (keycode == KC_KP_DOT) //send backspace
+            {
+#ifdef CONSOLE_ENABLE
+                uprintf("KL: keycode == KC_KP_DOT\n");
+#endif 
+                tap_code(KC_BACKSPACE);
+                set_press_and_hold_key_to_handled(&fn_key); //set to handled so it won't process fn when key is up or when key is hold
+                return false;
+            }
+            else if (keycode == KC_0) //send ins
+            {
+#ifdef CONSOLE_ENABLE
+                uprintf("KL: keycode == KC_0\n");
+#endif 
+                tap_code(KC_INS);            
+                set_press_and_hold_key_to_handled(&fn_key); //set to handled so it won't process fn when key is up or when key is hold
+                return false;
+            }
         }
 
         if (!process_mone_key(keycode)) 
@@ -388,7 +408,8 @@ bool process_hold_fn_key(uint16_t keycode)
 {
 #ifdef DEBUG_FNKEY
     uprintf("KL: %s\n", __FUNCTION__),
-#endif    
+#endif
+
     //hold fn to switch layer
     switchToNextLayer(true);
     return false;

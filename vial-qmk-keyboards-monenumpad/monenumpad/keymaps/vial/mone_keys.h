@@ -12,12 +12,14 @@ enum mone_keys {
    MK_YT_FASTFORWD,  //YouTube Fast forward
    MK_YT_SPEEDUP, //YouTube Speed up
    MK_YT_SPEEDDOWN, //YouTube Speed down
+   MK_YT_NEXTVID_PLAYLIST, // Move to the next video in playlist
+   MK_YT_PREVVID_PLAYLIST,  // Move to the previous video in playlist
    MK_YT_NEXTCH, //YouTube Next Chapter
    MK_YT_PREVCH, //YouTube Previous Chapter
    MK_YT_NEXTVID, //YouTube Next Video
    MK_YT_PREVVID, //YouTube Previous Video
    MK_YT_FULLSCVW, //YouTube Full Screen Player
-   MK_YT_MINIVW, //YouTube Mini Player
+   MK_YT_CYCLEVW, //YouTube Cycle through different view modes: Normal -> Theater -> Full
    MK_YT_THEATERVW, //YouTube Theater view
    MK_YT_PLAY, //YouTube play/pause
 
@@ -41,8 +43,6 @@ enum mone_keys {
    MK_IOS_APPSWITCHER, //App Switcher, World+Up
    MK_IOS_PREVAPP, //Previous App, World+Left
    MK_IOS_NEXTAPP, //Next App, World+Right
-   MK_IOS_BRIDOWN,
-   MK_IOS_BRIDUP,
 
    MK_LAST //exclusive
 };

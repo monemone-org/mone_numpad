@@ -47,6 +47,21 @@ static void openUrl(const char *url)
 }
 
 
+const char* YT_CYCLEVW_MODES[] = {
+    "tt",
+    "t",
+    "f"
+};
+const int YT_CYCLEVW_MODES_COUNT = sizeof(YT_CYCLEVW_MODES)/sizeof(YT_CYCLEVW_MODES[0]);
+int g_current_yt_cyclevew_index = 0;
+void next_yt_cyclevw(void)
+{
+    const char* vw_mode_keys = YT_CYCLEVW_MODES[g_current_yt_cyclevew_index];
+    g_current_yt_cyclevew_index = (g_current_yt_cyclevew_index + 1) % YT_CYCLEVW_MODES_COUNT;
+    send_string(vw_mode_keys);
+}
+
+
 // return true if qmk should continue processing the pressed key 
 bool process_mone_key(uint16_t keycode)
 {
@@ -76,7 +91,7 @@ bool process_mone_key(uint16_t keycode)
         case MK_YT_NEXTCH:
             if (user_config.is_win_mode) 
             {
-                SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+                SEND_STRING(SS_RCTL(SS_TAP(X_RIGHT)));
             }
             else 
             {
@@ -86,7 +101,7 @@ bool process_mone_key(uint16_t keycode)
         case MK_YT_PREVCH:
             if (user_config.is_win_mode) 
             {
-                SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+                SEND_STRING(SS_RCTL(SS_TAP(X_LEFT)));
             }
             else {
                 SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
@@ -109,8 +124,8 @@ bool process_mone_key(uint16_t keycode)
         case MK_YT_FULLSCVW:
             SEND_STRING(SS_TAP(X_F));
             break;
-        case MK_YT_MINIVW:
-            SEND_STRING(SS_TAP(X_I));
+        case MK_YT_CYCLEVW:
+            next_yt_cyclevw();
             break;
         case MK_YT_THEATERVW:
             SEND_STRING(SS_TAP(X_T));
@@ -157,6 +172,14 @@ bool process_mone_key(uint16_t keycode)
 
         // case MK_IOS_SHOWKEED:
         //     break;
+
+        case MK_YT_NEXTVID_PLAYLIST:
+            SEND_STRING(SS_LSFT(SS_TAP(X_N)));
+            break;
+
+        case MK_YT_PREVVID_PLAYLIST:
+            SEND_STRING(SS_LSFT(SS_TAP(X_P)));
+            break;
 
         case MK_IOS_PREVTRACK:  //iOS previous track  KC_MEDIA_PREV_TRACK
             SEND_STRING(SS_TAP(X_MEDIA_PREV_TRACK));
@@ -245,14 +268,6 @@ bool process_mone_key(uint16_t keycode)
             register_code16(KC_APPLE_FN);
             SEND_STRING(SS_TAP(X_RIGHT));
             unregister_code16(KC_APPLE_FN);
-            break;
-
-        case MK_IOS_BRIDOWN:
-            SEND_STRING(SS_TAP(X_BRIGHTNESS_DOWN));
-            break;
-
-        case MK_IOS_BRIDUP:
-            SEND_STRING(SS_TAP(X_BRIGHTNESS_UP));
             break;
 
         default:

@@ -30,7 +30,7 @@
 // #define DEBUG_EDIT_SESSION
 // #define DEBUG_MAXMIX
 // #define DEBUG_MAXMIX_DEBUG
-#define DEBUG_RECEIVE_KB
+// #define DEBUG_RECEIVE_KB
 // #define DEBUG_LAYER
 // #define DEBUG_SUBMIT_WEBPAGE_TIMING
 // #define DEBUG_PRESS_AND_HOLD    1
