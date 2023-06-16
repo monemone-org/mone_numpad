@@ -1,7 +1,7 @@
 # mone_numpad
 
 ## Introduction
-Mone_numpad is a handwired numpad with volume dial that runs a custom VIAL/QMK firware. It can control the machine's input an output volume.
+Mone_numpad is a handwired numpad with a volume dial that runs a custom VIAL/QMK firware. It can control the machine's input and output volume.
 
 * the electronic design and schematic 
 * The STL for the case
@@ -17,7 +17,7 @@ Mone_numpad is a handwired numpad with volume dial that runs a custom VIAL/QMK f
 
 ### keyboard-layout_editor/
 
-The json file for [keyboard-layout_editor](http://www.keyboard-layout-editor.com)
+It contains the json file for [keyboard-layout_editor](http://www.keyboard-layout-editor.com)
 
 ### schematics/
 
@@ -29,44 +29,49 @@ Modified docukboard STL for mone_numpad
 
 ### vial layouts/
 
-
+vial layout files
 
 ### vial-qmk/
 
-Modified forted version of vial-qmk. It added supports for
+A modified forted version of vial-qmk. It added supports for
 
 1. Mac Fn key
-2. Added support for custom command prefix for mone_numpad
-3. Allow numpad to intercept vial_encoder_update()
+2. Custom command prefix for mone_numpad
+3. intercepting vial_encoder_update()
 
 
 ### vial-qmk-keyboards-monenumpad/
 
-1. firware code for mone_numpad
-2. Build steps (see: `compile_monenumpad_vial.sh`):
-	1. copies `vial-qmk-keyboards-monenumpad/monenumpad/`  to `vial-qmk/keyboards/monenumpad/`
-	2. `cd vial-amk`
-	3. `qmk compile -kb monenumpad -km vial`
+The firware code for mone_numpad.
+
+See: `compile_monenumpad_vial.sh` for build steps.
 
 
 ### desktop/
 
+Code for the desktop companion app for mone_numpad
+
 #####  desktop/NotificationIcon
-	
-* The Windows desktop application that displays as an notification icon on the taskbar
-* It is the companion app for mone_numpad to let mone_numpad control the system and application volume. 
+
+* NotificationIcon is the Win32 desktop companion app for mone_numpad.
+* It provides the following functionalities:
+	* displays as an notification icon on the taskbar.
+	* provides volumn channel info to monenumpad:
+ 		1. default output
+   		2. default input
+   		3. active applications tha has volume channels
 
 ##### desktop/USBDeviceSwift/RaceflightControllerHIDExample
-* A modified Swift sample app to help test my customized vial/qmk firmware for mone_numpad on Mac.
+* A modified Swift sample app to help test monenumpad's customized vial/qmk firmware on Mac.
 
 ##### desktop/hidapi
 
-A cutomized version of a fork of hidapi (an open source project) with the following changes.
+A cutomized fork of hidapi (an open source project) with the following changes.
 
 * 1 byte packing C struct. 
 	* At one point, I was writing C# and Swift clients.  Changing the byte packing to 1 byte made it easier to marshel the C structure data to/from C# and Swift.
 
-* added support to notify when a HID device is connected/disconnected.
+* added support to send notifications when a HID device is connected/disconnected.
 
 	```C++
 		
@@ -96,7 +101,7 @@ A cutomized version of a fork of hidapi (an open source project) with the follow
 
 	```
 
-* added support to get notified when an input record is read from a HID device.
+* added support to send notifications when an input record is read from a HID device.
 	```C++
 
 		typedef struct on_read_callback_entry {
@@ -112,10 +117,11 @@ A cutomized version of a fork of hidapi (an open source project) with the follow
 ##### desktop/xcodeProj
 * the xcodeproj for `desktop/hidapi` to helpe edit and build on Mac
 
-
 ##### desktop/monenumpad_desktop
-* The original C# POC test client app before I switched to develop `NotificationIcon`.  
-* My original plan was to create a real desktop app to talk to monenum_pad via hidapi. I got the marshalling code working. However C# WinForm (or any C# Windows client framework) does not have any easy support to add an icon to the taskbar's notification area.  The easiest way is still to use Win32. Therefore I created `NotificationIcon` instead and abandoned this project.
+
+The original C# POC test client app before I switched to develop `NotificationIcon`.  
+
+My original plan was to create a C# desktop app to talk to monenum_pad via hidapi. I got the marshalling code working. However C# WinForm (or any C# Windows client framework) does not have easy support to add an icon to the taskbar's notification area.  The easiest way is still Win32. So I created `NotificationIcon` instead and abandoned this project.
 
 
 
